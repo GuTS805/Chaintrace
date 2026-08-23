@@ -4,10 +4,14 @@ The attribution pipeline is **real-chain-ready**: it consumes the standard
 Etherscan `account/txlist` schema and runs traversal + signals + attribution on it
 unchanged.
 
+- `kraken_depositor_216b7523.json` — a **genuine** low-degree wallet
+  (`0x216b75231dfec0a4716b602ab00669fa568ad09b`, 12 real txs) captured live from
+  Blockscout's Etherscan-compatible API. It deposits ETH to **Kraken's** public hot
+  wallet (tx `0x52f9341275b49db16a206875b0f5370c78c7b836c0bc604abeae4365764dd148`
+  — verify on any explorer). Our unchanged pipeline attributes it to **Kraken
+  (~0.76)** on this real data. Seeded automatically by `run.ps1`.
 - `sample_etherscan_txlist.json` — an **illustrative** example of the Etherscan
-  response *shape* (not verified real transactions). It reaches Binance's real,
-  publicly-labeled hot wallet so you can watch the same pipeline attribute
-  imported data.
+  response *shape* (not verified real transactions), kept for schema reference.
 
 ## Capture a real low-degree wallet (offline replay)
 

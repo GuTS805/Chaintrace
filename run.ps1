@@ -79,6 +79,9 @@ Push-Location $backend
 Write-Step "Seeding demo scenarios (offline)"
 & $venvPy -m app.synthetic.seed | Out-Null
 
+Write-Step "Importing real on-chain snapshot (offline replay)"
+& $venvPy -m app.ingest.chain_import --file data/realchain/kraken_depositor_216b7523.json | Out-Null
+
 if (-not (Test-Path (Join-Path $backend "models\attribution_model.joblib"))) {
   Write-Step "Training attribution model (artifact missing)"
   & $venvPy -m app.attribution.train | Out-Null
