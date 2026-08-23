@@ -36,6 +36,58 @@ python -m app.ingest.chain_import --address 0x... --save data/realchain/case.jso
 python -m app.ingest.chain_import --file data/realchain/case.json
 ```
 
+## Provider layer (Phase 7) — routed, cached, circuit-broken
+
+Nothing above `app/providers/` knows which upstream produced a row. The router is
+itself a `ChainProvider`, so ingest and traversal call it exactly as they would
+call a single API and never learn that failover happened.
+
+```
+ProviderRouter
+ ├── EtherscanProvider     history + balance   (key)
+ ├── BlockscoutProvider    history + balance   (keyless, opt-in)
+ ├── AlchemyProvider       history + balance   (key)
+ └── InfuraProvider        balance only        (key)
+
+cache → in-process coalescing → cross-process single-flight
+      → first capable provider whose circuit is closed → next on failure
+```
+
+**Providers declare capabilities.** Infura is a plain JSON-RPC node: it has no
+address index, so there is no call that returns "every transaction touching this
+address". Rather than stub that with an empty list — which downstream reads as
+"this wallet has no activity", the most dangerous possible wrong answer — it
+declares only `WALLET_INFO` and the router never asks it for history.
+
+**Failures are classified, not merged.** A rate limit or 5xx is retried with
+exponential backoff and full jitter, then fails over and counts toward opening
+that provider's circuit. A malformed response fails over immediately, because an
+identical request returns identical garbage. A capability gap is skipped silently
+and never penalises the provider. Etherscan's habit of reporting throttling as
+`HTTP 200` with the notice in the body is detected explicitly.
+
+**Circuit breakers** stop a dead upstream from making every investigation slower
+than having no provider at all: after N consecutive failures the circuit opens and
+calls fail over without touching the network, then a single probe is allowed
+through after a cooldown.
+
+**Redis is on the request path now**, keyed by chain and address and never by
+provider name — a page fetched from Blockscout satisfies a later request that
+would have gone to Etherscan, so failover does not double upstream traffic. Ten
+investigators opening the same wallet at the same moment produce one upstream
+fetch: in-process via an async coalescer, and across processes via a best-effort
+`SET NX PX` lock. If Redis is unreachable every one of these degrades to "just do
+the work" — a cache outage must not become a platform outage.
+
+Pull an address through the chain:
+
+```bash
+python -m app.ingest.chain_import --router --address 0x... --limit 500
+```
+
+Each imported row records the provider that actually served its page, so a store
+fed by failover can still say where every transaction came from.
+
 ## Investigations (Phase 7) — the primary resource
 
 A wallet lookup is a question; an **investigation** is the durable record of
