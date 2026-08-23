@@ -11,8 +11,8 @@ attribution path — attribution is heuristics + a gradient-boosted classifier
 can also explicitly say **"insufficient evidence"** rather than force-attribute
 every wallet.
 
-> **Status: Phases 1–3 complete.** Later phases add the signals + attribution
-> engine (4), the frontend (5), and PDF reports (6).
+> **Status: Phases 1–4 complete.** Later phases add the frontend (5) and PDF
+> reports (6).
 
 ## Graph traversal + path extraction (Phase 3)
 
@@ -110,6 +110,71 @@ docker-compose.yml       # postgres + redis
   against a real hot wallet is a demo-reliability risk.
 - **Risk score and VASP attribution stay separate** (different questions;
   conflating them is a correctness bug).
+
+## Signals + attribution engine (Phase 4)
+
+Six signals, each a small class with a common interface, emit one classifier
+feature **and** a human-readable `Evidence` object. The expensive graph
+derivations run once in `build_graph_facts`, so training and inference compute
+features identically (no train/serve skew).
+
+| Signal | Feature | What it measures |
+|---|---|---|
+| `HOP_PATH` | hop_closeness | shortest-path proximity to the candidate |
+| `DEPOSIT_SWEEP` | sweep_intensity | many→one consolidation into the hot wallet |
+| `COUNTERPARTY_OVERLAP` | counterparty_overlap | shared associates with the deposit cluster |
+| `TEMPORAL_CORRELATION` | temporal_correlation | deposit timing vs sweep timing |
+| `KNOWN_LABEL` | label_confidence | reaches a labeled wallet (× source confidence) |
+| `PATTERN_SIMILARITY` | pattern_similarity | cosine to a canonical exchange fingerprint |
+
+Pipeline: `feature_vector` → **XGBoost** → **isotonic/sigmoid calibration** (the
+lower-Brier of the two on a held-out split is kept). Per-prediction feature
+contributions come from XGBoost's built-in **TreeSHAP** (`pred_contribs`) and set
+each Evidence's `weight`. Hop distance is a *feature*, never a hard-coded
+confidence (requirement #4).
+
+**Calibration report** (held-out test, `make train`, seed 42):
+
+| calibration | Brier score |
+|---|---|
+| uncalibrated | 0.075 |
+| **isotonic (chosen)** | **0.074** |
+| sigmoid | 0.078 |
+
+Splits: 3600 train / 1200 calib / 1200 test; positive rate 0.61. Calibration
+curve: `backend/models/calibration_curve.png`.
+
+> **Honesty note (from the spec review):** the classifier is trained on the
+> synthetic generator (`app/synthetic/training.py`), with labels drawn from an
+> explicit logistic ground truth over the features — so the Brier score and
+> calibration curve measure calibration against that synthetic distribution, not
+> real-chain data. This is stated plainly rather than implied otherwise.
+
+The engine assembles calibrated candidates + evidence into `AttributionResult`
+and decides the outcome: a dominant candidate above threshold → single
+attribution; two close credible candidates → **ambiguous**; nothing above the
+floor → **insufficient_evidence**. Demo behaviour:
+
+| Scenario | Result | Detail |
+|---|---|---|
+| ransomware_to_exchange | single | Binance ~0.99 (risk MEDIUM: upstream mixer) |
+| peel_chain | single | Kraken ~0.64 (moderate) |
+| dead_end | insufficient_evidence | no candidate cleared the floor |
+| two_exchanges | ambiguous | Binance vs Coinbase, split |
+
+**Risk is computed separately** from attribution (`app/attribution/risk.py`) —
+exposure to sanctioned/mixer/scam entities by proximity in *both* directions —
+because risk and VASP attribution are different questions.
+
+Endpoints:
+
+```
+GET /wallets/{addr}/attribution?depth=  -> AttributionResult (candidates+evidence)
+GET /wallets/{addr}/risk?depth=         -> RiskResult (score, level, indicators)
+```
+
+The trained model artifact is committed under `backend/models/` so the demo runs
+without retraining; regenerate with `make train`.
 
 ## Quickstart
 
