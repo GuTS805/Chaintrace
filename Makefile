@@ -53,7 +53,7 @@ train:
 	cd $(BACKEND) && $(PY) -m app.attribution.train
 
 import-realchain:
-	cd $(BACKEND) && $(PY) -m app.ingest.chain_import --file data/realchain/sample_etherscan_txlist.json
+	cd $(BACKEND) && $(PY) -m app.ingest.chain_import --file data/realchain/kraken_depositor_216b7523.json
 
 dev:
 	cd $(BACKEND) && uvicorn app.main:app --reload
