@@ -82,6 +82,31 @@ The older `/wallets/{addr}/*` routes remain as ad-hoc lookups. They recompute on
 every call and leave no record, which is exactly why they are not the primary
 resource.
 
+### In the UI
+
+`/investigations` opens one and lists the rest; `/investigations/{id}` watches it
+run and then shows the result:
+
+- a **stage track** that names the phase being executed, because a real traversal
+  is slow enough that a bare spinner tells an investigator nothing;
+- **methodology & integrity** alongside the verdict — model version, data
+  provider, traversal bounds, data timestamp, and the evidence hash — rather than
+  buried in the PDF;
+- an **evidence ledger**: the flat records exactly as they were hashed, one row
+  per observed transaction with its own content-derived id, so a reviewer can
+  cite a single line instead of "the deposit-sweep signal".
+
+The list auto-refreshes while any investigation is still running and stops once
+everything reaches a terminal state.
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs the same gates that run locally — `ruff`, `mypy
+--strict`, `pytest`, plus `alembic upgrade` / `alembic check` / a full downgrade,
+and the frontend's `tsc --noEmit` and `next build`. The migration check is there
+because model-vs-migration drift is the failure that silently ships a column the
+deployed database does not have.
+
 ## Reports (Phase 6)
 
 One-click investigator PDFs, generated server-side with reportlab (pure Python,
