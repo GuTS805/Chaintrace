@@ -9,6 +9,7 @@ const OUTCOME_TONE: Record<string, "good" | "warn" | "accent" | "muted"> = {
   "insufficient evidence": "muted",
   "ambiguous split": "accent",
   "real: Kraken deposit": "good",
+  "real: Binance deposit": "good",
 };
 
 export default function Home() {

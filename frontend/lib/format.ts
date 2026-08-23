@@ -50,8 +50,13 @@ export const DEMO_WALLETS: { label: string; address: string; note: string }[] = 
     note: "ambiguous split",
   },
   {
-    label: "Real on-chain wallet",
+    label: "Real wallet — Kraken",
     address: "0x216b75231dfec0a4716b602ab00669fa568ad09b",
     note: "real: Kraken deposit",
+  },
+  {
+    label: "Real wallet — Binance",
+    address: "0x5b271663569cc0df548a81e2b56689be6999081c",
+    note: "real: Binance deposit",
   },
 ];
