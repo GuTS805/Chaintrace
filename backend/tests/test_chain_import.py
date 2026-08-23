@@ -19,10 +19,13 @@ from app.repositories.sql_graph_repository import SqlGraphRepository
 _REALCHAIN = Path(__file__).resolve().parents[1] / "data" / "realchain"
 SAMPLE = _REALCHAIN / "sample_etherscan_txlist.json"
 REAL = _REALCHAIN / "kraken_depositor_216b7523.json"
+REAL_BINANCE = _REALCHAIN / "binance_depositor_5b271663.json"
 BINANCE_HOT = "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be"
+BINANCE_14 = "0x28c6c06298d514db089934071355e5743bf21d60"
 KRAKEN_HOT = "0x2910543af39aba0cd09dbb2d50200b3e800a63d2"
 SRC = "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
 REAL_ADDR = "0x216b75231dfec0a4716b602ab00669fa568ad09b"
+REAL_BINANCE_ADDR = "0x5b271663569cc0df548a81e2b56689be6999081c"
 
 
 def test_parse_etherscan_schema() -> None:
@@ -70,6 +73,24 @@ async def test_committed_real_snapshot_reaches_kraken(session: AsyncSession) -> 
     assert kraken is not None
     assert kraken.is_labeled is True
     assert kraken.vasp_name == "Kraken"
+
+
+async def test_committed_real_binance_snapshot_reaches_binance(
+    session: AsyncSession,
+) -> None:
+    await ingest_all(session)
+    payload = json.loads(REAL_BINANCE.read_text(encoding="utf-8"))
+    txs = parse_etherscan_txlist(payload)
+    assert len(txs) >= 4
+    await import_provider_txs(session, txs)
+    await session.commit()
+
+    repo = SqlGraphRepository(session)
+    graph = await repo.traverse(REAL_BINANCE_ADDR, TraversalBounds(max_hops=4))
+    binance = next((n for n in graph.nodes if n.address == BINANCE_14), None)
+    assert binance is not None
+    assert binance.is_labeled is True
+    assert binance.vasp_name == "Binance"
 
 
 async def test_import_is_idempotent(session: AsyncSession) -> None:

@@ -10,6 +10,11 @@ unchanged.
   wallet (tx `0x52f9341275b49db16a206875b0f5370c78c7b836c0bc604abeae4365764dd148`
   — verify on any explorer). Our unchanged pipeline attributes it to **Kraken
   (~0.76)** on this real data. Seeded automatically by `run.ps1`.
+- `binance_depositor_5b271663.json` — a second **genuine** low-degree wallet
+  (`0x5b271663569cc0df548a81e2b56689be6999081c`, 4 real txs) that forwards ETH to
+  **Binance's** public hot wallet (tx
+  `0x1c8df3644db3e26e79bcff17ef4b1d8c111ae7d7e00000381b790aec350ccfc4`). The
+  pipeline attributes it to **Binance (~0.76)**. An independent second-VASP proof.
 - `sample_etherscan_txlist.json` — an **illustrative** example of the Etherscan
   response *shape* (not verified real transactions), kept for schema reference.
 
