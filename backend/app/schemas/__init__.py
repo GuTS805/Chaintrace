@@ -5,7 +5,13 @@ from app.schemas.attribution import (
     Evidence,
     VaspCandidate,
 )
-from app.schemas.graph import GraphEdge, GraphNode, GraphResult, PruneInfo
+from app.schemas.graph import (
+    GraphEdge,
+    GraphNode,
+    GraphResult,
+    LabeledPath,
+    PruneInfo,
+)
 
 __all__ = [
     "AttributionResult",
@@ -13,6 +19,7 @@ __all__ = [
     "GraphEdge",
     "GraphNode",
     "GraphResult",
+    "LabeledPath",
     "PruneInfo",
     "VaspCandidate",
 ]

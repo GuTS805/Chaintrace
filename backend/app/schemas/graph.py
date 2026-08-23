@@ -52,3 +52,13 @@ class GraphResult(BaseModel):
     nodes: list[GraphNode] = Field(default_factory=list)
     edges: list[GraphEdge] = Field(default_factory=list)
     prune: PruneInfo = Field(default_factory=PruneInfo)
+
+
+class LabeledPath(BaseModel):
+    """Bounded paths from an unknown wallet to a specific labeled wallet."""
+
+    target: str
+    label_name: str | None = None
+    vasp_name: str | None = None
+    shortest_hops: int
+    paths: list[list[str]] = Field(default_factory=list)
