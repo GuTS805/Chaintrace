@@ -58,6 +58,14 @@ export default function WalletPage({
           <span className="text-muted">wallet</span>{" "}
           <span className="break-all text-accent">{address}</span>
         </h1>
+        <a
+          href={`${api.base}/wallets/${address}/report`}
+          target="_blank"
+          rel="noreferrer"
+          className="rounded border border-border px-3 py-2 text-xs text-muted hover:border-accent hover:text-accent"
+        >
+          ↓ report (PDF)
+        </a>
         <div className="ml-auto w-full max-w-md">
           <WalletSearch />
         </div>
