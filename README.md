@@ -11,9 +11,27 @@ attribution path — attribution is heuristics + a gradient-boosted classifier
 can also explicitly say **"insufficient evidence"** rather than force-attribute
 every wallet.
 
-> **Status: Phase 1 (data foundation) complete.** Later phases add the synthetic
-> dataset (2), bounded graph traversal (3), the signals + attribution engine (4),
-> the frontend (5), and PDF reports (6).
+> **Status: Phases 1–2 complete.** Later phases add bounded graph traversal (3),
+> the signals + attribution engine (4), the frontend (5), and PDF reports (6).
+
+## Demo scenarios (Phase 2)
+
+Four deterministic, fully offline scenarios — these *are* the demo. Each
+exercises one attribution outcome. `make seed-demo` loads them (and the bundled
+real labels) into the DB with zero network access; re-running is idempotent.
+
+| Scenario | Unknown wallet resolves to | Expected outcome |
+|---|---|---|
+| `ransomware_to_exchange` | Binance (deposit-sweep) | **CLEAN** (~90%+) |
+| `peel_chain` | Kraken (5-hop peel) | **MODERATE** (~70%) |
+| `dead_end` | — (no VASP linkage) | **INSUFFICIENT** ("I don't know") |
+| `two_exchanges` | Binance vs Coinbase | **AMBIGUOUS** (split) |
+
+The generator (`app/synthetic/`) is deterministic (stable addresses/hashes/
+timestamps) and doubles as the Phase 4 classifier's labeled training data: every
+scenario declares its `unknown_wallet`, `ground_truth` VASP (or `None`), and the
+`expected` outcome. `build_fixture_provider()` turns the same scenarios into an
+offline `ChainProvider` for tests and later phases.
 
 ## Stack
 
