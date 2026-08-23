@@ -17,6 +17,13 @@ unchanged.
   pipeline attributes it to **Binance (~0.76)**. An independent second-VASP proof.
 - `sample_etherscan_txlist.json` — an **illustrative** example of the Etherscan
   response *shape* (not verified real transactions), kept for schema reference.
+- `tron_kraken_depositor_TVYuaXdh.json` — a **genuine** low-degree Tron wallet
+  (`TVYuaXdhEHBvmk8284pSdtyRZwxE5oZ9yQ`, 16 real USDT-TRC20 transfers) captured
+  live from TronGrid's keyless API. It deposits USDT to **Kraken's** public Tron
+  hot wallet (`TG2CMGxnTPgQ6V58kiKd7wbyN8ewtAmY76`, tx
+  `6cc36b1392a879a3fd94f592dc45636184d1c460f6f62dfdcb8ffff4cf28fba0` — verify on
+  any Tron explorer). The unchanged pipeline attributes it to **Kraken** on this
+  real data — proof the multi-chain path works end to end, not just the EVM one.
 
 ## Capture a real low-degree wallet (offline replay)
 
@@ -28,7 +35,16 @@ hot-wallet traversal in the demo**:
 # needs ETHERSCAN_API_KEY in the environment / .env
 python -m app.ingest.chain_import --address 0xYOURADDR --save data/realchain/real_case.json
 # later, offline:
-python -m app.ingest.chain_import --file data/realchain/real_case.json
+python -m app.ingest.chain_import --file data/realchain/real_case.json --chain ethereum
+```
+
+Tron is keyless — no API key needed:
+
+```bash
+python -m app.ingest.chain_import --address TYOURADDR --save data/realchain/real_tron_case.json
+# chain is auto-detected from the address shape (T... = tron); --file still
+# needs --chain tron explicitly, since a saved JSON has no address to sniff.
+python -m app.ingest.chain_import --file data/realchain/real_tron_case.json --chain tron
 ```
 
 Then open that address in the UI, or call `/wallets/{addr}/attribution`.

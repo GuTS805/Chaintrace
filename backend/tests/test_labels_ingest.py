@@ -14,14 +14,14 @@ async def test_ingest_all_populates_labels_and_vasps(session: AsyncSession) -> N
     stats = await ingest_all(session)
     await session.commit()
 
-    # Bundled files: 4 + 3 + 3 = 10 label rows.
-    assert stats.inserted == 10
+    # Bundled files: 4 + 3 + 3 + 8 (tron) = 18 label rows.
+    assert stats.inserted == 18
     assert stats.skipped == 0
 
     total_labels = (
         await session.execute(select(func.count()).select_from(Label))
     ).scalar_one()
-    assert total_labels == 10
+    assert total_labels == 18
 
     # Sanctioned mixer addresses came in via the OFAC source.
     sanctioned = (
@@ -56,20 +56,20 @@ async def test_ingest_is_idempotent(session: AsyncSession) -> None:
     second = await ingest_all(session)
     await session.commit()
 
-    assert first.inserted == 10
+    assert first.inserted == 18
     assert second.inserted == 0
-    assert second.skipped == 10
+    assert second.skipped == 18
 
     total = (
         await session.execute(select(func.count()).select_from(Label))
     ).scalar_one()
-    assert total == 10
+    assert total == 18
 
     # VASPs are not duplicated on re-ingest either.
     vasps = (
         await session.execute(select(func.count()).select_from(Vasp))
     ).scalar_one()
-    assert vasps == 3  # Binance, Kraken, Coinbase
+    assert vasps == 7  # Binance, Kraken, Coinbase, HTX, OKX, Bybit, KuCoin
 
 
 async def test_ofac_source_tagging(session: AsyncSession) -> None:

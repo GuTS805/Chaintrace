@@ -16,6 +16,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from app.providers.base import ProviderTx
+from app.providers.base import normalize_address as _norm
 
 # An exchange hot wallet typically consolidates many deposit addresses; this is
 # the reference cluster size at which the sweep signal is considered "saturated".
@@ -24,10 +25,6 @@ NEAR_FULL_THRESHOLD = 0.9  # swept value / deposit inflow >= this == near-full
 MAX_BFS_HOPS = 8
 # A sweep is a many-to-one consolidation; a lone deposit is not a sweep.
 MIN_SWEEP_CLUSTER = 2
-
-
-def _norm(a: str) -> str:
-    return a.strip().lower()
 
 
 @dataclass(frozen=True)
@@ -136,6 +133,60 @@ def _interval_regularity(timestamps: list[datetime]) -> float:
     return 1.0 / (1.0 + cv)
 
 
+@dataclass
+class SweepCluster:
+    """Many-to-one consolidation into a hot address — the deposit-sweep shape.
+
+    Standalone (not tied to a candidate wallet) so it can also drive the
+    exchange-clustering job (`app/attribution/cluster_builder.py`), which runs
+    it over a hot wallet's full inbound history rather than a bounded
+    attribution-context slice.
+    """
+
+    deposit_cluster: list[str] = field(default_factory=list)
+    sweep_cluster_size: int = 0
+    sweep_tx_hashes: list[str] = field(default_factory=list)
+    sweep_timestamps: list[datetime] = field(default_factory=list)
+    near_full_ratio: float = 0.0
+    interval_regularity: float = 0.0
+
+
+def detect_sweep_cluster(
+    hot: set[str], into_hot: list[ProviderTx], inflow: dict[str, Decimal]
+) -> SweepCluster:
+    """Group addresses that sweep (near-full, many-to-one) into `hot`.
+
+    `into_hot` must already be filtered to edges landing on `hot`; `inflow` is
+    each address's total received value across the wallet's full edge set (used
+    to judge whether a sweep was near-full, not just non-zero).
+    """
+    deposit_cluster = sorted({_norm(e.from_address) for e in into_hot} - hot)
+    if len(deposit_cluster) < MIN_SWEEP_CLUSTER:
+        deposit_cluster = []
+    cluster_set = set(deposit_cluster)
+    sweep_edges = [e for e in into_hot if _norm(e.from_address) in cluster_set]
+
+    near_full_ratio = 0.0
+    if sweep_edges:
+        near_full = 0
+        for e in sweep_edges:
+            dep = _norm(e.from_address)
+            received = inflow.get(dep, Decimal(0))
+            if received > 0 and float(e.value_wei) / float(received) >= NEAR_FULL_THRESHOLD:
+                near_full += 1
+        near_full_ratio = near_full / len(sweep_edges)
+
+    sweep_timestamps = [e.timestamp for e in sweep_edges]
+    return SweepCluster(
+        deposit_cluster=deposit_cluster,
+        sweep_cluster_size=len(deposit_cluster),
+        sweep_tx_hashes=[e.tx_hash for e in sweep_edges],
+        sweep_timestamps=sweep_timestamps,
+        near_full_ratio=near_full_ratio,
+        interval_regularity=_interval_regularity(sweep_timestamps),
+    )
+
+
 def build_graph_facts(
     unknown: str,
     vasp_name: str,
@@ -178,30 +229,18 @@ def build_graph_facts(
             facts.label_confidence = labels[reached].confidence
 
     # --- deposit-sweep (many-to-one only; a lone deposit is not a sweep) ---
-    deposit_cluster = sorted({_norm(e.from_address) for e in into_hot} - hot)
-    if len(deposit_cluster) < MIN_SWEEP_CLUSTER:
-        deposit_cluster = []
-    facts.deposit_cluster = deposit_cluster
-    facts.sweep_cluster_size = len(deposit_cluster)
-    cluster_set = set(deposit_cluster)
-    sweep_edges = [e for e in into_hot if _norm(e.from_address) in cluster_set]
-    facts.sweep_tx_hashes = [e.tx_hash for e in sweep_edges]
-    facts.sweep_timestamps = [e.timestamp for e in sweep_edges]
-
-    if sweep_edges:
-        near_full = 0
-        for e in sweep_edges:
-            dep = _norm(e.from_address)
-            received = inflow.get(dep, Decimal(0))
-            if received > 0 and float(e.value_wei) / float(received) >= NEAR_FULL_THRESHOLD:
-                near_full += 1
-        facts.near_full_ratio = near_full / len(sweep_edges)
-    facts.interval_regularity = _interval_regularity(facts.sweep_timestamps)
+    sweep = detect_sweep_cluster(hot, into_hot, inflow)
+    facts.deposit_cluster = sweep.deposit_cluster
+    facts.sweep_cluster_size = sweep.sweep_cluster_size
+    facts.sweep_tx_hashes = sweep.sweep_tx_hashes
+    facts.sweep_timestamps = sweep.sweep_timestamps
+    facts.near_full_ratio = sweep.near_full_ratio
+    facts.interval_regularity = sweep.interval_regularity
 
     # --- counterparty overlap ---
     unknown_cps = counterparties.get(unknown, set()) - {unknown}
     cluster_cps: set[str] = set()
-    for dep in deposit_cluster:
+    for dep in sweep.deposit_cluster:
         cluster_cps |= counterparties.get(dep, set())
     cluster_cps -= hot
     cluster_cps.discard(unknown)

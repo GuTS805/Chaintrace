@@ -41,11 +41,22 @@ export interface RiskIndicator {
   contribution: number;
 }
 
+export type TypologyCategory = "PEEL_CHAIN" | "LAYERING" | "SMURFING";
+
+export interface TypologyTag {
+  category: TypologyCategory;
+  description: string;
+  confidence: number;
+}
+
 export interface RiskResult {
   wallet: string;
   score: number;
   level: RiskLevel;
   indicators: RiskIndicator[];
+  typology_tags: TypologyTag[];
+  flagged: boolean;
+  flag_reason: string | null;
 }
 
 export interface GraphNode {
@@ -55,6 +66,7 @@ export interface GraphNode {
   label_name: string | null;
   vasp_name: string | null;
   is_contract: boolean;
+  cluster_id: number | null;
 }
 
 export interface GraphEdge {

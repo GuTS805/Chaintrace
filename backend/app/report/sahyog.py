@@ -206,7 +206,8 @@ def build_disclosure_request(
         hops=hops,
         tx_hashes=tx_hashes,
         risk_level=risk.level,
-        risk_notes=[i.description for i in risk.indicators],
+        risk_notes=[i.description for i in risk.indicators]
+        + [t.description for t in risk.typology_tags],
     )
 
     buf = BytesIO()

@@ -21,6 +21,12 @@ export function RiskPanel({ risk }: { risk: RiskResult }) {
 
   return (
     <Panel title="Risk" right={<Pill tone={tone}>{risk.level}</Pill>}>
+      {risk.flagged && (
+        <div className="mb-3 rounded border border-bad/50 bg-bad/10 px-3 py-2 text-xs text-bad">
+          <span className="font-semibold uppercase tracking-wider">⚠ High-risk flag</span>{" "}
+          {risk.flag_reason}
+        </div>
+      )}
       {/* Stepped threat meter. */}
       <div className="flex items-center gap-3">
         <div className="flex flex-1 gap-1">
@@ -58,6 +64,16 @@ export function RiskPanel({ risk }: { risk: RiskResult }) {
           </li>
         ))}
       </ul>
+      {risk.typology_tags.length > 0 && (
+        <ul className="mt-3 space-y-1.5 border-t border-border pt-2">
+          {risk.typology_tags.map((tag, i) => (
+            <li key={i} className="flex items-start gap-2 text-xs">
+              <Pill tone="warn">{tag.category.replace("_", " ")}</Pill>
+              <span className="flex-1 text-text">{tag.description}</span>
+            </li>
+          ))}
+        </ul>
+      )}
       <p className="mt-3 border-t border-border pt-2 text-[10px] uppercase tracking-widest text-muted">
         computed independently of attribution
       </p>

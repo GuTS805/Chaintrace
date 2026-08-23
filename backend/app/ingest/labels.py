@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.enums import LabelCategory, LabelSource
 from app.models import Label, Vasp
+from app.providers.base import normalize_address
 
 log = structlog.get_logger(__name__)
 
@@ -28,6 +29,7 @@ SOURCE_FILES: dict[str, LabelSource] = {
     "ethereum_lists.json": LabelSource.ETHEREUM_LISTS,
     "ofac_sdn.json": LabelSource.OFAC_SDN,
     "etherscan_tags.json": LabelSource.ETHERSCAN_TAG,
+    "tron_lists.json": LabelSource.TRON_LISTS,
 }
 
 
@@ -52,7 +54,7 @@ def load_source_file(path: Path) -> list[dict[str, str]]:
     raw = json.loads(path.read_text(encoding="utf-8"))
     records: list[dict[str, str]] = []
     for item in raw:
-        address = str(item["address"]).strip().lower()
+        address = normalize_address(str(item["address"]))
         if not address:
             continue
         records.append(

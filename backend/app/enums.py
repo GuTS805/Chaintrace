@@ -21,6 +21,7 @@ class LabelSource(StrEnum):
     ETHEREUM_LISTS = "ETHEREUM_LISTS"
     OFAC_SDN = "OFAC_SDN"
     ETHERSCAN_TAG = "ETHERSCAN_TAG"
+    TRON_LISTS = "TRON_LISTS"
     MANUAL = "MANUAL"
 
 
@@ -44,6 +45,15 @@ class FindingSeverity(StrEnum):
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
+
+
+class TypologyCategory(StrEnum):
+    """Laundering-pattern shapes detected on the traced graph (independent of
+    the sanctioned/mixer/scam proximity that drives the risk score)."""
+
+    PEEL_CHAIN = "PEEL_CHAIN"
+    LAYERING = "LAYERING"
+    SMURFING = "SMURFING"
 
 
 class SignalType(StrEnum):

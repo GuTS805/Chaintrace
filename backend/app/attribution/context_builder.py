@@ -14,7 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Label, Transaction, Vasp
-from app.providers.base import ProviderTx
+from app.providers.base import ProviderTx, normalize_address
 from app.repositories.graph_repository import Direction, TraversalBounds
 from app.repositories.sql_graph_repository import SqlGraphRepository
 from app.schemas.graph import GraphResult
@@ -48,7 +48,7 @@ class ContextBuilder:
         self._repo = SqlGraphRepository(session)
 
     async def _inbound(self, addrs: Iterable[str]) -> list[Transaction]:
-        addrs = list({a.lower() for a in addrs})
+        addrs = list({normalize_address(a) for a in addrs})
         if not addrs:
             return []
         rows = (
@@ -84,7 +84,7 @@ class ContextBuilder:
     async def build(
         self, unknown: str, *, depth: int = 6, min_value_wei: int = 0
     ) -> AttributionContext:
-        unknown = unknown.lower()
+        unknown = normalize_address(unknown)
         forward = await self._repo.traverse(
             unknown,
             TraversalBounds(

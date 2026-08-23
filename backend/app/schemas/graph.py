@@ -35,6 +35,7 @@ class GraphNode(BaseModel):
     label_name: str | None = None
     vasp_name: str | None = None
     is_contract: bool = False
+    cluster_id: int | None = None
 
 
 class GraphEdge(BaseModel):

@@ -25,6 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.providers.base import ProviderTx
 from app.providers.etherscan import fetch_etherscan_txlist, parse_etherscan_txlist
+from app.providers.tron import fetch_trongrid_trc20, is_tron_address, parse_trongrid_trc20
 
 log = structlog.get_logger(__name__)
 
@@ -37,7 +38,7 @@ class ImportStats:
 
 
 async def import_provider_txs(
-    session: AsyncSession, txs: list[ProviderTx]
+    session: AsyncSession, txs: list[ProviderTx], *, chain: str = "ethereum"
 ) -> ImportStats:
     """Idempotently upsert wallets + transactions from normalized ProviderTx rows."""
     from app.models import Transaction, Wallet
@@ -66,6 +67,7 @@ async def import_provider_txs(
                 session.add(
                     Wallet(
                         address=addr,
+                        chain=chain,
                         first_seen=ts[0] if ts else None,
                         last_seen=ts[-1] if ts else None,
                     )
@@ -92,13 +94,25 @@ async def import_provider_txs(
     return stats
 
 
-async def _from_file(path: Path) -> list[ProviderTx]:
+async def _from_file(path: Path, chain: str) -> list[ProviderTx]:
     payload = json.loads(path.read_text(encoding="utf-8"))
+    if chain == "tron":
+        return parse_trongrid_trc20(payload)
     return parse_etherscan_txlist(payload)
 
 
-async def _from_live(address: str, save: Path | None) -> list[ProviderTx]:
+async def _from_live(address: str, save: Path | None, chain: str) -> list[ProviderTx]:
     from app.config import get_settings
+
+    if chain == "tron":
+        # Keyless like Blockscout — no API key required.
+        base_url = get_settings().trongrid_base_url
+        payload = await fetch_trongrid_trc20(address, base_url=base_url)
+        if save is not None:
+            save.parent.mkdir(parents=True, exist_ok=True)
+            save.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+            log.info("snapshot_saved", path=str(save), count=len(payload.get("data", [])))
+        return parse_trongrid_trc20(payload)
 
     api_key = get_settings().etherscan_api_key
     if not api_key:
@@ -114,22 +128,40 @@ async def _from_live(address: str, save: Path | None) -> list[ProviderTx]:
 async def _main() -> None:
     parser = argparse.ArgumentParser(description="Import real-chain transactions.")
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--file", type=Path, help="Saved Etherscan txlist JSON.")
-    group.add_argument("--address", type=str, help="Address to fetch live (needs API key).")
+    group.add_argument("--file", type=Path, help="Saved Etherscan/TronGrid JSON.")
+    group.add_argument(
+        "--address", type=str, help="Address to fetch live (Tron is keyless)."
+    )
     parser.add_argument("--save", type=Path, help="Save a live fetch to this JSON path.")
+    parser.add_argument(
+        "--chain",
+        choices=["ethereum", "tron"],
+        default=None,
+        help="Defaults to auto-detect from --address (T… = tron); required with --file.",
+    )
     args = parser.parse_args()
 
+    chain = args.chain
+    if chain is None:
+        chain = "tron" if args.address and is_tron_address(args.address) else "ethereum"
+
     txs = (
-        await _from_file(args.file)
+        await _from_file(args.file, chain)
         if args.file
-        else await _from_live(args.address, args.save)
+        else await _from_live(args.address, args.save, chain)
     )
 
     from app.db.session import get_sessionmaker
 
     async with get_sessionmaker()() as session:
-        stats = await import_provider_txs(session, txs)
+        stats = await import_provider_txs(session, txs, chain=chain)
         await session.commit()
+
+        from app.attribution.cluster_builder import rebuild_all_clusters
+
+        await rebuild_all_clusters(session)
+        await session.commit()
+
         result = {
             "parsed": len(txs),
             "imported_transactions": stats.transactions,
