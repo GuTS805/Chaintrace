@@ -47,7 +47,7 @@ ingest-labels:
 	cd $(BACKEND) && $(PY) -m app.ingest.labels
 
 seed-demo:
-	@echo "seed-demo lands in Phase 2"
+	cd $(BACKEND) && $(PY) -m app.synthetic.seed
 
 dev:
 	cd $(BACKEND) && uvicorn app.main:app --reload
