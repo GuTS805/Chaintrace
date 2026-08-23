@@ -16,7 +16,13 @@ export default function WalletPage({
 }: {
   params: { address: string };
 }) {
-  const address = decodeURIComponent(params.address).toLowerCase();
+  const decoded = decodeURIComponent(params.address);
+  // EVM addresses are case-insensitive hex; Tron (and other base58) addresses
+  // are case-sensitive/checksummed and must not be lowercased.
+  const address = decoded.toLowerCase().startsWith("0x")
+    ? decoded.toLowerCase()
+    : decoded;
+  const chain = address.startsWith("T") ? "TRON" : "ETHEREUM";
   const [attribution, setAttribution] = useState<AttributionResult | null>(null);
   const [risk, setRisk] = useState<RiskResult | null>(null);
   const [graph, setGraph] = useState<GraphResult | null>(null);
@@ -60,7 +66,10 @@ export default function WalletPage({
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-base font-semibold">
           <span className="text-muted">wallet</span>{" "}
-          <span className="break-all text-accent">{address}</span>
+          <span className="break-all text-accent">{address}</span>{" "}
+          <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-widest text-muted">
+            {chain}
+          </span>
         </h1>
         <a
           href={`${api.base}/wallets/${address}/report`}

@@ -32,11 +32,20 @@ function roleOf(n: GraphNode): Role {
   return "plain";
 }
 
-function nodeStyle(role: Role): React.CSSProperties {
+// Distinct deposit clusters (same cluster_id -> swept into the same hot wallet)
+// get a shared background tint so they read as a group in the graph.
+const CLUSTER_TINTS = ["#eef2ff", "#fef3c7", "#dcfce7", "#fee2e2", "#e0f2fe", "#f3e8ff"];
+
+function clusterTint(clusterId: number | null | undefined): string | null {
+  if (clusterId == null) return null;
+  return CLUSTER_TINTS[clusterId % CLUSTER_TINTS.length];
+}
+
+function nodeStyle(role: Role, clusterId: number | null | undefined): React.CSSProperties {
   const color = ROLE_COLOR[role];
   const special = role !== "plain";
   return {
-    background: "#ffffff",
+    background: clusterTint(clusterId) ?? "#ffffff",
     border: `${special ? 1.5 : 1}px solid ${color}`,
     borderRadius: 8,
     color: "#0f1720",
@@ -78,10 +87,15 @@ export function GraphView({ graph }: { graph: GraphResult }) {
                   {title}
                 </div>
               )}
+              {n.cluster_id != null && (
+                <div style={{ color: "#5b6673", marginTop: 2, fontSize: 9 }}>
+                  cluster #{n.cluster_id}
+                </div>
+              )}
             </div>
           ),
         },
-        style: nodeStyle(role),
+        style: nodeStyle(role, n.cluster_id),
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
       };

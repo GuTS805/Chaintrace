@@ -7,7 +7,8 @@ weighted by proximity. Deliberately separate from the attribution probability.
 from __future__ import annotations
 
 from app.attribution.context_builder import AttributionContext
-from app.schemas.risk import RiskIndicator, RiskLevel, RiskResult
+from app.attribution.typology import detect_typology
+from app.schemas.risk import RiskIndicator, RiskLevel, RiskResult, TypologyTag
 
 # Category -> base severity weight.
 _CATEGORY_WEIGHT = {
@@ -62,9 +63,30 @@ class RiskScorer:
                 )
             )
         indicators.sort(key=lambda i: i.contribution, reverse=True)
+        level = _level(score)
+        typology_tags = detect_typology(context)
+        flagged, flag_reason = self._flag(level, typology_tags)
+
         return RiskResult(
             wallet=context.unknown,
             score=round(min(score, 1.0), 4),
-            level=_level(score),
+            level=level,
             indicators=indicators,
+            typology_tags=typology_tags,
+            flagged=flagged,
+            flag_reason=flag_reason,
         )
+
+    @staticmethod
+    def _flag(
+        level: RiskLevel, typology_tags: list[TypologyTag]
+    ) -> tuple[bool, str | None]:
+        reasons: list[str] = []
+        if level in (RiskLevel.HIGH, RiskLevel.CRITICAL):
+            reasons.append(f"{level.value} exposure to a sanctioned/mixer/scam entity")
+        if typology_tags:
+            names = ", ".join(t.category for t in typology_tags)
+            reasons.append(f"typology detected: {names}")
+        if not reasons:
+            return False, None
+        return True, "; ".join(reasons)

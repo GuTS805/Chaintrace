@@ -269,6 +269,29 @@ def build_wallet_report(
             Paragraph("No sanctioned / mixer / scam exposure detected.", s["body"])
         )
 
+    if risk.flagged:
+        story.append(Spacer(1, 4))
+        story.append(
+            Paragraph(
+                f"⚠ HIGH-RISK FLAG — {_esc(risk.flag_reason or '')}",
+                ParagraphStyle(
+                    "flag", parent=s["body"], textColor=_BAD, fontName="Helvetica-Bold"
+                ),
+            )
+        )
+
+    story.append(Paragraph("Laundering typology", s["h2"]))
+    for tag in risk.typology_tags:
+        story.append(
+            Paragraph(
+                f"• <b>{_esc(tag.category)}</b> ({_pct(tag.confidence, 0)} confidence) — "
+                f"{_esc(tag.description)}",
+                s["body"],
+            )
+        )
+    if not risk.typology_tags:
+        story.append(Paragraph("No laundering-typology pattern detected.", s["body"]))
+
     # Graph snapshot.
     story.append(Paragraph("Transaction graph snapshot", s["h2"]))
     story.append(GraphFlowable(graph))

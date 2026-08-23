@@ -15,7 +15,11 @@ export function WalletSearch({
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    const addr = value.trim().toLowerCase();
+    const trimmed = value.trim();
+    // EVM addresses are case-insensitive hex; lowercase for consistency. Tron
+    // (and other base58) addresses are case-sensitive/checksummed, so leave
+    // them untouched.
+    const addr = trimmed.toLowerCase().startsWith("0x") ? trimmed.toLowerCase() : trimmed;
     if (addr) router.push(`/wallets/${addr}`);
   }
 
@@ -28,7 +32,7 @@ export function WalletSearch({
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="0x… wallet address"
+        placeholder="0x… or T… wallet address"
         spellCheck={false}
         autoFocus={autoFocus}
         aria-label="Wallet address"

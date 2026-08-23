@@ -14,7 +14,8 @@ from sqlalchemy import ColumnElement, and_, literal, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.selectable import CTE
 
-from app.models import Label, Transaction, Vasp, Wallet
+from app.models import ClusterMember, Label, Transaction, Vasp, Wallet
+from app.providers.base import normalize_address as _norm
 from app.repositories.graph_repository import (
     Direction,
     GraphRepository,
@@ -29,10 +30,6 @@ from app.schemas.graph import (
 )
 
 _TX = Transaction.__table__
-
-
-def _norm(address: str) -> str:
-    return address.strip().lower()
 
 
 class SqlGraphRepository(GraphRepository):
@@ -189,6 +186,15 @@ class SqlGraphRepository(GraphRepository):
         ).all()
         contracts = {addr: bool(is_c) for addr, is_c in contract_rows}
 
+        cluster_rows = (
+            await self._session.execute(
+                select(ClusterMember.address, ClusterMember.cluster_id).where(
+                    ClusterMember.address.in_(addrs)
+                )
+            )
+        ).all()
+        cluster_ids = {addr: cid for addr, cid in cluster_rows}
+
         nodes: list[GraphNode] = []
         for addr, depth in sorted(node_depth.items(), key=lambda kv: kv[1]):
             label_name, vasp_name = labels.get(addr, (None, None))
@@ -200,6 +206,7 @@ class SqlGraphRepository(GraphRepository):
                     label_name=label_name,
                     vasp_name=vasp_name,
                     is_contract=contracts.get(addr, False),
+                    cluster_id=cluster_ids.get(addr),
                 )
             )
         return nodes

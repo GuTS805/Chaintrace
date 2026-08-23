@@ -1,0 +1,49 @@
+[
+  {
+    "address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+    "name": "Tether: USDT Stablecoin (TRC20)",
+    "category": "CONTRACT"
+  },
+  {
+    "address": "TJDENsfBJs4RFETt1X1W8wMDc8M5XnJhCe",
+    "name": "Binance-Hot 6",
+    "category": "EXCHANGE",
+    "vasp": "Binance"
+  },
+  {
+    "address": "TCYDDPYUiq97JU1RwBMGdf7jWTUTZ8GmgT",
+    "name": "Binance 1",
+    "category": "EXCHANGE",
+    "vasp": "Binance"
+  },
+  {
+    "address": "TG2CMGxnTPgQ6V58kiKd7wbyN8ewtAmY76",
+    "name": "Kraken: Hot Wallet",
+    "category": "EXCHANGE",
+    "vasp": "Kraken"
+  },
+  {
+    "address": "TYh6mgoMNZTCsgpYHBz7gttEfrQmDMABub",
+    "name": "HTX Exchange",
+    "category": "EXCHANGE",
+    "vasp": "HTX"
+  },
+  {
+    "address": "TLaGjwhvA8XQYSxFAcAXy7Dvuue9eGYitv",
+    "name": "OKX Hot Wallet 8",
+    "category": "EXCHANGE",
+    "vasp": "OKX"
+  },
+  {
+    "address": "TU4vEruvZwLLkSfV9bNw12EJTPvNr7Pvaa",
+    "name": "Bybit",
+    "category": "EXCHANGE",
+    "vasp": "Bybit"
+  },
+  {
+    "address": "TK1U4Hym23Jz9fP3p8oker4A8VQdoq88Ms",
+    "name": "KuCoin 10",
+    "category": "EXCHANGE",
+    "vasp": "KuCoin"
+  }
+]

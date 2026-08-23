@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     blockscout_base_url: str = Field(
         default="https://eth.blockscout.com/api", alias="BLOCKSCOUT_BASE_URL"
     )
+    # TronGrid: keyless like Blockscout for low-volume use; an optional API key
+    # (header, not this URL) only raises rate limits.
+    trongrid_base_url: str = Field(
+        default="https://api.trongrid.io", alias="TRONGRID_BASE_URL"
+    )
 
     # Attribution engine.
     model_version: str = Field(default="phase1-dev", alias="MODEL_VERSION")

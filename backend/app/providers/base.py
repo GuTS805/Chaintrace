@@ -34,6 +34,20 @@ class WalletInfo(BaseModel):
     tx_count: int = 0
 
 
+def normalize_address(addr: str) -> str:
+    """Canonicalize an address for storage/comparison.
+
+    EVM addresses are case-insensitive hex, so lowercasing is safe and is the
+    existing convention throughout the store. Tron (and other base58) addresses
+    are case-sensitive/checksummed — lowercasing would corrupt them — so they
+    pass through unchanged.
+    """
+    a = addr.strip()
+    if a.lower().startswith("0x"):
+        return a.lower()
+    return a
+
+
 @runtime_checkable
 class ChainProvider(Protocol):
     """Uniform interface over chain data sources."""

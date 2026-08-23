@@ -21,6 +21,7 @@ const ASSET_DECIMALS: Record<string, number> = {
   USDT: 6,
   USDC: 6,
   BUSD: 18,
+  TRX: 6,
 };
 
 export function assetAmount(value: string, asset: string): number {

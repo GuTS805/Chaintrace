@@ -9,7 +9,7 @@ from app.providers.base import ProviderTx
 from app.signals import FEATURE_NAMES, SIGNALS, build_graph_facts, feature_vector
 from app.signals.counterparty_overlap import CounterpartyOverlapSignal
 from app.signals.deposit_sweep import DepositSweepSignal
-from app.signals.facts import LabelInfo
+from app.signals.facts import LabelInfo, detect_sweep_cluster
 from app.signals.hop_path import HopPathSignal
 from app.signals.known_label import KnownLabelSignal
 from app.signals.pattern_similarity import PatternSimilaritySignal
@@ -55,6 +55,22 @@ def test_facts_reachability_and_cluster() -> None:
     assert f.sweep_cluster_size == 10
     assert f.near_full_ratio == 1.0
     assert f.label_confidence == 0.9
+
+
+def test_detect_sweep_cluster_standalone() -> None:
+    """Same detector, called directly with pre-derived inputs (as
+    cluster_builder does over a hot wallet's full inbound history, not a
+    bounded attribution-context slice)."""
+    edges = _sweep_edges()
+    into_hot = [e for e in edges if e.to_address == HOT]
+    inflow: dict[str, Decimal] = {}
+    for e in edges:
+        inflow[e.to_address] = inflow.get(e.to_address, Decimal(0)) + e.value_wei
+
+    sweep = detect_sweep_cluster({HOT}, into_hot, inflow)
+    assert sweep.sweep_cluster_size == 10
+    assert sweep.near_full_ratio == 1.0
+    assert set(sweep.deposit_cluster) == {f"0xdep{i}" for i in range(10)}
 
 
 def test_feature_vector_matches_registry_order() -> None:
