@@ -37,7 +37,7 @@ export const DEMO_WALLETS: { label: string; address: string; note: string }[] = 
   {
     label: "Peel chain",
     address: "0x3d2a2561bf2b18e85fdc482a15674cc977f95b3f",
-    note: "moderate (Kraken)",
+    note: "peel chain → Kraken",
   },
   {
     label: "No VASP linkage",

@@ -5,7 +5,7 @@ import { DEMO_WALLETS, shortAddr } from "@/lib/format";
 
 const OUTCOME_TONE: Record<string, "good" | "warn" | "accent" | "muted"> = {
   "clean attribution (Binance)": "good",
-  "moderate (Kraken)": "warn",
+  "peel chain → Kraken": "warn",
   "insufficient evidence": "muted",
   "ambiguous split": "accent",
   "real: Kraken deposit": "good",
