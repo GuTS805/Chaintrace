@@ -1,0 +1,29 @@
+{
+  "_note": "Illustrative example of the Etherscan account/txlist response SHAPE, used to demonstrate that the same pipeline ingests real-chain data. Replace with a real snapshot: python -m app.ingest.chain_import --address 0x... --save <this file> (needs ETHERSCAN_API_KEY). The destination 0x3f5ce5... is Binance's real, publicly-labeled hot wallet.",
+  "status": "1",
+  "message": "OK",
+  "result": [
+    {
+      "blockNumber": "19450001",
+      "timeStamp": "1710500000",
+      "hash": "0xaa01000000000000000000000000000000000000000000000000000000000001",
+      "from": "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "to": "0xb2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+      "value": "5000000000000000000",
+      "gas": "21000",
+      "gasPrice": "12000000000",
+      "gasUsed": "21000"
+    },
+    {
+      "blockNumber": "19450050",
+      "timeStamp": "1710503600",
+      "hash": "0xaa01000000000000000000000000000000000000000000000000000000000002",
+      "from": "0xb2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+      "to": "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
+      "value": "4990000000000000000",
+      "gas": "21000",
+      "gasPrice": "11000000000",
+      "gasUsed": "21000"
+    }
+  ]
+}
