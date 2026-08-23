@@ -1,0 +1,16 @@
+"""API smoke test."""
+
+from __future__ import annotations
+
+from fastapi.testclient import TestClient
+
+from app.main import app
+
+
+def test_health_endpoint() -> None:
+    client = TestClient(app)
+    resp = client.get("/health")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "ok"
+    assert "model_version" in body
