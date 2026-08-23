@@ -39,3 +39,6 @@ Thumbs.db
 /models/*.joblib
 !/models/.gitkeep
 *.log
+
+# playwright mcp output
+.playwright-mcp/

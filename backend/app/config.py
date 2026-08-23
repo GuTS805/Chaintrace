@@ -38,6 +38,14 @@ class Settings(BaseSettings):
     # App.
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     env: str = Field(default="development", alias="ENV")
+    cors_origins: str = Field(
+        default="http://localhost:3000,http://127.0.0.1:3000",
+        alias="CORS_ORIGINS",
+    )
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
     @property
     def sync_database_url(self) -> str:

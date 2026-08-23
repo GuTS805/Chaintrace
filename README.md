@@ -11,8 +11,25 @@ attribution path — attribution is heuristics + a gradient-boosted classifier
 can also explicitly say **"insufficient evidence"** rather than force-attribute
 every wallet.
 
-> **Status: Phases 1–4 complete.** Later phases add the frontend (5) and PDF
-> reports (6).
+> **Status: Phases 1–5 complete.** Phase 6 (PDF report generation) remains.
+
+## Frontend (Phase 5)
+
+Next.js 14 (App Router) + TypeScript + Tailwind + React Flow. Dark, dense,
+terminal-adjacent, data-first. Verified end-to-end against the live API.
+
+- `/` — wallet search + offline demo wallets
+- `/wallets/{address}` — attribution panel (probability bars + expandable
+  evidence with per-signal TreeSHAP contributions), independent risk panel,
+  React Flow transaction graph (root/VASP/mixer nodes colour-coded, click a node
+  to trace it), and attach-to-case
+- `/cases`, `/cases/{id}` — create cases, attach wallets, add findings/notes
+
+The backend gained a small cases API (`/cases…`) and CORS. Run:
+
+```bash
+cd frontend && npm install && cp .env.example .env.local && npm run dev
+```
 
 ## Graph traversal + path extraction (Phase 3)
 
