@@ -30,6 +30,11 @@ export default function Home() {
           rather than guess. No LLM in the attribution path.
         </p>
         <WalletSearch autoFocus />
+        <p className="text-xs text-muted">
+          Not just the demo wallets — paste{" "}
+          <span className="text-accent">any real Ethereum address</span> and fetch
+          it live from chain.
+        </p>
       </section>
 
       <section className="space-y-3">

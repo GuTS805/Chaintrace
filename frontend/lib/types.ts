@@ -105,3 +105,10 @@ export interface Finding {
 export interface CaseDetail extends CaseOut {
   findings: Finding[];
 }
+
+export interface LiveTraceResult {
+  address: string;
+  imported_transactions: number;
+  total_transactions: number;
+  source: "cache" | "blockscout";
+}

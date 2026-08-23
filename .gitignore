@@ -42,3 +42,6 @@ Thumbs.db
 
 # playwright mcp output
 .playwright-mcp/
+
+# claude worktrees / local session state
+.claude/

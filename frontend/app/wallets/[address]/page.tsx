@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { AttributionResult, GraphResult, RiskResult } from "@/lib/types";
 import { AttributionPanel } from "@/components/AttributionPanel";
@@ -8,6 +8,7 @@ import { RiskPanel } from "@/components/RiskPanel";
 import { GraphView } from "@/components/GraphView";
 import { AddToCase } from "@/components/AddToCase";
 import { WalletSearch } from "@/components/WalletSearch";
+import { LiveTrace } from "@/components/LiveTrace";
 import { Panel } from "@/components/ui";
 
 export default function WalletPage({
@@ -22,34 +23,37 @@ export default function WalletPage({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let active = true;
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    Promise.allSettled([
+    const results = await Promise.allSettled([
       api.attribution(address),
       api.risk(address),
       api.graph(address, 5),
-    ]).then((results) => {
-      if (!active) return;
-      const [a, r, g] = results;
-      if (a.status === "fulfilled") setAttribution(a.value);
-      if (r.status === "fulfilled") setRisk(r.value);
-      if (g.status === "fulfilled") setGraph(g.value);
-      if (results.every((x) => x.status === "rejected")) {
-        const first = results.find((x) => x.status === "rejected") as
-          | PromiseRejectedResult
-          | undefined;
-        setError(
-          first ? String(first.reason) : "Could not reach the API. Is it running?",
-        );
-      }
-      setLoading(false);
-    });
-    return () => {
-      active = false;
-    };
+    ]);
+    const [a, r, g] = results;
+    if (a.status === "fulfilled") setAttribution(a.value);
+    if (r.status === "fulfilled") setRisk(r.value);
+    if (g.status === "fulfilled") setGraph(g.value);
+    if (results.every((x) => x.status === "rejected")) {
+      const first = results.find((x) => x.status === "rejected") as
+        | PromiseRejectedResult
+        | undefined;
+      setError(
+        first ? String(first.reason) : "Could not reach the API. Is it running?",
+      );
+    }
+    setLoading(false);
   }, [address]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  // A wallet with no local data: no candidates and an empty graph.
+  const isEmpty =
+    (attribution?.candidates.length ?? 0) === 0 &&
+    (graph?.nodes.length ?? 0) <= 1;
 
   return (
     <div className="space-y-4">
@@ -82,7 +86,11 @@ export default function WalletPage({
         </Panel>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && isEmpty && (
+        <LiveTrace address={address} onDone={load} />
+      )}
+
+      {!loading && !error && !isEmpty && (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className="space-y-4">
             {attribution && <AttributionPanel result={attribution} />}

@@ -29,6 +29,12 @@ The pipeline consumes the standard **Etherscan `txlist` schema**, so traversal +
 attribution run on real data unchanged — demonstrated offline, without depending
 on live hot-wallet traversal:
 
+**Live "trace any wallet":** paste any real Ethereum address in the UI — if it
+isn't cached, `POST /wallets/{addr}/live-trace` fetches its transactions live from
+Blockscout (keyless), imports them, and the same pipeline attributes it. Results
+are cached, so a wallet is fetched once and then works offline. The six seeded
+cases remain the offline demo spine.
+
 ```bash
 make import-realchain          # replay the bundled Etherscan-schema sample
 # or snapshot a real low-degree wallet once (needs ETHERSCAN_API_KEY), then replay offline:

@@ -4,6 +4,7 @@ import type {
   CaseOut,
   Finding,
   GraphResult,
+  LiveTraceResult,
   RiskResult,
 } from "./types";
 
@@ -49,6 +50,13 @@ export const api = {
     getJSON<GraphResult>(
       `/wallets/${address}/graph?depth=${depth}&direction=${direction}`,
     ),
+  liveTrace: async (address: string): Promise<LiveTraceResult> => {
+    const r = await sendJSON<LiveTraceResult>(
+      `/wallets/${address}/live-trace`,
+      "POST",
+    );
+    return r as LiveTraceResult;
+  },
   listCases: () => getJSON<CaseOut[]>(`/cases`),
   getCase: (id: number) => getJSON<CaseDetail>(`/cases/${id}`),
   createCase: (body: {
