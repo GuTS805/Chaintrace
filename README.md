@@ -13,6 +13,29 @@ every wallet.
 
 > **Status: all six phases complete.**
 
+## Run the demo (one command, Windows)
+
+```powershell
+.\run.ps1        # setup if needed, start API + frontend (SQLite, no Docker), open the browser
+.\run.ps1 -Stop  # stop both servers
+```
+
+See **[RUNBOOK.md](RUNBOOK.md)** for the 90-second judge walkthrough
+(unknown wallet → graph → attribution → why → risk → case → PDF).
+
+## Real-chain ready
+
+The pipeline consumes the standard **Etherscan `txlist` schema**, so traversal +
+attribution run on real data unchanged — demonstrated offline, without depending
+on live hot-wallet traversal:
+
+```bash
+make import-realchain          # replay the bundled Etherscan-schema sample
+# or snapshot a real low-degree wallet once (needs ETHERSCAN_API_KEY), then replay offline:
+python -m app.ingest.chain_import --address 0x... --save data/realchain/case.json
+python -m app.ingest.chain_import --file data/realchain/case.json
+```
+
 ## Reports (Phase 6)
 
 One-click investigator PDFs, generated server-side with reportlab (pure Python,
