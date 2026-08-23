@@ -5,5 +5,11 @@ from app.repositories.graph_repository import (
     GraphRepository,
     TraversalBounds,
 )
+from app.repositories.sql_graph_repository import SqlGraphRepository
 
-__all__ = ["Direction", "GraphRepository", "TraversalBounds"]
+__all__ = [
+    "Direction",
+    "GraphRepository",
+    "SqlGraphRepository",
+    "TraversalBounds",
+]

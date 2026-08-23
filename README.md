@@ -11,8 +11,32 @@ attribution path — attribution is heuristics + a gradient-boosted classifier
 can also explicitly say **"insufficient evidence"** rather than force-attribute
 every wallet.
 
-> **Status: Phases 1–2 complete.** Later phases add bounded graph traversal (3),
-> the signals + attribution engine (4), the frontend (5), and PDF reports (6).
+> **Status: Phases 1–3 complete.** Later phases add the signals + attribution
+> engine (4), the frontend (5), and PDF reports (6).
+
+## Graph traversal + path extraction (Phase 3)
+
+Bounded multi-hop traversal via a single `WITH RECURSIVE` CTE (verified to render
+on both Postgres and SQLite), cycle-free through a path string carried in the
+recursion. Every traversal is bounded and reports exactly why it stopped.
+
+- `SqlGraphRepository` (behind the `GraphRepository` interface) — `traverse()`
+  and `shortest_paths()`.
+- `TraversalBounds`: `max_hops`, `min_value_wei`, `since`/`until`, `max_nodes`,
+  and `direction` (FORWARD / REVERSE / BOTH — REVERSE powers deposit-sweep).
+- `PruneInfo` reports `pruned` + concrete `reasons` (`MAX_HOPS`, `MAX_NODES`,
+  `MIN_VALUE`, `TIME_WINDOW`) — each detected with a bounded EXISTS check so the
+  flag is honest, never a guess.
+
+Endpoints:
+
+```
+GET /wallets/{addr}/graph?depth=&min_value=&since=&until=&direction=&max_nodes=
+    -> { root, nodes[], edges[], prune }
+
+GET /wallets/{addr}/paths-to-labeled?depth=&direction=&limit_per_target=
+    -> [ { target, label_name, vasp_name, shortest_hops, paths[][] } ]
+```
 
 ## Demo scenarios (Phase 2)
 
