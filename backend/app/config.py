@@ -24,12 +24,51 @@ class Settings(BaseSettings):
     # Cache.
     redis_url: str = Field(default="redis://localhost:6379/0", alias="REDIS_URL")
 
-    # Chain providers (unused while running offline fixtures).
+    # ---- Chain providers (unused while running offline fixtures) ----
     etherscan_api_key: str = Field(default="", alias="ETHERSCAN_API_KEY")
     etherscan_base_url: str = Field(
         default="https://api.etherscan.io/api", alias="ETHERSCAN_BASE_URL"
     )
+    blockscout_base_url: str = Field(
+        default="https://eth.blockscout.com/api", alias="BLOCKSCOUT_BASE_URL"
+    )
+    alchemy_api_key: str = Field(default="", alias="ALCHEMY_API_KEY")
+    alchemy_base_url: str = Field(
+        default="https://eth-mainnet.g.alchemy.com/v2", alias="ALCHEMY_BASE_URL"
+    )
+    infura_api_key: str = Field(default="", alias="INFURA_API_KEY")
+    infura_base_url: str = Field(
+        default="https://mainnet.infura.io/v3", alias="INFURA_BASE_URL"
+    )
     rpc_url: str = Field(default="", alias="RPC_URL")
+
+    # Failover order, most-preferred first. Providers whose credentials are
+    # missing are skipped when the router is built, so this can list everything.
+    provider_order: str = Field(
+        default="etherscan,blockscout,alchemy,infura", alias="PROVIDER_ORDER"
+    )
+    # Blockscout needs no key, so it would otherwise be enabled everywhere --
+    # including offline runs that must make no network calls at all.
+    provider_allow_keyless: bool = Field(
+        default=False, alias="PROVIDER_ALLOW_KEYLESS"
+    )
+
+    # ---- Provider resilience ----
+    provider_timeout_seconds: float = Field(default=15.0, alias="PROVIDER_TIMEOUT")
+    provider_max_attempts: int = Field(default=3, alias="PROVIDER_MAX_ATTEMPTS")
+    provider_failure_threshold: int = Field(
+        default=3, alias="PROVIDER_FAILURE_THRESHOLD"
+    )
+    provider_recovery_seconds: float = Field(
+        default=30.0, alias="PROVIDER_RECOVERY_SECONDS"
+    )
+    provider_page_size: int = Field(default=200, alias="PROVIDER_PAGE_SIZE")
+
+    # ---- Provider cache ----
+    provider_cache_enabled: bool = Field(default=True, alias="PROVIDER_CACHE_ENABLED")
+    provider_cache_ttl_seconds: int = Field(
+        default=900, alias="PROVIDER_CACHE_TTL_SECONDS"
+    )
 
     # Attribution engine.
     model_version: str = Field(default="phase1-dev", alias="MODEL_VERSION")
@@ -46,6 +85,10 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def provider_order_list(self) -> list[str]:
+        return [p.strip().lower() for p in self.provider_order.split(",") if p.strip()]
 
     @property
     def sync_database_url(self) -> str:

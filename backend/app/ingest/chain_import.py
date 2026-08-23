@@ -26,6 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.chains import DEFAULT_CHAIN
 from app.providers.base import ProviderTx
 from app.providers.etherscan import fetch_etherscan_txlist, parse_etherscan_txlist
+from app.providers.router import ProviderRouter
 
 log = structlog.get_logger(__name__)
 
@@ -114,6 +115,52 @@ async def import_provider_txs(
     return stats
 
 
+async def import_from_router(
+    session: AsyncSession,
+    router: ProviderRouter,
+    address: str,
+    *,
+    limit: int = 1000,
+    chain: str = DEFAULT_CHAIN.value,
+) -> ImportStats:
+    """Pull an address's history through the router and store it page by page.
+
+    Pages are imported as they arrive rather than accumulated: a long history
+    that dies halfway still leaves the earlier pages committed, and each page is
+    stamped with the provider that actually served it, so a store fed by failover
+    records which upstream each row came from.
+    """
+    totals = ImportStats()
+    seen_hashes: set[str] = set()
+    cursor: str | None = None
+
+    for _ in range(router.max_pages):
+        page = await router.get_transaction_page(address, limit=limit, cursor=cursor)
+        fresh = [t for t in page.transactions if t.tx_hash not in seen_hashes]
+        seen_hashes.update(t.tx_hash for t in fresh)
+
+        if fresh:
+            stats = await import_provider_txs(
+                session, fresh, chain=chain, provider=page.source or "unknown"
+            )
+            totals.transactions += stats.transactions
+            totals.wallets += stats.wallets
+            totals.skipped += stats.skipped
+
+        if page.partial:
+            log.warning(
+                "chain_import_partial_page",
+                address=address,
+                provider=page.source,
+                cursor=cursor,
+            )
+        if not page.next_cursor:
+            break
+        cursor = page.next_cursor
+
+    return totals
+
+
 async def _from_file(path: Path) -> list[ProviderTx]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     return parse_etherscan_txlist(payload)
@@ -139,15 +186,45 @@ async def _main() -> None:
     group.add_argument("--file", type=Path, help="Saved Etherscan txlist JSON.")
     group.add_argument("--address", type=str, help="Address to fetch live (needs API key).")
     parser.add_argument("--save", type=Path, help="Save a live fetch to this JSON path.")
+    parser.add_argument(
+        "--router",
+        action="store_true",
+        help="Fetch through the configured provider chain (retries, failover, cache) "
+        "instead of calling Etherscan directly. Requires --address.",
+    )
+    parser.add_argument("--limit", type=int, default=1000, help="Max transactions.")
     args = parser.parse_args()
+
+    from app.db.session import get_sessionmaker
+
+    if args.router:
+        if not args.address:
+            raise SystemExit("--router requires --address.")
+        from app.providers.factory import build_router
+
+        router = build_router()
+        async with get_sessionmaker()() as session:
+            stats = await import_from_router(
+                session, router, args.address, limit=args.limit
+            )
+            await session.commit()
+            result = {
+                "imported_transactions": stats.transactions,
+                "new_wallets": stats.wallets,
+                "skipped_existing": stats.skipped,
+                "provider_health": [
+                    {"provider": h.provider, "state": h.state.value} for h in router.health()
+                ],
+            }
+            log.info("chain_import_complete", **result)
+            print(json.dumps(result, indent=2))
+        return
 
     txs = (
         await _from_file(args.file)
         if args.file
         else await _from_live(args.address, args.save)
     )
-
-    from app.db.session import get_sessionmaker
 
     async with get_sessionmaker()() as session:
         stats = await import_provider_txs(session, txs)
