@@ -1,41 +1,68 @@
 import Link from "next/link";
 import { WalletSearch } from "@/components/WalletSearch";
-import { Panel } from "@/components/ui";
+import { Pill } from "@/components/ui";
 import { DEMO_WALLETS, shortAddr } from "@/lib/format";
+
+const OUTCOME_TONE: Record<string, "good" | "warn" | "accent" | "muted"> = {
+  "clean attribution (Binance)": "good",
+  "moderate (Kraken)": "warn",
+  "insufficient evidence": "muted",
+  "ambiguous split": "accent",
+};
 
 export default function Home() {
   return (
-    <div className="mx-auto max-w-3xl space-y-6 pt-6">
-      <div>
-        <h1 className="text-lg font-semibold">Wallet attribution</h1>
-        <p className="mt-1 text-sm text-muted">
-          Enter a wallet address to attribute it to a likely VASP with a
-          calibrated confidence score and a traceable evidence chain.
+    <div className="mx-auto max-w-4xl space-y-10 pt-6">
+      <section className="space-y-5">
+        <div className="text-[11px] uppercase tracking-widest2 text-accent">
+          forensic wallet attribution
+        </div>
+        <h1 className="font-display text-4xl font-bold leading-[1.1] text-text sm:text-5xl">
+          Trace any wallet to the{" "}
+          <span className="text-accent">exchange behind it</span>.
+        </h1>
+        <p className="max-w-2xl text-sm leading-relaxed text-muted">
+          Attribution from on-chain heuristics and a calibrated classifier — every
+          score traces to concrete evidence, and the system will say{" "}
+          <span className="text-text">&ldquo;insufficient evidence&rdquo;</span>{" "}
+          rather than guess. No LLM in the attribution path.
         </p>
-      </div>
+        <WalletSearch autoFocus />
+      </section>
 
-      <WalletSearch />
-
-      <Panel title="Demo wallets (offline seeded)">
-        <ul className="divide-y divide-border">
-          {DEMO_WALLETS.map((w) => (
-            <li key={w.address}>
-              <Link
-                href={`/wallets/${w.address}`}
-                className="flex items-center gap-3 py-2.5 hover:bg-panel2"
-              >
-                <span className="w-44 font-semibold text-accent">{w.label}</span>
-                <span className="text-muted">{shortAddr(w.address)}</span>
-                <span className="ml-auto text-xs text-muted">{w.note}</span>
-              </Link>
-            </li>
+      <section className="space-y-3">
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] uppercase tracking-widest2 text-muted">
+            case files · offline seeded
+          </span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {DEMO_WALLETS.map((w, i) => (
+            <Link
+              key={w.address}
+              href={`/wallets/${w.address}`}
+              className="group rounded-md border border-border bg-panel p-4 transition-colors hover:border-accent/50 hover:bg-panel2"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-display text-[10px] tabular-nums text-muted">
+                  CASE-{String(i + 1).padStart(2, "0")}
+                </span>
+                <Pill tone={OUTCOME_TONE[w.note] ?? "muted"}>{w.note}</Pill>
+              </div>
+              <div className="mt-2 font-display text-base font-semibold text-text group-hover:text-accent">
+                {w.label}
+              </div>
+              <div className="mt-1 text-xs text-muted">{shortAddr(w.address, 10, 8)}</div>
+            </Link>
           ))}
-        </ul>
-      </Panel>
+        </div>
+      </section>
 
       <p className="text-xs text-muted">
-        Run <code className="text-text">make seed-demo</code> and start the API
-        first. Manage investigations under{" "}
+        Start the API (<code className="text-text">uvicorn app.main:app</code>) and
+        seed data (<code className="text-text">make seed-demo</code>) first. Manage
+        investigations under{" "}
         <Link href="/cases" className="text-accent hover:underline">
           cases
         </Link>

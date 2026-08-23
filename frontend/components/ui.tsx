@@ -12,14 +12,15 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <section
-      className={`rounded-md border border-border bg-panel ${className}`}
-    >
+    <section className={`rounded-md border border-border bg-panel ${className}`}>
       {title && (
-        <div className="flex items-center justify-between border-b border-border px-4 py-2">
-          <h2 className="text-xs uppercase tracking-widest text-muted">
-            {title}
-          </h2>
+        <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="h-3 w-[3px] rounded-full bg-accent" />
+            <h2 className="text-[10px] uppercase tracking-widest2 text-muted">
+              {title}
+            </h2>
+          </div>
           {right}
         </div>
       )}
@@ -28,21 +29,40 @@ export function Panel({
   );
 }
 
-export function Bar({ value, tone = "accent" }: { value: number; tone?: string }) {
-  const toneClass =
-    {
-      accent: "bg-accent",
-      good: "bg-good",
-      warn: "bg-warn",
-      bad: "bg-bad",
-      vasp: "bg-vasp",
-    }[tone] ?? "bg-accent";
+const TONE_BG: Record<string, string> = {
+  accent: "bg-accent",
+  good: "bg-good",
+  warn: "bg-warn",
+  bad: "bg-bad",
+  vasp: "bg-vasp",
+  muted: "bg-muted",
+};
+
+export function Bar({
+  value,
+  tone = "accent",
+  threshold,
+  height = "h-2",
+}: {
+  value: number;
+  tone?: string;
+  threshold?: number;
+  height?: string;
+}) {
+  const clamped = Math.max(0, Math.min(1, value));
   return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-panel2">
+    <div className={`relative w-full overflow-hidden rounded-full bg-panel2 ${height}`}>
       <div
-        className={`h-full ${toneClass}`}
-        style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%` }}
+        className={`h-full rounded-full ${TONE_BG[tone] ?? "bg-accent"}`}
+        style={{ width: `${clamped * 100}%` }}
       />
+      {threshold !== undefined && (
+        <span
+          className="absolute top-0 h-full w-px bg-text/70"
+          style={{ left: `${Math.max(0, Math.min(1, threshold)) * 100}%` }}
+          aria-hidden
+        />
+      )}
     </div>
   );
 }

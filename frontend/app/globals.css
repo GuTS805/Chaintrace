@@ -1,3 +1,7 @@
+/* Runtime font load (keeps the production build offline-safe; falls back to the
+   mono/sans stacks in tailwind.config if the network is unavailable). */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,32 +12,55 @@
 
 html,
 body {
-  background-color: #0a0e14;
-  color: #c9d1d9;
+  background-color: #0b0d12;
+  color: #d7dce5;
 }
 
 body {
-  font-feature-settings: "liga" 0;
   -webkit-font-smoothing: antialiased;
+  /* Subtle carbon grid — reads like an instrument backdrop, not decoration. */
+  background-image:
+    linear-gradient(#11151d 1px, transparent 1px),
+    linear-gradient(90deg, #11151d 1px, transparent 1px);
+  background-size: 44px 44px;
+  background-position: -1px -1px;
 }
 
-/* Thin, unobtrusive scrollbars to match the dense terminal aesthetic. */
+/* Focus ring — visible for keyboard users across all interactives. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #f2b750;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0e14;
+  background: #0b0d12;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1c2530;
+  background: #242c3a;
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a3646;
+  background: #333d50;
 }
 
-/* React Flow dark tweaks. */
 .react-flow__attribution {
   display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }
