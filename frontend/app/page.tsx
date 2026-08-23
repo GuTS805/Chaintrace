@@ -61,10 +61,14 @@ export default function Home() {
         </div>
       </section>
 
-      <p className="text-xs text-muted">
-        Start the API (<code className="text-text">uvicorn app.main:app</code>) and
-        seed data (<code className="text-text">make seed-demo</code>) first. Manage
-        investigations under{" "}
+      <p className="text-xs leading-relaxed text-muted">
+        A wallet trace above is an ad-hoc lookup and leaves no record. To produce
+        something citable — a frozen result with a methodology block and an
+        evidence integrity hash — open an{" "}
+        <Link href="/investigations" className="text-accent hover:underline">
+          investigation
+        </Link>{" "}
+        instead, and group them under{" "}
         <Link href="/cases" className="text-accent hover:underline">
           cases
         </Link>

@@ -34,6 +34,12 @@ export default function RootLayout({
                 trace
               </Link>
               <Link
+                href="/investigations"
+                className="rounded px-2 py-1 hover:bg-panel hover:text-text"
+              >
+                investigations
+              </Link>
+              <Link
                 href="/cases"
                 className="rounded px-2 py-1 hover:bg-panel hover:text-text"
               >
