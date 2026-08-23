@@ -45,6 +45,41 @@ def parse_etherscan_txlist(payload: dict[str, Any]) -> list[ProviderTx]:
     return txs
 
 
+def parse_etherscan_tokentx(payload: dict[str, Any]) -> list[ProviderTx]:
+    """Normalize an Etherscan/Blockscout ``tokentx`` payload (ERC-20 transfers).
+
+    Value is kept in the token's raw integer units; ``asset`` carries the symbol
+    (e.g. USDT). Stablecoin flows are where most laundering happens, so tracing
+    them through the same pipeline matters.
+    """
+    results = payload.get("result", [])
+    if not isinstance(results, list):
+        raise ValueError("Unexpected token payload: 'result' is not a list")
+
+    txs: list[ProviderTx] = []
+    for item in results:
+        to_addr = (item.get("to") or "").strip().lower() or None
+        try:
+            ts = datetime.fromtimestamp(int(item["timeStamp"]), tz=UTC)
+        except (KeyError, ValueError, OverflowError):
+            continue
+        symbol = str(item.get("tokenSymbol") or "TOKEN").strip() or "TOKEN"
+        txs.append(
+            ProviderTx(
+                tx_hash=str(item["hash"]),
+                block_number=int(item["blockNumber"]) if item.get("blockNumber") else None,
+                timestamp=ts,
+                from_address=str(item["from"]).strip().lower(),
+                to_address=to_addr,
+                value_wei=Decimal(str(item.get("value", "0"))),
+                gas_used=int(item["gasUsed"]) if item.get("gasUsed") else None,
+                gas_price_wei=Decimal(str(item["gasPrice"])) if item.get("gasPrice") else None,
+                asset=symbol,
+            )
+        )
+    return txs
+
+
 async def fetch_etherscan_txlist(
     address: str,
     api_key: str,

@@ -70,6 +70,18 @@ export default function WalletPage({
         >
           ↓ report (PDF)
         </a>
+        {attribution &&
+          !attribution.insufficient_evidence &&
+          attribution.candidates.length > 0 && (
+            <a
+              href={`${api.base}/wallets/${address}/disclosure-request`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded border border-accent/50 bg-accent/10 px-3 py-2 text-xs text-accent hover:bg-accent/20"
+            >
+              ⚖ disclosure request (SAHYOG)
+            </a>
+          )}
         <div className="ml-auto w-full max-w-md">
           <WalletSearch />
         </div>
