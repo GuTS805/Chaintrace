@@ -1,0 +1,26 @@
+[
+  {
+    "address": "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
+    "name": "Binance: Hot Wallet",
+    "category": "EXCHANGE",
+    "vasp": "Binance"
+  },
+  {
+    "address": "0xd551234ae421e3bcba99a0da6d736074f22192ff",
+    "name": "Binance 2",
+    "category": "EXCHANGE",
+    "vasp": "Binance"
+  },
+  {
+    "address": "0x2910543af39aba0cd09dbb2d50200b3e800a63d2",
+    "name": "Kraken",
+    "category": "EXCHANGE",
+    "vasp": "Kraken"
+  },
+  {
+    "address": "0x71660c4005ba85c37ccec55d0c4493e66fe775d3",
+    "name": "Coinbase 1",
+    "category": "EXCHANGE",
+    "vasp": "Coinbase"
+  }
+]

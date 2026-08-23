@@ -1,0 +1,17 @@
+[
+  {
+    "address": "0x722122df12d4e14e13ac3b6895a86e84145b6967",
+    "name": "Tornado Cash Router",
+    "category": "SANCTIONED"
+  },
+  {
+    "address": "0xd90e2f925da726b50c4ed8d0fb90ad053324f31b",
+    "name": "Tornado Cash 10 ETH",
+    "category": "SANCTIONED"
+  },
+  {
+    "address": "0x8589427373d6d84e98730d7795d8f6f8731fda16",
+    "name": "Tornado Cash: Donation",
+    "category": "SANCTIONED"
+  }
+]

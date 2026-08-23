@@ -1,0 +1,18 @@
+[
+  {
+    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "name": "Tether: USDT Stablecoin",
+    "category": "CONTRACT"
+  },
+  {
+    "address": "0x28c6c06298d514db089934071355e5743bf21d60",
+    "name": "Binance 14",
+    "category": "EXCHANGE",
+    "vasp": "Binance"
+  },
+  {
+    "address": "0x1111111254eeb25477b68fb85ed929f73a960582",
+    "name": "1inch v5: Aggregation Router",
+    "category": "DEFI"
+  }
+]
