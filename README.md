@@ -11,7 +11,19 @@ attribution path — attribution is heuristics + a gradient-boosted classifier
 can also explicitly say **"insufficient evidence"** rather than force-attribute
 every wallet.
 
-> **Status: Phases 1–5 complete.** Phase 6 (PDF report generation) remains.
+> **Status: all six phases complete.**
+
+## Reports (Phase 6)
+
+One-click investigator PDFs, generated server-side with reportlab (pure Python,
+offline — no headless browser):
+
+- `GET /wallets/{addr}/report` — verdict, candidates, **full evidence chain with
+  per-signal contributions**, independent risk section, and a drawn
+  transaction-graph snapshot.
+- `GET /cases/{id}/report` — case summary, investigator, and all findings/notes.
+
+The frontend exposes a **↓ report (PDF)** button on the wallet and case pages.
 
 ## Frontend (Phase 5)
 
