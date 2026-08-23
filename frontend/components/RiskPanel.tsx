@@ -1,25 +1,48 @@
 import type { RiskResult } from "@/lib/types";
 import { pct, shortAddr } from "@/lib/format";
-import { Bar, Panel, Pill } from "./ui";
+import { Panel, Pill } from "./ui";
 
+const LEVELS = ["LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
 const LEVEL_TONE: Record<string, "muted" | "warn" | "bad"> = {
   LOW: "muted",
   MEDIUM: "warn",
   HIGH: "bad",
   CRITICAL: "bad",
 };
+const FILL: Record<string, string> = {
+  muted: "bg-muted",
+  warn: "bg-warn",
+  bad: "bg-bad",
+};
 
 export function RiskPanel({ risk }: { risk: RiskResult }) {
   const tone = LEVEL_TONE[risk.level] ?? "muted";
+  const activeIdx = LEVELS.indexOf(risk.level as (typeof LEVELS)[number]);
+
   return (
     <Panel title="Risk" right={<Pill tone={tone}>{risk.level}</Pill>}>
-      <div className="mb-1 flex items-center justify-between text-xs text-muted">
-        <span>exposure score</span>
-        <span className="tabular-nums">{pct(risk.score, 0)}</span>
+      {/* Stepped threat meter. */}
+      <div className="flex items-center gap-3">
+        <div className="flex flex-1 gap-1">
+          {LEVELS.map((lvl, i) => (
+            <div key={lvl} className="flex-1">
+              <div
+                className={`h-1.5 rounded-full ${
+                  i <= activeIdx ? FILL[tone] : "bg-panel2"
+                }`}
+              />
+              <div className="mt-1 text-center text-[9px] uppercase tracking-wider text-muted">
+                {lvl.slice(0, 4)}
+              </div>
+            </div>
+          ))}
+        </div>
+        <span className={`font-display text-xl tabular-nums text-${tone}`}>
+          {pct(risk.score, 0)}
+        </span>
       </div>
-      <Bar value={risk.score} tone={tone === "muted" ? "accent" : tone} />
 
-      <ul className="mt-3 space-y-1.5">
+      <ul className="mt-4 space-y-1.5">
         {risk.indicators.length === 0 && (
           <li className="text-xs text-muted">
             No sanctioned / mixer / scam exposure detected.
@@ -35,8 +58,8 @@ export function RiskPanel({ risk }: { risk: RiskResult }) {
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-[10px] text-muted">
-        Risk is computed independently of VASP attribution.
+      <p className="mt-3 border-t border-border pt-2 text-[10px] uppercase tracking-widest text-muted">
+        computed independently of attribution
       </p>
     </Panel>
   );

@@ -3,7 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function WalletSearch({ initial = "" }: { initial?: string }) {
+export function WalletSearch({
+  initial = "",
+  autoFocus = false,
+}: {
+  initial?: string;
+  autoFocus?: boolean;
+}) {
   const router = useRouter();
   const [value, setValue] = useState(initial);
 
@@ -14,19 +20,25 @@ export function WalletSearch({ initial = "" }: { initial?: string }) {
   }
 
   return (
-    <form onSubmit={submit} className="flex gap-2">
+    <form
+      onSubmit={submit}
+      className="flex items-center gap-2 rounded-md border border-border bg-panel px-3 py-2 focus-within:border-accent"
+    >
+      <span className="select-none text-accent">trace&gt;</span>
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="0x… wallet address"
         spellCheck={false}
-        className="w-full rounded border border-border bg-panel2 px-3 py-2 text-text outline-none placeholder:text-muted focus:border-accent"
+        autoFocus={autoFocus}
+        aria-label="Wallet address"
+        className="w-full bg-transparent text-text outline-none placeholder:text-muted"
       />
       <button
         type="submit"
-        className="rounded border border-accent/50 bg-accent/10 px-4 py-2 text-accent hover:bg-accent/20"
+        className="rounded border border-accent/50 bg-accent/10 px-4 py-1.5 text-xs uppercase tracking-widest text-accent hover:bg-accent/20"
       >
-        trace
+        run
       </button>
     </form>
   );

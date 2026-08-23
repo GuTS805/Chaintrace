@@ -19,25 +19,25 @@ function nodeStyle(
   category: string | null,
   isVasp: boolean,
 ): React.CSSProperties {
-  let border = "#2a3646";
-  let color = "#c9d1d9";
+  let border = "#2f3949";
+  let color = "#d7dce5";
   if (isRoot) {
-    border = "#39bae6";
-    color = "#39bae6";
+    border = "#f2b750";
+    color = "#f2b750";
   } else if (category === "SANCTIONED" || category === "MIXER") {
-    border = "#f07178";
-    color = "#f07178";
+    border = "#ff6b7d";
+    color = "#ff6b7d";
   } else if (isVasp) {
-    border = "#b18cff";
-    color = "#b18cff";
+    border = "#a68bff";
+    color = "#a68bff";
   }
   return {
-    background: "#0f1620",
+    background: "#12151d",
     border: `1px solid ${border}`,
     borderRadius: 6,
     color,
     fontSize: 11,
-    fontFamily: "var(--font-mono), monospace",
+    fontFamily: '"IBM Plex Mono", ui-monospace, monospace',
     padding: "6px 10px",
     width: 170,
   };
@@ -100,7 +100,7 @@ export function GraphView({ graph }: { graph: GraphResult }) {
         label: `${weiToEth(e.value_wei, 2)} ETH`,
         labelStyle: { fill: "#6b7684", fontSize: 9 },
         labelBgStyle: { fill: "#0a0e14" },
-        style: { stroke: "#2a3646" },
+        style: { stroke: "#2f3949" },
         animated: false,
       });
     }
@@ -131,14 +131,15 @@ export function GraphView({ graph }: { graph: GraphResult }) {
             minZoom={0.2}
             proOptions={{ hideAttribution: true }}
           >
-            <Background color="#1c2530" gap={20} />
+            <Background color="#242c3a" gap={22} />
             <Controls showInteractive={false} />
           </ReactFlow>
         )}
       </div>
-      <p className="mt-2 text-[10px] text-muted">
-        Click any node to trace that wallet. Root = cyan · VASP = purple ·
-        sanctioned/mixer = red.
+      <p className="mt-2 text-[10px] uppercase tracking-widest text-muted">
+        click a node to trace · root <span className="text-accent">amber</span> ·
+        VASP <span className="text-vasp">violet</span> · mixer{" "}
+        <span className="text-bad">rose</span>
       </p>
     </Panel>
   );
