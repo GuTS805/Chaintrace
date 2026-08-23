@@ -56,14 +56,22 @@ enforcement can trust knows when to abstain."*
 
 ---
 
-## 3. The four demo cases
+## 3. The demo cases
+
+Four synthetic cases exercise model behaviour; two **genuine** mainnet wallets
+(captured from Blockscout) prove the same pipeline runs on real data.
 
 | Case | Address ends… | Result | Point it proves |
 |---|---|---|---|
 | CASE-01 Ransomware → exchange | `…36edc3` | Binance ~99% | clean, high-confidence attribution + full evidence |
-| CASE-02 Peel chain | `…f95b3f` | Kraken ~64% | moderate confidence over a 5-hop peel chain |
+| CASE-02 Peel chain | `…f95b3f` | Kraken (confident) | traced to Kraken across a 5-hop peel chain |
 | CASE-03 No VASP linkage | `…766772` | **insufficient** | the system abstains instead of guessing |
 | CASE-04 Two exchanges | `…f07a17` | **ambiguous** | split verdict when no candidate dominates |
+| CASE-05 Real wallet — Kraken | `…8ad09b` | Kraken | **real** Ethereum wallet; deposit verifiable on-chain |
+| CASE-06 Real wallet — Binance | `…99081c` | Binance ~0.76 | **real** wallet, second VASP, moderate confidence |
+
+> CASE-05/06 are real mainnet wallets. Say: *"Same pipeline, real Ethereum data —
+> and you can verify the deposit transaction yourself on any explorer."*
 
 ---
 
