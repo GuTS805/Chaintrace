@@ -1,5 +1,12 @@
 node_modules/
 .next/
 out/
+build/
 .env*.local
 
+# next / typescript generated
+next-env.d.ts
+*.tsbuildinfo
+
+# playwright mcp output
+.playwright-mcp/
