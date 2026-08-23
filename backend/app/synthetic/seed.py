@@ -99,6 +99,9 @@ async def _seed_scenario(
             continue
         session.add(
             Transaction(
+                # Stamped explicitly so a snapshot built on demo data says so
+                # rather than inheriting a default that looks like real chain data.
+                provider="fixture",
                 tx_hash=tx.tx_hash,
                 block_number=tx.block_number,
                 timestamp=tx.timestamp,

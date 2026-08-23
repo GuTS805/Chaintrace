@@ -20,6 +20,8 @@ export interface VaspCandidate {
   vasp_name: string;
   probability: number;
   evidence: Evidence[];
+  /** The labeled address actually reached, not just the brand it belongs to. */
+  hot_wallet: string | null;
 }
 
 export interface AttributionResult {
@@ -104,4 +106,115 @@ export interface Finding {
 
 export interface CaseDetail extends CaseOut {
   findings: Finding[];
+}
+
+// --- Investigations: the primary resource ---------------------------------
+
+export type Chain = "ethereum" | "bitcoin" | "polygon" | "arbitrum" | "base";
+
+/**
+ * Investigation lifecycle. The intermediate stages are surfaced deliberately: a
+ * real traversal takes long enough that an investigator needs to see which phase
+ * is running, not just a spinner.
+ */
+export type InvestigationStatus =
+  | "QUEUED"
+  | "FETCHING"
+  | "TRAVERSING"
+  | "ANALYZING"
+  | "COMPLETED"
+  | "FAILED";
+
+/** Stages in the order a progress track should render them. */
+export const INVESTIGATION_STAGES: InvestigationStatus[] = [
+  "QUEUED",
+  "FETCHING",
+  "TRAVERSING",
+  "ANALYZING",
+  "COMPLETED",
+];
+
+export const STAGE_LABEL: Record<InvestigationStatus, string> = {
+  QUEUED: "Queued",
+  FETCHING: "Fetching chain data",
+  TRAVERSING: "Building graph",
+  ANALYZING: "Computing attribution & risk",
+  COMPLETED: "Complete",
+  FAILED: "Failed",
+};
+
+export function isTerminal(status: InvestigationStatus): boolean {
+  return status === "COMPLETED" || status === "FAILED";
+}
+
+export interface InvestigationOut {
+  id: string;
+  chain: string;
+  address: string;
+  status: InvestigationStatus;
+  depth: number;
+  max_nodes: number;
+  requested_by: string | null;
+  case_id: number | null;
+  error: string | null;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+  has_result: boolean;
+}
+
+/** How a conclusion was produced — what makes the report defensible. */
+export interface Methodology {
+  model_version: string;
+  provider: string;
+  confidence_threshold: number;
+  traversal_bounds: Record<string, unknown>;
+  data_timestamp: string | null;
+  evidence_hash: string;
+  snapshot_created_at: string;
+}
+
+export interface InvestigationDetail extends InvestigationOut {
+  attribution: AttributionResult | null;
+  risk: RiskResult | null;
+  methodology: Methodology | null;
+}
+
+export interface EvidenceRecord {
+  evidence_id: string;
+  investigation_id: string;
+  chain: string;
+  vasp_name: string;
+  signal_type: SignalType;
+  description: string;
+  weight: number;
+  source_transaction: string | null;
+  source_wallet: string;
+  target_wallet: string | null;
+  observed_at: string | null;
+  created_at: string;
+  model_version: string;
+  provider: string;
+}
+
+export interface EvidenceBundle {
+  investigation_id: string;
+  evidence_hash: string;
+  record_count: number;
+  records: EvidenceRecord[];
+}
+
+export interface InvestigationGraph {
+  investigation_id: string;
+  graph: GraphResult;
+}
+
+export interface InvestigationCreate {
+  address: string;
+  chain?: Chain;
+  depth?: number;
+  min_value_wei?: number;
+  max_nodes?: number;
+  case_id?: number;
+  requested_by?: string;
 }

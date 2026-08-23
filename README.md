@@ -36,6 +36,52 @@ python -m app.ingest.chain_import --address 0x... --save data/realchain/case.jso
 python -m app.ingest.chain_import --file data/realchain/case.json
 ```
 
+## Investigations (Phase 7) — the primary resource
+
+A wallet lookup is a question; an **investigation** is the durable record of
+having asked it. It is the resource the platform is organised around.
+
+```
+POST /investigations            {"chain": "ethereum", "address": "0x..."}
+  -> 202  {"id": "INV-2026-00142", "status": "QUEUED"}
+
+GET  /investigations/{id}              status + conclusion + methodology
+GET  /investigations/{id}/graph
+GET  /investigations/{id}/attribution
+GET  /investigations/{id}/risk
+GET  /investigations/{id}/evidence     flat records + integrity hash
+GET  /investigations/{id}/report       PDF, rendered from the snapshot
+```
+
+`POST` never blocks on a traversal. It returns `202` immediately and the client
+polls the id through `QUEUED → FETCHING → TRAVERSING → ANALYZING → COMPLETED`
+(or `FAILED`, with the reason on the row). A pending investigation answers `409`
+rather than `404` on its result routes — the resource exists, it just has no
+result yet, and a poller must be able to tell those apart.
+
+**Results are frozen.** On completion the graph, attribution, risk, evidence and
+methodology are written once to an `investigation_snapshot`, and every result
+route reads that snapshot instead of recomputing. If the chain reorgs, a label is
+corrected, or the model is retrained tomorrow, yesterday's report still says what
+it said the day it was filed. To change a conclusion you run a new investigation;
+both stay on the record.
+
+**Evidence is sealed.** Each snapshot carries a SHA-256 over the canonical
+evidence records — keys sorted, timestamps normalised to UTC, floats at fixed
+precision, records order-independent. Two runs over identical data produce the
+same hash, and altering any observation changes it. The hash is printed in the
+PDF's *Provenance & integrity* block.
+
+**Identity is `(chain, address)`, never address alone.** The same 20-byte address
+exists on every EVM chain and belongs to different parties there. Transactions,
+labels, wallets and investigations are all chain-scoped, and a traversal never
+crosses chains — funds that move between chains do so through a bridge, which is
+a labeled endpoint on both sides.
+
+The older `/wallets/{addr}/*` routes remain as ad-hoc lookups. They recompute on
+every call and leave no record, which is exactly why they are not the primary
+resource.
+
 ## Reports (Phase 6)
 
 One-click investigator PDFs, generated server-side with reportlab (pure Python,

@@ -34,7 +34,10 @@ class AttributionEngine:
             evidence.append(ev)
         evidence.sort(key=lambda e: e.weight, reverse=True)
         return VaspCandidate(
-            vasp_name=facts.vasp_name, probability=round(prob, 4), evidence=evidence
+            vasp_name=facts.vasp_name,
+            probability=round(prob, 4),
+            evidence=evidence,
+            hot_wallet=facts.reached_hot,
         )
 
     def attribute(self, candidate_facts: list[GraphFacts]) -> AttributionResult:

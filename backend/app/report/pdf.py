@@ -135,7 +135,15 @@ def build_wallet_report(
     risk: RiskResult,
     graph: GraphResult,
     generated_at: datetime | None = None,
+    provenance: list[tuple[str, str]] | None = None,
 ) -> bytes:
+    """Render the investigator PDF.
+
+    ``provenance`` carries investigation id, chain, provider, data timestamp and
+    the evidence integrity hash when the report is rendered from a frozen
+    investigation snapshot. Omitted for an ad-hoc wallet lookup, which has no
+    snapshot to be tied to.
+    """
     generated_at = generated_at or datetime.now(UTC)
     s = _styles()
     buf = BytesIO()
@@ -281,6 +289,18 @@ def build_wallet_report(
             s["small"],
         )
     )
+
+    if provenance:
+        story.append(Paragraph("Provenance &amp; integrity", s["h2"]))
+        story.append(_kv_table(provenance, s))
+        story.append(
+            Paragraph(
+                "The integrity hash is SHA-256 over the canonical evidence records "
+                "for this investigation. Re-deriving it from the evidence listed "
+                "above must reproduce the same value; any alteration changes it.",
+                s["small"],
+            )
+        )
 
     story.append(Spacer(1, 10))
     story.append(

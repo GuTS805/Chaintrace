@@ -55,3 +55,23 @@ class SignalType(StrEnum):
     TEMPORAL_CORRELATION = "TEMPORAL_CORRELATION"
     KNOWN_LABEL = "KNOWN_LABEL"
     PATTERN_SIMILARITY = "PATTERN_SIMILARITY"
+
+
+class InvestigationStatus(StrEnum):
+    """Lifecycle of an investigation job.
+
+    The intermediate stages are deliberately visible to the client: a real
+    traversal takes long enough that an investigator needs to see *which* phase
+    is running, not just a spinner.
+    """
+
+    QUEUED = "QUEUED"
+    FETCHING = "FETCHING"
+    TRAVERSING = "TRAVERSING"
+    ANALYZING = "ANALYZING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+    @property
+    def is_terminal(self) -> bool:
+        return self in (InvestigationStatus.COMPLETED, InvestigationStatus.FAILED)

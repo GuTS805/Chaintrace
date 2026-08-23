@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import __version__
-from app.api import attribution, cases, graph, health, report
+from app.api import attribution, cases, graph, health, investigations, report
 from app.config import get_settings
 from app.logging import configure_logging
 
@@ -27,6 +27,9 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(health.router)
+    # Investigations are the primary resource; the /wallets/* routes remain as
+    # ad-hoc lookups that produce no durable record.
+    app.include_router(investigations.router)
     app.include_router(graph.router)
     app.include_router(attribution.router)
     app.include_router(cases.router)
