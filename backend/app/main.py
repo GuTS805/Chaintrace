@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from app import __version__
-from app.api import graph, health
+from app.api import attribution, graph, health
 from app.logging import configure_logging
 
 
@@ -19,6 +19,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(health.router)
     app.include_router(graph.router)
+    app.include_router(attribution.router)
     return app
 
 

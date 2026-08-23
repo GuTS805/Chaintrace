@@ -12,6 +12,7 @@ from app.schemas.graph import (
     LabeledPath,
     PruneInfo,
 )
+from app.schemas.risk import RiskIndicator, RiskLevel, RiskResult
 
 __all__ = [
     "AttributionResult",
@@ -21,5 +22,8 @@ __all__ = [
     "GraphResult",
     "LabeledPath",
     "PruneInfo",
+    "RiskIndicator",
+    "RiskLevel",
+    "RiskResult",
     "VaspCandidate",
 ]

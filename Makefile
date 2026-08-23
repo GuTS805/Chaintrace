@@ -49,5 +49,8 @@ ingest-labels:
 seed-demo:
 	cd $(BACKEND) && $(PY) -m app.synthetic.seed
 
+train:
+	cd $(BACKEND) && $(PY) -m app.attribution.train
+
 dev:
 	cd $(BACKEND) && uvicorn app.main:app --reload
