@@ -49,6 +49,12 @@ Unknown wallet → Investigate → Graph → Attribution → WHY? → Risk → C
    one-click investigator report: verdict, full evidence chain, risk, and a graph
    snapshot.
 
+**The live "any wallet" moment (big one):** paste **any real Ethereum address**
+into `trace>`. If it isn't cached, a **⚡ Fetch from Ethereum (live)** panel
+appears → click it → we pull the wallet's transactions live from Blockscout and
+run the same pipeline on it. *"It's not canned — any real wallet, traced live."*
+(Needs internet; the six seeded cases stay fully offline as the reliable spine.)
+
 **The "I don't know" moment (do this one):** open **CASE-03 · No VASP linkage** →
 it returns **INSUFFICIENT EVIDENCE**, not a forced guess. Then **CASE-04 · Two
 exchanges** → **AMBIGUOUS**, two credible candidates split. *"A tool law

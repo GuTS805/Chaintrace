@@ -30,6 +30,11 @@ class Settings(BaseSettings):
         default="https://api.etherscan.io/api", alias="ETHERSCAN_BASE_URL"
     )
     rpc_url: str = Field(default="", alias="RPC_URL")
+    # Keyless Etherscan-compatible endpoint used by the live "trace any wallet"
+    # feature. Blockscout requires no API key.
+    blockscout_base_url: str = Field(
+        default="https://eth.blockscout.com/api", alias="BLOCKSCOUT_BASE_URL"
+    )
 
     # Attribution engine.
     model_version: str = Field(default="phase1-dev", alias="MODEL_VERSION")

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import __version__
-from app.api import attribution, cases, graph, health, report
+from app.api import attribution, cases, graph, health, live, report
 from app.config import get_settings
 from app.logging import configure_logging
 
@@ -31,6 +31,7 @@ def create_app() -> FastAPI:
     app.include_router(attribution.router)
     app.include_router(cases.router)
     app.include_router(report.router)
+    app.include_router(live.router)
     return app
 
 
