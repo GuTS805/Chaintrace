@@ -10,18 +10,14 @@ from __future__ import annotations
 from typing import Any
 
 
-async def fetch_blockscout_txlist(
-    address: str,
-    *,
-    base_url: str,
-    limit: int = 100,
-    timeout: float = 20.0,
+async def _fetch(
+    action: str, address: str, base_url: str, limit: int, timeout: float
 ) -> dict[str, Any]:
     import httpx
 
     params: dict[str, str | int] = {
         "module": "account",
-        "action": "txlist",
+        "action": action,
         "address": address,
         "sort": "asc",
         "page": 1,
@@ -32,3 +28,17 @@ async def fetch_blockscout_txlist(
         resp.raise_for_status()
         data: dict[str, Any] = resp.json()
         return data
+
+
+async def fetch_blockscout_txlist(
+    address: str, *, base_url: str, limit: int = 100, timeout: float = 20.0
+) -> dict[str, Any]:
+    """Native ETH transfers for an address."""
+    return await _fetch("txlist", address, base_url, limit, timeout)
+
+
+async def fetch_blockscout_tokentx(
+    address: str, *, base_url: str, limit: int = 100, timeout: float = 20.0
+) -> dict[str, Any]:
+    """ERC-20 token transfers (USDT/USDC/…) for an address."""
+    return await _fetch("tokentx", address, base_url, limit, timeout)

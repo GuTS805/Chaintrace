@@ -63,6 +63,7 @@ export interface GraphEdge {
   to_address: string;
   value_wei: string;
   timestamp: string;
+  asset: string;
 }
 
 export interface PruneInfo {

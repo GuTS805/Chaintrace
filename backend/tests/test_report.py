@@ -15,7 +15,11 @@ from app.attribution.context_builder import ContextBuilder
 from app.attribution.model import DEFAULT_MODEL_PATH
 from app.db.session import get_session
 from app.main import app
-from app.report import build_case_report, build_wallet_report
+from app.report import (
+    build_case_report,
+    build_disclosure_request,
+    build_wallet_report,
+)
 from app.schemas.attribution import AttributionResult, Evidence, VaspCandidate
 from app.schemas.case import CaseDetail
 from app.schemas.graph import GraphEdge, GraphNode, GraphResult, PruneInfo
@@ -102,6 +106,22 @@ def test_build_wallet_report_is_pdf() -> None:
     assert len(pdf) > 1000
 
 
+def test_build_disclosure_request_is_pdf() -> None:
+    pdf = build_disclosure_request(
+        "0xabc", _sample_attribution(), _sample_risk(), hops=2, tx_hashes=["0xaaa"]
+    )
+    assert pdf.startswith(b"%PDF")
+    assert len(pdf) > 1500
+
+
+def test_disclosure_requires_a_candidate() -> None:
+    empty = AttributionResult(
+        candidates=[], confidence_threshold=0.55, model_version="x"
+    )
+    with pytest.raises(ValueError):
+        build_disclosure_request("0xabc", empty, _sample_risk(), hops=0, tx_hashes=[])
+
+
 def test_build_case_report_is_pdf() -> None:
     detail = CaseDetail(
         id=1,
@@ -141,6 +161,32 @@ async def test_wallet_report_endpoint(client: AsyncClient) -> None:
     assert resp.status_code == 200
     assert resp.headers["content-type"] == "application/pdf"
     assert resp.content.startswith(b"%PDF")
+
+
+@pytest.mark.skipif(
+    not DEFAULT_MODEL_PATH.exists(), reason="model artifact missing; run `make train`"
+)
+async def test_disclosure_request_endpoint(client: AsyncClient) -> None:
+    addr = next(
+        s.unknown_wallet
+        for s in build_all_scenarios()
+        if s.key == "ransomware_to_exchange"
+    )
+    resp = await client.get(f"/wallets/{addr}/disclosure-request")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"] == "application/pdf"
+    assert resp.content.startswith(b"%PDF")
+
+
+@pytest.mark.skipif(
+    not DEFAULT_MODEL_PATH.exists(), reason="model artifact missing; run `make train`"
+)
+async def test_disclosure_request_409_when_unattributed(client: AsyncClient) -> None:
+    addr = next(
+        s.unknown_wallet for s in build_all_scenarios() if s.key == "dead_end"
+    )
+    resp = await client.get(f"/wallets/{addr}/disclosure-request")
+    assert resp.status_code == 409
 
 
 async def test_case_report_endpoint(client: AsyncClient) -> None:

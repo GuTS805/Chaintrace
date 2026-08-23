@@ -13,6 +13,28 @@ export function weiToEth(wei: string, digits = 3): string {
   return n.toFixed(digits);
 }
 
+// Decimals for common assets so stablecoin amounts render correctly.
+const ASSET_DECIMALS: Record<string, number> = {
+  ETH: 18,
+  WETH: 18,
+  DAI: 18,
+  USDT: 6,
+  USDC: 6,
+  BUSD: 18,
+};
+
+export function assetAmount(value: string, asset: string): number {
+  const d = ASSET_DECIMALS[asset.toUpperCase()] ?? 18;
+  const n = Number(value) / 10 ** d;
+  return Number.isFinite(n) ? n : 0;
+}
+
+export function formatAsset(value: string, asset: string): string {
+  const n = assetAmount(value, asset);
+  const amt = n >= 1 ? n.toFixed(2) : n.toFixed(4);
+  return `${amt} ${asset}`;
+}
+
 export function fmtTime(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;

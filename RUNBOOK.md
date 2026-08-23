@@ -48,6 +48,14 @@ Unknown wallet → Investigate → Graph → Attribution → WHY? → Risk → C
 8. **PDF** — Click **↓ report (PDF)** (top of the wallet page, or on a case) for a
    one-click investigator report: verdict, full evidence chain, risk, and a graph
    snapshot.
+9. **SAHYOG request** — On an attributed wallet, click **⚖ disclosure request
+   (SAHYOG)** for a ready lawful information-request draft addressed to the
+   attributed VASP (KYC, bank/UPI, IP logs, beneficial owner, freeze) — the actual
+   next step an I4C/LEA officer files. *"We don't just name the exchange, we hand
+   the officer the request to send it."*
+
+**Stablecoin note:** live traces also pull **ERC-20 (USDT/USDC)** transfers — the
+graph labels each edge's asset, so stablecoin laundering is traced too.
 
 **The live "any wallet" moment (big one):** paste **any real Ethereum address**
 into `trace>`. If it isn't cached, a **⚡ Fetch from Ethereum (live)** panel

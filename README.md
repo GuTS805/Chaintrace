@@ -35,6 +35,17 @@ Blockscout (keyless), imports them, and the same pipeline attributes it. Results
 are cached, so a wallet is fetched once and then works offline. The six seeded
 cases remain the offline demo spine.
 
+**Stablecoin tracing:** the live path also imports **ERC-20 transfers**
+(USDT/USDC/…), so laundering that moves in stablecoins is traced too — the graph
+shows the asset per edge.
+
+**SAHYOG disclosure request:** `GET /wallets/{addr}/disclosure-request` turns an
+attribution into a ready **lawful information-request draft** for the attributed
+VASP, in the format an authorized officer files via India's SAHYOG Portal (I4C,
+MHA) — subject wallet, attributed VASP + confidence, on-chain evidence, risk, and
+the KYC/beneficial-owner/freeze items requested. Clearly marked a draft with no
+legal effect until filed.
+
 ```bash
 make import-realchain          # replay the bundled Etherscan-schema sample
 # or snapshot a real low-degree wallet once (needs ETHERSCAN_API_KEY), then replay offline:

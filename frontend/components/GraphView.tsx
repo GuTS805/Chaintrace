@@ -13,7 +13,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import type { GraphNode, GraphResult } from "@/lib/types";
-import { shortAddr, weiToEth } from "@/lib/format";
+import { assetAmount, formatAsset, shortAddr } from "@/lib/format";
 import { Panel, Pill } from "./ui";
 
 type Role = "root" | "risk" | "vasp" | "plain";
@@ -93,15 +93,15 @@ export function GraphView({ graph }: { graph: GraphResult }) {
       if (!nodeIds.has(e.from_address) || !nodeIds.has(e.to_address)) continue;
       if (seen.has(e.tx_hash)) continue;
       seen.add(e.tx_hash);
-      const eth = Number(e.value_wei) / 1e18;
-      const width = Math.max(1, Math.min(4, 1 + Math.log10(1 + eth)));
+      const amt = assetAmount(e.value_wei, e.asset);
+      const width = Math.max(1, Math.min(4, 1 + Math.log10(1 + amt)));
       const toVasp = roleByAddr.get(e.to_address) === "vasp";
       const stroke = toVasp ? "#4f46e5" : "#9aa4b2";
       rfEdges.push({
         id: e.tx_hash,
         source: e.from_address,
         target: e.to_address,
-        label: `${weiToEth(e.value_wei, 2)} ETH`,
+        label: formatAsset(e.value_wei, e.asset),
         labelStyle: { fill: "#5b6673", fontSize: 9 },
         labelBgStyle: { fill: "#ffffff", fillOpacity: 0.85 },
         style: { stroke, strokeWidth: width },

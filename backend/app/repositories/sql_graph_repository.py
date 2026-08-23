@@ -67,6 +67,7 @@ class SqlGraphRepository(GraphRepository):
             _TX.c.tx_hash,
             _TX.c.value_wei,
             _TX.c.timestamp,
+            _TX.c.asset,
         ).where(base)
         rev = select(
             _TX.c.to_address.label("a"),
@@ -74,6 +75,7 @@ class SqlGraphRepository(GraphRepository):
             _TX.c.tx_hash,
             _TX.c.value_wei,
             _TX.c.timestamp,
+            _TX.c.asset,
         ).where(base)
 
         if bounds.direction is Direction.FORWARD:
@@ -94,6 +96,7 @@ class SqlGraphRepository(GraphRepository):
                 e.c.tx_hash,
                 e.c.value_wei,
                 e.c.timestamp,
+                e.c.asset,
                 literal(1).label("depth"),
                 sep.concat(root).concat(sep).concat(e.c.b).concat(sep).label("path"),
             )
@@ -108,6 +111,7 @@ class SqlGraphRepository(GraphRepository):
                 e.c.tx_hash,
                 e.c.value_wei,
                 e.c.timestamp,
+                e.c.asset,
                 (trav.c.depth + 1).label("depth"),
                 trav.c.path.concat(e.c.b).concat(sep).label("path"),
             )
@@ -129,7 +133,7 @@ class SqlGraphRepository(GraphRepository):
         trav = self._walk_cte(root, bounds)
         stmt = select(
             trav.c.src, trav.c.dst, trav.c.tx_hash, trav.c.value_wei,
-            trav.c.timestamp, trav.c.depth,
+            trav.c.timestamp, trav.c.asset, trav.c.depth,
         ).limit(self._ROW_HARD_CAP)
         rows = (await self._session.execute(stmt)).all()
 
@@ -153,6 +157,7 @@ class SqlGraphRepository(GraphRepository):
                     to_address=r.dst,
                     value_wei=r.value_wei,
                     timestamp=r.timestamp,
+                    asset=r.asset,
                 )
             )
 

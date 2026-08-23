@@ -43,6 +43,7 @@ class GraphEdge(BaseModel):
     to_address: str
     value_wei: Decimal
     timestamp: datetime
+    asset: str = "ETH"
 
 
 class GraphResult(BaseModel):
