@@ -12,7 +12,9 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <section className={`rounded-md border border-border bg-panel ${className}`}>
+    <section
+      className={`rounded-md border border-border bg-panel shadow-panel ${className}`}
+    >
       {title && (
         <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
           <div className="flex items-center gap-2">

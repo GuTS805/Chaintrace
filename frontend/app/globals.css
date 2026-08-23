@@ -7,21 +7,21 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
 body {
-  background-color: #0b0d12;
-  color: #d7dce5;
+  background-color: #f6f7f9;
+  color: #0f1720;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
-  /* Subtle carbon grid — reads like an instrument backdrop, not decoration. */
+  /* Faint blueprint grid — instrument backdrop, not decoration. */
   background-image:
-    linear-gradient(#11151d 1px, transparent 1px),
-    linear-gradient(90deg, #11151d 1px, transparent 1px);
+    linear-gradient(#eceff4 1px, transparent 1px),
+    linear-gradient(90deg, #eceff4 1px, transparent 1px);
   background-size: 44px 44px;
   background-position: -1px -1px;
 }
@@ -32,7 +32,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #f2b750;
+  outline: 2px solid #4f46e5;
   outline-offset: 2px;
   border-radius: 3px;
 }
@@ -42,14 +42,14 @@ textarea:focus-visible {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0b0d12;
+  background: #f6f7f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #242c3a;
+  background: #d8dee7;
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #333d50;
+  background: #c2cad6;
 }
 
 .react-flow__attribution {
