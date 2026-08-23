@@ -33,6 +33,13 @@ class VaspCandidate(BaseModel):
     vasp_name: str
     probability: float = Field(..., ge=0.0, le=1.0)
     evidence: list[Evidence] = Field(default_factory=list)
+    hot_wallet: str | None = Field(
+        default=None,
+        description=(
+            "The labeled address actually reached from the unknown wallet. Named "
+            "so evidence points at a concrete counterparty, not just a brand."
+        ),
+    )
 
 
 class AttributionResult(BaseModel):

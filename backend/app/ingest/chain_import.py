@@ -23,6 +23,7 @@ import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.chains import DEFAULT_CHAIN
 from app.providers.base import ProviderTx
 from app.providers.etherscan import fetch_etherscan_txlist, parse_etherscan_txlist
 
@@ -37,17 +38,35 @@ class ImportStats:
 
 
 async def import_provider_txs(
-    session: AsyncSession, txs: list[ProviderTx]
+    session: AsyncSession,
+    txs: list[ProviderTx],
+    *,
+    chain: str = DEFAULT_CHAIN.value,
+    provider: str = "etherscan",
 ) -> ImportStats:
-    """Idempotently upsert wallets + transactions from normalized ProviderTx rows."""
+    """Idempotently upsert wallets + transactions from normalized ProviderTx rows.
+
+    Both ``chain`` and ``provider`` are stamped on every row: the chain because
+    identity is (chain, address), the provider so a later investigation snapshot
+    can state which source its conclusion actually rests on.
+    """
     from app.models import Transaction, Wallet
 
     stats = ImportStats()
+    # Idempotency is per chain: the same tx hash on two chains is two rows.
     known_tx = {
-        row[0] for row in (await session.execute(select(Transaction.tx_hash))).all()
+        row[0]
+        for row in (
+            await session.execute(
+                select(Transaction.tx_hash).where(Transaction.chain == chain)
+            )
+        ).all()
     }
     known_wallets = {
-        row[0] for row in (await session.execute(select(Wallet.address))).all()
+        row[0]
+        for row in (
+            await session.execute(select(Wallet.address).where(Wallet.chain == chain))
+        ).all()
     }
 
     seen: dict[str, list[datetime]] = {}
@@ -66,6 +85,7 @@ async def import_provider_txs(
                 session.add(
                     Wallet(
                         address=addr,
+                        chain=chain,
                         first_seen=ts[0] if ts else None,
                         last_seen=ts[-1] if ts else None,
                     )
@@ -74,6 +94,8 @@ async def import_provider_txs(
                 stats.wallets += 1
         session.add(
             Transaction(
+                chain=chain,
+                provider=provider,
                 tx_hash=tx.tx_hash,
                 block_number=tx.block_number,
                 timestamp=tx.timestamp,

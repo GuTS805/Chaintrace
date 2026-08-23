@@ -14,6 +14,7 @@ from sqlalchemy import ColumnElement, and_, literal, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.selectable import CTE
 
+from app.chains import DEFAULT_CHAIN, normalize_address
 from app.models import Label, Transaction, Vasp, Wallet
 from app.repositories.graph_repository import (
     Direction,
@@ -31,8 +32,8 @@ from app.schemas.graph import (
 _TX = Transaction.__table__
 
 
-def _norm(address: str) -> str:
-    return address.strip().lower()
+def _norm(address: str, chain: str = DEFAULT_CHAIN.value) -> str:
+    return normalize_address(address, chain)
 
 
 class SqlGraphRepository(GraphRepository):
@@ -52,6 +53,9 @@ class SqlGraphRepository(GraphRepository):
         (a=to, b=from); BOTH is the union (needed for deposit-sweep analysis).
         """
         conds: list[ColumnElement[bool]] = [
+            # Chain first: it is the most selective predicate and it is what makes
+            # the traversal a single-ledger walk rather than an address join.
+            _TX.c.chain == bounds.chain,
             _TX.c.to_address.is_not(None),
             _TX.c.value_wei >= bounds.min_value_wei,
         ]
@@ -125,7 +129,7 @@ class SqlGraphRepository(GraphRepository):
 
     # -- traversal -------------------------------------------------------
     async def traverse(self, root: str, bounds: TraversalBounds) -> GraphResult:
-        root = _norm(root)
+        root = _norm(root, bounds.chain)
         trav = self._walk_cte(root, bounds)
         stmt = select(
             trav.c.src, trav.c.dst, trav.c.tx_hash, trav.c.value_wei,
@@ -156,19 +160,22 @@ class SqlGraphRepository(GraphRepository):
                 )
             )
 
-        nodes = await self._build_nodes(node_depth)
+        nodes = await self._build_nodes(node_depth, bounds.chain)
         prune = await self._detect_prune(node_depth, bounds, node_cap_hit)
         return GraphResult(root=root, nodes=nodes, edges=edges, prune=prune)
 
-    async def _build_nodes(self, node_depth: dict[str, int]) -> list[GraphNode]:
+    async def _build_nodes(
+        self, node_depth: dict[str, int], chain: str
+    ) -> list[GraphNode]:
         addrs = list(node_depth)
-        # Labels (+ VASP name) for discovered addresses.
+        # Labels (+ VASP name) for discovered addresses, scoped to this chain — a
+        # Polygon label must not name an Ethereum node.
         label_rows = (
             await self._session.execute(
                 select(Label.address, Label.name, Vasp.name)
                 .select_from(Label)
                 .join(Vasp, Label.vasp_id == Vasp.id, isouter=True)
-                .where(Label.address.in_(addrs))
+                .where(Label.address.in_(addrs), Label.chain == chain)
             )
         ).all()
         labels: dict[str, tuple[str, str | None]] = {}
@@ -178,7 +185,7 @@ class SqlGraphRepository(GraphRepository):
         contract_rows = (
             await self._session.execute(
                 select(Wallet.address, Wallet.is_contract).where(
-                    Wallet.address.in_(addrs)
+                    Wallet.address.in_(addrs), Wallet.chain == chain
                 )
             )
         ).all()
@@ -204,6 +211,7 @@ class SqlGraphRepository(GraphRepository):
         nodes: Sequence[str],
         direction: Direction,
         extra: list[ColumnElement[bool]],
+        chain: str = DEFAULT_CHAIN.value,
     ) -> bool:
         if not nodes:
             return False
@@ -218,7 +226,14 @@ class SqlGraphRepository(GraphRepository):
         stmt = (
             select(literal(1))
             .select_from(_TX)
-            .where(and_(_TX.c.to_address.is_not(None), membership, *extra))
+            .where(
+                and_(
+                    _TX.c.chain == chain,
+                    _TX.c.to_address.is_not(None),
+                    membership,
+                    *extra,
+                )
+            )
             .limit(1)
         )
         return (await self._session.execute(stmt)).first() is not None
@@ -247,6 +262,7 @@ class SqlGraphRepository(GraphRepository):
             max_depth_nodes,
             bounds.direction,
             [_TX.c.value_wei >= bounds.min_value_wei, *time_conds],
+            bounds.chain,
         ):
             reasons.append(PruneReason.MAX_HOPS)
 
@@ -255,6 +271,7 @@ class SqlGraphRepository(GraphRepository):
             expandable,
             bounds.direction,
             [_TX.c.value_wei < bounds.min_value_wei, *time_conds],
+            bounds.chain,
         ):
             reasons.append(PruneReason.MIN_VALUE)
 
@@ -269,6 +286,7 @@ class SqlGraphRepository(GraphRepository):
                 expandable,
                 bounds.direction,
                 [_TX.c.value_wei >= bounds.min_value_wei, or_(*out_of_window)],
+                bounds.chain,
             ):
                 reasons.append(PruneReason.TIME_WINDOW)
 
@@ -283,8 +301,8 @@ class SqlGraphRepository(GraphRepository):
     async def shortest_paths(
         self, source: str, target: str, bounds: TraversalBounds, limit: int = 5
     ) -> list[list[str]]:
-        source = _norm(source)
-        target = _norm(target)
+        source = _norm(source, bounds.chain)
+        target = _norm(target, bounds.chain)
         if source == target:
             return [[source]]
 

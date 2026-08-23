@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.chains import DEFAULT_CHAIN, normalize_address
 from app.models import Label, Transaction, Vasp
 from app.providers.base import ProviderTx
 from app.repositories.graph_repository import Direction, TraversalBounds
@@ -28,6 +29,7 @@ class AttributionContext:
     forward_graph: GraphResult
     reverse_graph: GraphResult
     labels: dict[str, LabelInfo] = field(default_factory=dict)
+    chain: str = DEFAULT_CHAIN.value
 
 
 def _to_provider_tx(t: Transaction) -> ProviderTx:
@@ -43,17 +45,23 @@ def _to_provider_tx(t: Transaction) -> ProviderTx:
 
 
 class ContextBuilder:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self, session: AsyncSession, chain: str = DEFAULT_CHAIN.value
+    ) -> None:
         self._session = session
+        self._chain = chain
         self._repo = SqlGraphRepository(session)
 
     async def _inbound(self, addrs: Iterable[str]) -> list[Transaction]:
-        addrs = list({a.lower() for a in addrs})
+        addrs = list({normalize_address(a, self._chain) for a in addrs})
         if not addrs:
             return []
         rows = (
             await self._session.execute(
-                select(Transaction).where(Transaction.to_address.in_(addrs))
+                select(Transaction).where(
+                    Transaction.to_address.in_(addrs),
+                    Transaction.chain == self._chain,
+                )
             )
         ).scalars().all()
         return list(rows)
@@ -68,7 +76,7 @@ class ContextBuilder:
                 )
                 .select_from(Label)
                 .join(Vasp, Label.vasp_id == Vasp.id, isouter=True)
-                .where(Label.address.in_(list(addrs)))
+                .where(Label.address.in_(list(addrs)), Label.chain == self._chain)
             )
         ).all()
         out: dict[str, LabelInfo] = {}
@@ -84,11 +92,14 @@ class ContextBuilder:
     async def build(
         self, unknown: str, *, depth: int = 6, min_value_wei: int = 0
     ) -> AttributionContext:
-        unknown = unknown.lower()
+        unknown = normalize_address(unknown, self._chain)
         forward = await self._repo.traverse(
             unknown,
             TraversalBounds(
-                max_hops=depth, direction=Direction.FORWARD, max_nodes=2000
+                max_hops=depth,
+                direction=Direction.FORWARD,
+                max_nodes=2000,
+                chain=self._chain,
             ),
         )
         # Reverse reachability powers the (separate) risk score: where funds came
@@ -96,7 +107,10 @@ class ContextBuilder:
         reverse = await self._repo.traverse(
             unknown,
             TraversalBounds(
-                max_hops=depth, direction=Direction.REVERSE, max_nodes=2000
+                max_hops=depth,
+                direction=Direction.REVERSE,
+                max_nodes=2000,
+                chain=self._chain,
             ),
         )
 
@@ -149,4 +163,5 @@ class ContextBuilder:
             forward_graph=forward,
             reverse_graph=reverse,
             labels=labels,
+            chain=self._chain,
         )

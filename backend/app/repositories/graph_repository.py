@@ -13,6 +13,7 @@ from datetime import datetime
 from decimal import Decimal
 from enum import StrEnum
 
+from app.chains import DEFAULT_CHAIN
 from app.schemas.graph import GraphResult
 
 
@@ -30,7 +31,13 @@ class Direction(StrEnum):
 
 @dataclass(frozen=True)
 class TraversalBounds:
-    """Hard bounds applied to every traversal (HARD REQUIREMENT #5)."""
+    """Hard bounds applied to every traversal (HARD REQUIREMENT #5).
+
+    ``chain`` is a bound like any other: a traversal never crosses chains. Funds
+    that move between chains do so through a bridge, which is a labeled endpoint
+    on both sides — following the address across would fabricate an edge that
+    does not exist on either ledger.
+    """
 
     max_hops: int = 4
     min_value_wei: Decimal = Decimal(0)
@@ -38,6 +45,7 @@ class TraversalBounds:
     until: datetime | None = None
     max_nodes: int = 500
     direction: Direction = Direction.FORWARD
+    chain: str = DEFAULT_CHAIN.value
 
 
 class GraphRepository(ABC):

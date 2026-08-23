@@ -2,10 +2,16 @@ import type {
   AttributionResult,
   CaseDetail,
   CaseOut,
+  EvidenceBundle,
   Finding,
   GraphResult,
+  InvestigationCreate,
+  InvestigationDetail,
+  InvestigationGraph,
+  InvestigationOut,
   RiskResult,
 } from "./types";
+import { isTerminal } from "./types";
 
 const BASE =
   process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
@@ -39,6 +45,28 @@ async function sendJSON<T>(
 
 export const api = {
   base: BASE,
+
+  // --- investigations (primary resource) ---
+  /** Open an investigation. Returns as soon as the job is accepted (202). */
+  createInvestigation: (body: InvestigationCreate) =>
+    sendJSON<InvestigationOut>(`/investigations`, "POST", body),
+  getInvestigation: (id: string) =>
+    getJSON<InvestigationDetail>(`/investigations/${id}`),
+  listInvestigations: (caseId?: number) =>
+    getJSON<InvestigationOut[]>(
+      caseId === undefined ? `/investigations` : `/investigations?case_id=${caseId}`,
+    ),
+  investigationGraph: (id: string) =>
+    getJSON<InvestigationGraph>(`/investigations/${id}/graph`),
+  investigationAttribution: (id: string) =>
+    getJSON<AttributionResult>(`/investigations/${id}/attribution`),
+  investigationRisk: (id: string) =>
+    getJSON<RiskResult>(`/investigations/${id}/risk`),
+  investigationEvidence: (id: string) =>
+    getJSON<EvidenceBundle>(`/investigations/${id}/evidence`),
+  investigationReportUrl: (id: string) => `${BASE}/investigations/${id}/report`,
+
+  // --- ad-hoc wallet lookups (no durable record) ---
   attribution: (address: string, depth = 6) =>
     getJSON<AttributionResult>(
       `/wallets/${address}/attribution?depth=${depth}`,
@@ -68,3 +96,41 @@ export const api = {
     },
   ) => sendJSON<Finding>(`/cases/${caseId}/findings`, "POST", body),
 };
+
+/**
+ * Poll an investigation until it finishes, reporting each stage change.
+ *
+ * Resolves on COMPLETED *or* FAILED — a failed investigation is a real outcome
+ * the caller must render, not an exception. Rejects only if the run outlasts
+ * `timeoutMs`, so a hung job cannot leave the UI spinning forever.
+ */
+export async function pollInvestigation(
+  id: string,
+  onStage?: (inv: InvestigationDetail) => void,
+  { intervalMs = 1000, timeoutMs = 300_000 }: PollOptions = {},
+): Promise<InvestigationDetail> {
+  const deadline = Date.now() + timeoutMs;
+  let lastStatus = "";
+
+  for (;;) {
+    const inv = await api.getInvestigation(id);
+    if (inv.status !== lastStatus) {
+      lastStatus = inv.status;
+      onStage?.(inv);
+    }
+    if (isTerminal(inv.status)) return inv;
+    if (Date.now() >= deadline) {
+      throw new Error(
+        `Investigation ${id} did not finish within ${Math.round(
+          timeoutMs / 1000,
+        )}s (last stage: ${inv.status}).`,
+      );
+    }
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+}
+
+export interface PollOptions {
+  intervalMs?: number;
+  timeoutMs?: number;
+}
