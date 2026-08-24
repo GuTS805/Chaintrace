@@ -12,7 +12,7 @@ import { AddToCase } from "@/components/AddToCase";
 import { WalletSearch } from "@/components/WalletSearch";
 import { LiveTrace } from "@/components/LiveTrace";
 import { PdfButton } from "@/components/PdfButton";
-import { BentoGrid, Tile } from "@/components/ui";
+import { BentoGrid, Eyebrow, Tile } from "@/components/ui";
 
 export default function WalletPage({
   params,
@@ -81,34 +81,34 @@ export default function WalletPage({
   const riskAddresses = new Set(risk?.indicators.map((i) => i.address) ?? []);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-base font-semibold">
-          <span className="text-muted">wallet</span>{" "}
-          <span className="break-all font-mono text-accent">{address}</span>{" "}
-          <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-widest text-muted">
-            {chain}
-          </span>
-        </h1>
-        <PdfButton
-          path={`/wallets/${address}/report`}
-          className="rounded border border-border px-3 py-2 text-xs text-muted hover:border-accent hover:text-accent"
-        >
-          ↓ report (PDF)
-        </PdfButton>
-        {attribution &&
-          !attribution.insufficient_evidence &&
-          attribution.candidates.length > 0 && (
-            <PdfButton
-              path={`/wallets/${address}/disclosure-request`}
-              className="rounded border border-gold/50 bg-gold/10 px-3 py-2 text-xs text-gold hover:bg-gold/20"
-            >
-              ⚖ disclosure request (SAHYOG)
-            </PdfButton>
-          )}
-        <div className="ml-auto w-full max-w-md">
-          <WalletSearch />
+    <div className="space-y-10">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <Eyebrow>Trace wallet · {chain}</Eyebrow>
+          <h1 className="mt-2 break-all font-mono text-[15px] text-text">{address}</h1>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <PdfButton
+            path={`/wallets/${address}/report`}
+            className="rounded-md border border-border px-3 py-2 text-[12px] text-muted transition-colors hover:border-borderStrong hover:text-text"
+          >
+            Report (PDF)
+          </PdfButton>
+          {attribution &&
+            !attribution.insufficient_evidence &&
+            attribution.candidates.length > 0 && (
+              <PdfButton
+                path={`/wallets/${address}/disclosure-request`}
+                className="rounded-md bg-gold px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-gold/90"
+              >
+                Prepare disclosure request (SAHYOG)
+              </PdfButton>
+            )}
+        </div>
+      </div>
+
+      <div className="max-w-md">
+        <WalletSearch />
       </div>
 
       {loading && <p className="text-sm text-muted">Tracing…</p>}
@@ -133,45 +133,44 @@ export default function WalletPage({
       )}
 
       {!loading && !error && !isEmpty && (
-        // Graph as the biggest tile — the spine every other tile references
-        // in place via hover, sized to match: bento's size-encodes-importance
-        // reads exactly as the graph-first investigation model this page
-        // already used, just made explicit.
-        <BentoGrid>
-          <div className="col-span-4 md:col-span-5">
-            {attribution && (
-              <AttributionPanel
-                result={attribution}
-                onHoverEvidence={(hashes) => setHighlightedTx(new Set(hashes ?? []))}
-              />
-            )}
-          </div>
-          <div className="col-span-4 md:col-span-7">
-            {graph && (
-              <GraphView
-                graph={graph}
-                highlightedTx={highlightedTx}
-                highlightedNode={highlightedNode}
-                riskAddresses={riskAddresses}
-                onNodeFocus={(addr, isRoot) => {
-                  if (!isRoot) setFocusedNode(addr);
-                }}
-              />
-            )}
-          </div>
+        // Verdict, then evidence, then the graph — each given the full page
+        // width to breathe, in the order an investigator actually reads them
+        // (wallet → attribution → confidence → evidence → graph → risk →
+        // action), instead of packed side-by-side panels competing for room.
+        <div className="space-y-10">
+          {attribution && (
+            <AttributionPanel
+              result={attribution}
+              onHoverEvidence={(hashes) => setHighlightedTx(new Set(hashes ?? []))}
+            />
+          )}
 
-          <div className="col-span-4 md:col-span-6">
-            {risk && (
-              <RiskPanel
-                risk={risk}
-                onHoverIndicator={(addr) => setHighlightedNode(addr)}
-              />
-            )}
-          </div>
-          <div className="col-span-4 md:col-span-6">
-            <AddToCase address={address} attribution={attribution} />
-          </div>
-        </BentoGrid>
+          {graph && (
+            <GraphView
+              graph={graph}
+              highlightedTx={highlightedTx}
+              highlightedNode={highlightedNode}
+              riskAddresses={riskAddresses}
+              onNodeFocus={(addr, isRoot) => {
+                if (!isRoot) setFocusedNode(addr);
+              }}
+            />
+          )}
+
+          <BentoGrid>
+            <div className="col-span-4 md:col-span-7">
+              {risk && (
+                <RiskPanel
+                  risk={risk}
+                  onHoverIndicator={(addr) => setHighlightedNode(addr)}
+                />
+              )}
+            </div>
+            <div className="col-span-4 md:col-span-5">
+              <AddToCase address={address} attribution={attribution} />
+            </div>
+          </BentoGrid>
+        </div>
       )}
 
       {focusedNode && (

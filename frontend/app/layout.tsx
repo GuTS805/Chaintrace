@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { AuthGate } from "@/components/AuthGate";
 import { OfficerBadge } from "@/components/OfficerBadge";
 import { CommandPalette } from "@/components/CommandPalette";
@@ -19,32 +21,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className="min-h-screen bg-bg font-sans text-sm text-text">
-        <header className="sticky top-0 z-20 border-b border-border bg-bg/85 backdrop-blur">
-          <div className="mx-auto flex max-w-[1600px] items-center gap-6 px-5 py-3">
+        <header className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur">
+          <div className="mx-auto flex max-w-[1440px] items-center gap-8 px-8 py-4">
             <Link href="/" className="group flex items-center gap-2.5">
-              <Mark size={22} />
-              <span className="font-display text-[15px] font-semibold tracking-tight text-text">
+              <Mark size={20} />
+              <span className="font-display text-[14px] font-medium tracking-tight text-text">
                 CHAIN<span className="text-accent">TRACE</span>
               </span>
             </Link>
-            <nav className="flex items-center gap-1 text-[11px] uppercase tracking-widest text-muted">
-              <Link href="/" className="rounded px-2 py-1 hover:bg-panel hover:text-text">
-                trace
+            <nav className="flex items-center gap-5 text-[11px] font-medium uppercase tracking-[0.1em] text-muted">
+              <Link href="/" className="transition-colors hover:text-text">
+                Trace
               </Link>
-              <Link href="/cases" className="rounded px-2 py-1 hover:bg-panel hover:text-text">
-                cases
+              <Link href="/cases" className="transition-colors hover:text-text">
+                Cases
               </Link>
             </nav>
-            <div className="hidden items-center gap-1.5 rounded border border-border bg-panel px-2 py-1 text-[11px] text-dim md:flex">
-              <span>search anywhere</span>
+            <div className="hidden items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-[11px] text-dim md:flex">
+              <span>Search anywhere</span>
               <Kbd>⌘K</Kbd>
             </div>
             <OfficerBadge />
           </div>
         </header>
-        <main className="mx-auto max-w-[1600px] px-5 py-8">
+        <main className="mx-auto max-w-[1440px] px-8 py-14">
           <AuthGate>{children}</AuthGate>
         </main>
         <CommandPalette />

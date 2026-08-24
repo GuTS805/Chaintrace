@@ -40,9 +40,9 @@ export function OfficerBadge() {
       {officer.badge_no && <span className="hidden sm:inline">{officer.badge_no}</span>}
       <button
         onClick={logout}
-        className="rounded border border-border px-2 py-1 hover:border-accent hover:text-accent"
+        className="rounded-md border border-border px-2.5 py-1 normal-case tracking-normal transition-colors hover:border-borderStrong hover:text-text"
       >
-        logout
+        Logout
       </button>
     </span>
   );

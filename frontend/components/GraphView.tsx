@@ -13,7 +13,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import type { GraphNode, GraphResult } from "@/lib/types";
 import { assetAmount, formatAsset, shortAddr } from "@/lib/format";
-import { Panel, Pill } from "./ui";
+import { Eyebrow, Pill, Tile } from "./ui";
 
 type Role = "root" | "risk" | "bridge" | "vasp" | "plain";
 
@@ -36,10 +36,10 @@ function roleOf(n: GraphNode): Role {
 
 // Distinct deposit clusters (same cluster_id -> swept into the same hot
 // wallet) get a shared subtle background tint so they read as a group.
-const CLUSTER_TINTS = ["#181c2e", "#1f1a2b", "#12261f", "#251a1e", "#12222a", "#1c1729"];
+const CLUSTER_TINTS = ["#121319", "#141219", "#0f1613", "#171213", "#0f1517", "#131017"];
 
 function clusterTint(clusterId: number | null | undefined): string {
-  if (clusterId == null) return "#161a22";
+  if (clusterId == null) return "#0e0e0e";
   return CLUSTER_TINTS[clusterId % CLUSTER_TINTS.length];
 }
 
@@ -49,15 +49,13 @@ function nodeStyle(role: Role, clusterId: number | null | undefined, isHighlight
   return {
     background: clusterTint(clusterId),
     border: `${special || isHighlighted ? 1.5 : 1}px solid ${isHighlighted ? "#6366f1" : color}`,
-    borderRadius: 8,
-    color: "#e5e7eb",
+    borderRadius: 6,
+    color: "#f5f5f5",
     fontSize: 11,
-    fontFamily: '"JetBrains Mono", ui-monospace, monospace',
+    fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
     padding: "6px 10px",
     width: 178,
-    boxShadow: isHighlighted
-      ? "0 0 0 3px rgba(99,102,241,0.25), 0 0 20px rgba(99,102,241,0.3)"
-      : "0 1px 3px rgba(0,0,0,0.4)",
+    boxShadow: isHighlighted ? "0 0 0 3px rgba(99,102,241,0.2)" : "none",
     transition: "box-shadow 150ms ease, border-color 150ms ease",
   };
 }
@@ -109,7 +107,7 @@ export function GraphView({
                 <div style={{ color: ROLE_COLOR[role], marginTop: 2, fontWeight: 600 }}>{title}</div>
               )}
               {n.cluster_id != null && (
-                <div style={{ color: "#94a3b8", marginTop: 2, fontSize: 9 }}>
+                <div style={{ color: "#71717a", marginTop: 2, fontSize: 9 }}>
                   cluster #{n.cluster_id}
                 </div>
               )}
@@ -139,8 +137,8 @@ export function GraphView({
         source: e.from_address,
         target: e.to_address,
         label: formatAsset(e.value_wei, e.asset),
-        labelStyle: { fill: isHl ? "#a5b4fc" : "#94a3b8", fontSize: 9, fontWeight: isHl ? 600 : 400 },
-        labelBgStyle: { fill: "#0b0d12", fillOpacity: 0.85 },
+        labelStyle: { fill: isHl ? "#a5b4fc" : "#a1a1aa", fontSize: 9, fontWeight: isHl ? 600 : 400 },
+        labelBgStyle: { fill: "#050505", fillOpacity: 0.85 },
         style: { stroke, strokeWidth: isHl ? width + 1.5 : width },
         className: isHl ? "trace-edge" : undefined,
         markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 16, height: 16 },
@@ -152,21 +150,18 @@ export function GraphView({
   }, [graph, highlightedTx, highlightedNode, riskAddresses]);
 
   return (
-    <Panel
-      title="Transaction graph"
-      className="overflow-hidden"
-      bodyClassName="p-0"
-      right={
-        graph.prune.pruned ? (
+    <Tile bodyClassName="p-6">
+      <div className="flex items-center justify-between pb-5">
+        <Eyebrow>Transaction graph</Eyebrow>
+        {graph.prune.pruned ? (
           <Pill tone="warn">pruned: {graph.prune.reasons.join(", ")}</Pill>
         ) : (
           <Pill tone="muted">{graph.prune.nodes_visited} nodes</Pill>
-        )
-      }
-    >
-      <div className="h-[560px] w-full">
+        )}
+      </div>
+      <div className="h-[640px] w-full overflow-hidden rounded-md">
         {graph.nodes.length === 0 ? (
-          <p className="p-4 text-sm text-muted">No outgoing activity within bounds.</p>
+          <p className="p-6 text-sm text-muted">No outgoing activity within bounds.</p>
         ) : (
           <ReactFlow
             nodes={nodes}
@@ -178,7 +173,7 @@ export function GraphView({
             minZoom={0.2}
             proOptions={{ hideAttribution: true }}
           >
-            <Background color="#1c212b" gap={24} />
+            <Background color="#161616" gap={28} />
             <Controls showInteractive={false} className="!border-border !bg-panel [&_button]:!border-border [&_button]:!bg-panel [&_button]:!fill-muted [&_button]:hover:!bg-panel2" />
             <MiniMap
               pannable
@@ -187,17 +182,17 @@ export function GraphView({
                 const gn = graph.nodes.find((x) => x.address === n.id);
                 return gn ? ROLE_COLOR[roleOf(gn)] : "#5b6472";
               }}
-              maskColor="rgba(11,13,18,0.75)"
-              style={{ background: "#171b23", border: "1px solid #252b36" }}
+              maskColor="rgba(5,5,5,0.75)"
+              style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)" }}
             />
           </ReactFlow>
         )}
       </div>
-      <p className="border-t border-border px-4 py-2 text-[10px] uppercase tracking-widest text-muted">
-        click a node to inspect inline · root <span className="text-accent">indigo</span> · attributed{" "}
+      <p className="pt-4 text-[11px] text-dim">
+        Click a node to inspect inline · root <span className="text-accent">indigo</span> · attributed{" "}
         <span className="text-good">green</span> · mixer <span className="text-bad">red</span> · bridge{" "}
         <span style={{ color: "#22d3ee" }}>cyan</span> · hovering evidence traces the matching edge here
       </p>
-    </Panel>
+    </Tile>
   );
 }

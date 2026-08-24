@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { WalletSearch } from "@/components/WalletSearch";
-import { Pill, Kbd, BentoGrid, Tile } from "@/components/ui";
+import { Eyebrow, Pill, Kbd, BentoGrid, Tile } from "@/components/ui";
 import { DEMO_WALLETS, shortAddr } from "@/lib/format";
 
 const OUTCOME_TONE: Record<string, "good" | "warn" | "accent" | "muted" | "gold"> = {
@@ -37,24 +37,22 @@ const FACTS = [
 export default function Home() {
   return (
     <BentoGrid>
-      <Tile className="col-span-4 md:col-span-8" bodyClassName="p-6 sm:p-8">
-        <div className="text-[11px] uppercase tracking-widest text-accent">
-          forensic wallet attribution
-        </div>
-        <h1 className="mt-3 font-display text-3xl font-bold leading-[1.1] text-text sm:text-4xl">
+      <Tile className="col-span-4 md:col-span-8" bodyClassName="p-8 sm:p-10">
+        <Eyebrow tone="accent">Forensic wallet attribution</Eyebrow>
+        <h1 className="mt-4 font-display text-[34px] font-semibold leading-[1.1] tracking-tight text-text sm:text-[42px]">
           Trace any wallet to the{" "}
           <span className="text-accent">exchange behind it</span>.
         </h1>
-        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">
+        <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-muted">
           Attribution from on-chain heuristics and a calibrated classifier — every
           score traces to concrete evidence, and the system will say{" "}
           <span className="text-text">&ldquo;insufficient evidence&rdquo;</span>{" "}
           rather than guess.
         </p>
-        <div className="mt-5">
+        <div className="mt-6">
           <WalletSearch autoFocus />
         </div>
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted">
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted">
           <span>
             Paste <span className="text-accent">any real wallet</span> (Ethereum,
             Polygon, or Tron) and fetch it live from chain.
@@ -76,10 +74,8 @@ export default function Home() {
         ))}
       </Tile>
 
-      <div className="col-span-4 flex items-center gap-3 py-1 md:col-span-12">
-        <span className="text-[10px] uppercase tracking-widest text-muted">
-          case files · offline seeded
-        </span>
+      <div className="col-span-4 flex items-center gap-3 pb-1 pt-4 md:col-span-12">
+        <Eyebrow>Case files · offline seeded</Eyebrow>
         <span className="h-px flex-1 bg-border" />
       </div>
 

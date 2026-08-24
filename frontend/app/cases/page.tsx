@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { CaseOut, CaseStatus } from "@/lib/types";
-import { BentoGrid, Tile, Pill } from "@/components/ui";
+import { BentoGrid, Button, Eyebrow, Tile, Pill } from "@/components/ui";
 import { fmtTime } from "@/lib/format";
 
 const STATUS_TONE: Record<CaseStatus, "good" | "warn" | "muted"> = {
@@ -56,11 +56,9 @@ export default function CasesPage() {
   return (
     <BentoGrid>
       <div className="col-span-4 md:col-span-12">
-        <div className="text-[11px] uppercase tracking-widest text-accent">
-          investigation workspace
-        </div>
-        <h1 className="mt-1 font-display text-2xl font-semibold text-text">Cases</h1>
-        <p className="mt-1 text-xs text-muted">
+        <Eyebrow tone="accent">Investigation workspace</Eyebrow>
+        <h1 className="mt-2 font-display text-[32px] font-semibold tracking-tight text-text">Cases</h1>
+        <p className="mt-2 text-[14px] text-muted">
           Group wallets, evidence, and notes under a case for reporting and disclosure.
         </p>
       </div>
@@ -71,21 +69,17 @@ export default function CasesPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Case name, e.g. &ldquo;Ransomware payout — Q1&rdquo;"
-            className="min-w-[220px] flex-1 rounded border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
+            className="min-w-[220px] flex-1 rounded-md border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
           />
           <input
             value={investigator}
             onChange={(e) => setInvestigator(e.target.value)}
             placeholder="Investigator (optional)"
-            className="min-w-[160px] rounded border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
+            className="min-w-[160px] rounded-md border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
           />
-          <button
-            type="submit"
-            disabled={creating || !name.trim()}
-            className="rounded border border-accent/50 bg-accent/10 px-4 py-2 text-xs uppercase tracking-widest text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {creating ? "opening…" : "open case"}
-          </button>
+          <Button type="submit" variant="primary" disabled={creating || !name.trim()}>
+            {creating ? "Opening…" : "Open case"}
+          </Button>
         </form>
       </Tile>
 
@@ -95,10 +89,8 @@ export default function CasesPage() {
         </div>
       )}
 
-      <div className="col-span-4 flex items-center gap-3 py-1 md:col-span-12">
-        <span className="text-[10px] uppercase tracking-widest text-muted">
-          open cases ({cases.length})
-        </span>
+      <div className="col-span-4 flex items-center gap-3 pb-1 pt-2 md:col-span-12">
+        <Eyebrow>Open cases ({cases.length})</Eyebrow>
         <span className="h-px flex-1 bg-border" />
       </div>
 

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { AttributionResult, Evidence, VaspCandidate } from "@/lib/types";
 import { pct, shortAddr, SIGNAL_LABEL, fmtTime } from "@/lib/format";
-import { Bar, Panel, Pill, GhostButton } from "./ui";
+import { Eyebrow, GhostButton, Pill, Tile } from "./ui";
 
 function toneForProb(p: number, threshold: number): "good" | "warn" | "muted" {
   if (p >= threshold) return "good";
@@ -16,21 +16,12 @@ interface Row {
   evidence: Evidence;
 }
 
-function SignedBar({ weight, scale }: { weight: number; scale: number }) {
-  const frac = scale > 0 ? Math.min(Math.abs(weight) / scale, 1) : 0;
-  const positive = weight >= 0;
-  return (
-    <div className="relative h-1.5 w-20 shrink-0 rounded-full bg-panel3">
-      <span className="absolute left-1/2 top-0 h-full w-px bg-border" />
-      <span
-        className={`absolute top-0 h-full rounded-full ${positive ? "bg-good" : "bg-bad"}`}
-        style={{
-          left: positive ? "50%" : `${50 - frac * 50}%`,
-          width: `${frac * 50}%`,
-        }}
-      />
-    </div>
-  );
+function strengthLabel(weight: number, scale: number): string {
+  const frac = scale > 0 ? Math.abs(weight) / scale : 0;
+  const sign = weight >= 0 ? "" : "counter-evidence · ";
+  if (frac >= 0.66) return `${sign}Very strong`;
+  if (frac >= 0.33) return `${sign}Strong`;
+  return `${sign}Moderate`;
 }
 
 function EvidenceRow({
@@ -49,37 +40,41 @@ function EvidenceRow({
     <li
       onMouseEnter={() => ev.tx_hashes.length > 0 && onHover(ev.tx_hashes)}
       onMouseLeave={() => onHover(null)}
-      className="group rounded border border-transparent px-3 py-2.5 transition-colors hover:border-accent/30 hover:bg-panel2"
+      className="group -mx-6 px-6 py-4 transition-colors hover:bg-panel2"
     >
-      <div className="mb-1 flex flex-wrap items-center gap-2">
-        <Pill tone="accent">{SIGNAL_LABEL[ev.signal_type] ?? ev.signal_type}</Pill>
-        {multiCandidate && <Pill tone="gold">{row.vasp}</Pill>}
-        <SignedBar weight={ev.weight} scale={scale} />
-        <span className="text-[10px] tabular-nums text-muted">
-          {ev.weight >= 0 ? "+" : ""}
-          {ev.weight.toFixed(3)}
-        </span>
-        {ev.tx_hashes.length > 0 && (
-          <span className="ml-auto text-[10px] text-dim opacity-0 transition-opacity group-hover:opacity-100">
-            ↦ highlighted in graph
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-medium text-text">
+            {SIGNAL_LABEL[ev.signal_type] ?? ev.signal_type}
           </span>
-        )}
+          {multiCandidate && <Pill tone="gold">{row.vasp}</Pill>}
+        </div>
+        <div className="flex items-center gap-3 text-[12px] tabular-nums">
+          <span className="text-dim">{strengthLabel(ev.weight, scale)}</span>
+          <span className={ev.weight >= 0 ? "text-muted" : "text-bad"}>
+            {ev.weight >= 0 ? "+" : ""}
+            {ev.weight.toFixed(3)}
+          </span>
+        </div>
       </div>
-      <p className="text-[13px] leading-snug text-text">{ev.description}</p>
+      <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{ev.description}</p>
       {ev.tx_hashes.length > 0 && (
-        <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
           {ev.tx_hashes.slice(0, 6).map((h) => (
-            <span key={h} className="font-mono text-[10px] text-muted">
+            <span key={h} className="font-mono text-[11px] text-dim">
               {shortAddr(h, 8, 6)}
             </span>
           ))}
           {ev.tx_hashes.length > 6 && (
-            <span className="text-[10px] text-dim">+{ev.tx_hashes.length - 6}</span>
+            <span className="text-[11px] text-dim">+{ev.tx_hashes.length - 6} more</span>
           )}
+          <span className="text-[11px] text-dim opacity-0 transition-opacity group-hover:opacity-100">
+            traced in graph ↦
+          </span>
         </div>
       )}
       {ev.timestamps.length > 0 && (
-        <div className="mt-0.5 text-[10px] text-dim">
+        <div className="mt-1 font-mono text-[11px] text-dim">
           {fmtTime(ev.timestamps[0])}
           {ev.timestamps.length > 1 && ` → ${fmtTime(ev.timestamps[ev.timestamps.length - 1])}`}
         </div>
@@ -98,14 +93,20 @@ export function AttributionPanel({
   const [filter, setFilter] = useState<string | "all">("all");
 
   const banner = result.insufficient_evidence
-    ? { tone: "warn" as const, label: "INSUFFICIENT EVIDENCE" }
+    ? { tone: "warn" as const, label: "Insufficient evidence" }
     : result.ambiguous
-      ? { tone: "accent" as const, label: "AMBIGUOUS" }
-      : { tone: "good" as const, label: "ATTRIBUTED" };
+      ? { tone: "accent" as const, label: "Ambiguous" }
+      : { tone: "good" as const, label: "Attributed" };
 
   const top = result.candidates[0];
   const topTone = top ? toneForProb(top.probability, result.confidence_threshold) : "muted";
   const multiCandidate = result.candidates.length > 1;
+  const confidenceWord =
+    top && top.probability >= result.confidence_threshold
+      ? "High confidence attribution"
+      : top
+        ? "Below the confidence threshold"
+        : undefined;
 
   const rows: Row[] = useMemo(() => {
     const all: Row[] = [];
@@ -119,74 +120,87 @@ export function AttributionPanel({
   const scale = Math.max(1e-6, ...rows.map((r) => Math.abs(r.evidence.weight)));
 
   return (
-    <Panel title="Attribution" right={<Pill tone={banner.tone}>{banner.label}</Pill>}>
-      {/* Signature: the calibrated attribution readout. */}
-      <div className="rounded-md border border-border bg-panel2 p-4">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <div className="text-[10px] uppercase tracking-widest text-muted">
-              {result.insufficient_evidence ? "no confident attribution" : "most likely VASP"}
-            </div>
-            <div className="mt-1 font-display text-2xl font-semibold text-text">
-              {top ? top.vasp_name : "—"}
-            </div>
-          </div>
-          <div className={`font-display text-4xl font-bold tabular-nums text-${topTone}`}>
-            {top ? pct(top.probability, 1) : "—"}
-          </div>
+    <Tile bodyClassName="p-8">
+      {/* Verdict — the largest, most visually dominant element on the page. */}
+      <div className="flex items-start justify-between gap-6">
+        <Eyebrow>
+          {result.insufficient_evidence ? "No confident attribution" : "Most likely VASP"}
+        </Eyebrow>
+        <Pill tone={banner.tone}>{banner.label}</Pill>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+        <div className="font-display text-[44px] font-semibold leading-[1.05] tracking-tight text-text">
+          {top ? top.vasp_name : "—"}
+        </div>
+        <div className={`font-display text-[56px] font-semibold leading-none tabular-nums text-${topTone}`}>
+          {top ? pct(top.probability, 1) : "—"}
+        </div>
+      </div>
+      {confidenceWord && <p className="mt-1 text-[13px] text-muted">{confidenceWord}</p>}
+
+      <div className="mt-6">
+        <div className="h-px w-full overflow-hidden rounded-full bg-panel3">
+          <div
+            className={`h-full transition-[width] duration-500 ease-out ${
+              topTone === "good" ? "bg-good" : topTone === "warn" ? "bg-warn" : "bg-muted"
+            }`}
+            style={{ width: `${(top ? Math.max(0, Math.min(1, top.probability)) : 0) * 100}%` }}
+          />
+        </div>
+        <div className="mt-1.5 flex justify-between text-[11px] text-dim">
+          <span>Calibrated probability</span>
+          <span>Threshold {pct(result.confidence_threshold, 0)}</span>
+        </div>
+      </div>
+
+      {result.explanation && (
+        <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-muted">{result.explanation}</p>
+      )}
+
+      {/* Evidence — unboxed rows, not cards-inside-a-card. */}
+      <div className="mt-10 border-t border-border pt-6">
+        <div className="flex items-center justify-between">
+          <Eyebrow>Why this attribution?</Eyebrow>
+          <span className="text-[11px] text-dim">
+            {rows.length} signal{rows.length === 1 ? "" : "s"}
+          </span>
         </div>
 
-        <div className="mt-3">
-          <Bar value={top ? top.probability : 0} tone={topTone} threshold={result.confidence_threshold} height="h-3" />
-          <div className="mt-1 flex justify-between text-[10px] text-muted">
-            <span>calibrated probability</span>
-            <span>│ threshold {pct(result.confidence_threshold, 0)}</span>
+        {multiCandidate && (
+          <div className="mt-4 flex flex-wrap items-center gap-1.5">
+            <GhostButton active={filter === "all"} onClick={() => setFilter("all")}>
+              all
+            </GhostButton>
+            {result.candidates.map((c: VaspCandidate) => (
+              <GhostButton key={c.vasp_name} active={filter === c.vasp_name} onClick={() => setFilter(c.vasp_name)}>
+                {c.vasp_name} {pct(c.probability, 0)}
+              </GhostButton>
+            ))}
           </div>
-        </div>
+        )}
 
-        {result.explanation && (
-          <p className="mt-3 border-t border-border pt-2 text-xs text-muted">{result.explanation}</p>
+        {rows.length === 0 ? (
+          <p className="mt-4 text-[13px] text-muted">No evidence signals fired for any candidate.</p>
+        ) : (
+          <ul className="mt-2 max-h-[440px] divide-y divide-border overflow-y-auto">
+            {rows.map((row, i) => (
+              <EvidenceRow
+                key={`${row.vasp}-${row.evidence.signal_type}-${i}`}
+                row={row}
+                scale={scale}
+                multiCandidate={multiCandidate}
+                onHover={onHoverEvidence}
+              />
+            ))}
+          </ul>
         )}
       </div>
 
-      {/* Candidate filter chips (only meaningful with >1 candidate). */}
-      {multiCandidate && (
-        <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] uppercase tracking-widest text-dim">evidence for</span>
-          <GhostButton active={filter === "all"} onClick={() => setFilter("all")}>
-            all
-          </GhostButton>
-          {result.candidates.map((c: VaspCandidate) => (
-            <GhostButton key={c.vasp_name} active={filter === c.vasp_name} onClick={() => setFilter(c.vasp_name)}>
-              {c.vasp_name} {pct(c.probability, 0)}
-            </GhostButton>
-          ))}
-        </div>
-      )}
-
-      {/* Combined, weight-ranked evidence stream — hover to trace it in the
-          graph, instead of per-candidate accordions the investigator has to
-          open and mentally diff. */}
-      {rows.length === 0 ? (
-        <p className="mt-4 text-sm text-muted">No evidence signals fired for any candidate.</p>
-      ) : (
-        <ul className="mt-3 max-h-[420px] space-y-1 overflow-y-auto pr-1">
-          {rows.map((row, i) => (
-            <EvidenceRow
-              key={`${row.vasp}-${row.evidence.signal_type}-${i}`}
-              row={row}
-              scale={scale}
-              multiCandidate={multiCandidate}
-              onHover={onHoverEvidence}
-            />
-          ))}
-        </ul>
-      )}
-
-      <div className="mt-3 flex items-center justify-between border-t border-border pt-2 text-[10px] uppercase tracking-widest text-muted">
-        <span>model · {result.model_version}</span>
-        <span>no LLM in attribution path</span>
+      <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-[11px] text-dim">
+        <span>Model · {result.model_version}</span>
+        <span>No LLM in attribution path</span>
       </div>
-    </Panel>
+    </Tile>
   );
 }

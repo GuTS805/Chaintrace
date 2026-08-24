@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { CaseDetail, CaseStatus, FindingSeverity } from "@/lib/types";
 import { PdfButton } from "@/components/PdfButton";
-import { BentoGrid, Tile, Pill } from "@/components/ui";
+import { BentoGrid, Button, Tile, Pill } from "@/components/ui";
 import { fmtTime, shortAddr } from "@/lib/format";
 
 const SEVERITIES: FindingSeverity[] = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"];
@@ -93,21 +93,21 @@ export default function CaseDetailPage({
         <Link href="/cases" className="text-xs text-muted hover:text-accent">
           ← cases
         </Link>
-        <div className="mt-1 flex flex-wrap items-center gap-3">
+        <div className="mt-2 flex flex-wrap items-center gap-3">
           <span className="font-mono text-xs text-dim">{caseRef(detail.id)}</span>
-          <h1 className="font-display text-xl font-semibold text-text">{detail.name}</h1>
+          <h1 className="font-display text-[26px] font-semibold tracking-tight text-text">{detail.name}</h1>
           <Pill tone={STATUS_TONE[detail.status]}>{detail.status}</Pill>
           <PdfButton
             path={`/cases/${caseId}/report`}
-            className="ml-auto rounded border border-border px-2 py-1 text-xs text-muted hover:border-accent hover:text-accent"
+            className="ml-auto rounded-md border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-borderStrong hover:text-text"
           >
-            ↓ report (PDF)
+            Report (PDF)
           </PdfButton>
           <button
             onClick={remove}
-            className="rounded border border-bad/40 px-2 py-1 text-xs text-bad hover:bg-bad/10"
+            className="rounded-md border border-bad/40 px-3 py-1.5 text-xs text-bad hover:bg-bad/10"
           >
-            delete
+            Delete
           </button>
         </div>
         {detail.investigator && (
@@ -121,12 +121,12 @@ export default function CaseDetailPage({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What did you find?"
-            className="w-full rounded border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
+            className="w-full rounded-md border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
           />
           <select
             value={severity}
             onChange={(e) => setSeverity(e.target.value as FindingSeverity)}
-            className="w-full rounded border border-border bg-panel2 px-2 py-2 text-xs text-text outline-none focus:border-accent"
+            className="w-full rounded-md border border-border bg-panel2 px-2 py-2 text-xs text-text outline-none focus:border-accent"
           >
             {SEVERITIES.map((s) => (
               <option key={s} value={s}>
@@ -138,22 +138,18 @@ export default function CaseDetailPage({
             value={wallet}
             onChange={(e) => setWallet(e.target.value)}
             placeholder="Wallet address (optional)"
-            className="w-full rounded border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
+            className="w-full rounded-md border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
           />
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Notes (optional)"
             rows={2}
-            className="w-full resize-none rounded border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
+            className="w-full resize-none rounded-md border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
           />
-          <button
-            type="submit"
-            disabled={saving || !title.trim()}
-            className="w-full rounded border border-accent/50 bg-accent/10 px-4 py-2 text-xs uppercase tracking-widest text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {saving ? "adding…" : "add"}
-          </button>
+          <Button type="submit" variant="primary" disabled={saving || !title.trim()} className="w-full">
+            {saving ? "Adding…" : "Add"}
+          </Button>
         </form>
       </Tile>
 
