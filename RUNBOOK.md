@@ -72,8 +72,9 @@ enforcement can trust knows when to abstain."*
 
 ## 3. The demo cases
 
-Four synthetic cases exercise model behaviour; two **genuine** mainnet wallets
-(captured from Blockscout) prove the same pipeline runs on real data.
+Four synthetic cases exercise model behaviour; three **genuine** mainnet wallets
+across **two chains** (captured from Blockscout / TronGrid) prove the same
+pipeline runs on real data.
 
 | Case | Address ends… | Result | Point it proves |
 |---|---|---|---|
@@ -83,9 +84,17 @@ Four synthetic cases exercise model behaviour; two **genuine** mainnet wallets
 | CASE-04 Two exchanges | `…f07a17` | **ambiguous** | split verdict when no candidate dominates |
 | CASE-05 Real wallet — Kraken | `…8ad09b` | Kraken | **real** Ethereum wallet; deposit verifiable on-chain |
 | CASE-06 Real wallet — Binance | `…99081c` | Binance ~0.76 | **real** wallet, second VASP, moderate confidence |
+| CASE-07 Real wallet — Tron (USDT) | `TVYuaXdh…` | Kraken ~0.76 | **real, second chain** — same pipeline, no code changes |
 
-> CASE-05/06 are real mainnet wallets. Say: *"Same pipeline, real Ethereum data —
-> and you can verify the deposit transaction yourself on any explorer."*
+> CASE-05/06/07 are real mainnet wallets. Say: *"Same pipeline, real on-chain data
+> across two blockchains — you can verify the deposits yourself on any explorer."*
+
+**The multi-chain moment:** open **CASE-07 · Real wallet — Tron (USDT)**. Point out
+the address format is different (`T…`, base58, Tron) but the exact same attribution
+engine, evidence chain, and risk score come back. *"The PS asks for Bitcoin,
+Ethereum, Tron, BNB Chain, Solana, Polygon — this shows the architecture isn't
+Ethereum-only; Tron is live today because it's what most stablecoin fraud in India
+actually moves through."*
 
 ---
 
@@ -103,6 +112,16 @@ Four synthetic cases exercise model behaviour; two **genuine** mainnet wallets
 - **Bounded, auditable traversal** (recursive SQL, max hops / value / nodes) with a
   reported reason whenever it prunes.
 - **Risk ≠ attribution** — computed independently.
+- **Multi-chain by architecture, not just Ethereum.** Tron/USDT-TRC20 is live
+  (`GET /wallets/{addr}/...` works the same for a `T…` address); adding another
+  chain means a new provider adapter, not a redesign.
+- **Exchange clusters, not just single addresses.** `GET /vasps/{name}/cluster`
+  returns every deposit address already observed sweeping into that VASP's hot
+  wallet — the PS explicitly asks for this.
+- **Laundering typology + automatic flagging.** The risk score also returns
+  `typology_tags` (e.g. layering through a mixer) and `flagged`/`flag_reason`, so
+  a case queue or watchlist can surface high-risk wallets without an analyst
+  reading every report.
 
 ---
 

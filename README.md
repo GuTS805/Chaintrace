@@ -46,11 +46,31 @@ MHA) — subject wallet, attributed VASP + confidence, on-chain evidence, risk, 
 the KYC/beneficial-owner/freeze items requested. Clearly marked a draft with no
 legal effect until filed.
 
+**Multi-chain (Tron/USDT-TRC20):** the same provider/import/traversal/attribution
+pipeline also ingests **Tron** (`app/providers/tron.py`, keyless via TronGrid) —
+the chain most used for stablecoin transfers involving Indian VDA fraud. Search a
+Tron address (`T…`, case-sensitive/base58) the same way as an Ethereum one; a real
+committed snapshot (`tron_kraken_depositor_TVYuaXdh.json`) resolves to Kraken.
+Wallets carry a `chain` column so Ethereum and Tron data coexist without collision.
+
+**Exchange clustering:** `GET /vasps/{name}/cluster` returns a VASP's known
+deposit-sweep cluster (rebuilt after every import by
+`app.attribution.cluster_builder`) — the set of deposit addresses already observed
+consolidating into that VASP's hot wallet, one cluster per chain.
+
+**Laundering typology + high-risk alerting:** the risk score now also returns
+`typology_tags` (e.g. `LAYERING` — funds pass through a mixer/sanctioned
+intermediary before reaching a VASP) and a `flagged` / `flag_reason` pair so a
+dashboard or an alerting layer can pick out high-risk wallets automatically
+(`app/attribution/typology.py`).
+
 ```bash
 make import-realchain          # replay the bundled Etherscan-schema sample
 # or snapshot a real low-degree wallet once (needs ETHERSCAN_API_KEY), then replay offline:
 python -m app.ingest.chain_import --address 0x... --save data/realchain/case.json
 python -m app.ingest.chain_import --file data/realchain/case.json
+# Tron is keyless — auto-detected from a T... address, or pass --chain tron explicitly:
+python -m app.ingest.chain_import --address T... --chain tron --save data/realchain/case.json
 ```
 
 ## Reports (Phase 6)

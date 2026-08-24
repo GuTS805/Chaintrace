@@ -3,13 +3,14 @@ import { WalletSearch } from "@/components/WalletSearch";
 import { Pill } from "@/components/ui";
 import { DEMO_WALLETS, shortAddr } from "@/lib/format";
 
-const OUTCOME_TONE: Record<string, "good" | "warn" | "accent" | "muted"> = {
+const OUTCOME_TONE: Record<string, "good" | "warn" | "accent" | "muted" | "vasp"> = {
   "clean attribution (Binance)": "good",
   "peel chain → Kraken": "warn",
   "insufficient evidence": "muted",
   "ambiguous split": "accent",
   "real: Kraken deposit": "good",
   "real: Binance deposit": "good",
+  "real: multi-chain": "vasp",
 };
 
 export default function Home() {
