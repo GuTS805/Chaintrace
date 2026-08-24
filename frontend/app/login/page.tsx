@@ -29,7 +29,7 @@ export default function LoginPage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-sm flex-col justify-center">
       <div className="mb-6 text-center">
-        <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-lg border border-border bg-panel">
+        <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl border border-border bg-panel">
           <Mark size={26} />
         </div>
         <h1 className="font-display text-lg font-semibold text-text">
@@ -42,7 +42,7 @@ export default function LoginPage() {
 
       <form
         onSubmit={submit}
-        className="space-y-3 rounded-lg border border-border bg-panel p-5 shadow-panel"
+        className="space-y-3 rounded-2xl border border-border bg-panel p-5 shadow-panel"
       >
         <div>
           <label className="mb-1 block text-[10px] uppercase tracking-widest text-dim">

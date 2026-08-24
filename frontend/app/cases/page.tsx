@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { CaseOut, CaseStatus } from "@/lib/types";
-import { Panel, Pill } from "@/components/ui";
+import { BentoGrid, Tile, Pill } from "@/components/ui";
 import { fmtTime } from "@/lib/format";
 
 const STATUS_TONE: Record<CaseStatus, "good" | "warn" | "muted"> = {
@@ -54,8 +54,8 @@ export default function CasesPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
+    <BentoGrid>
+      <div className="col-span-4 md:col-span-12">
         <div className="text-[11px] uppercase tracking-widest text-accent">
           investigation workspace
         </div>
@@ -65,7 +65,7 @@ export default function CasesPage() {
         </p>
       </div>
 
-      <Panel title="Open a case">
+      <Tile title="Open a case" className="col-span-4 md:col-span-12">
         <form onSubmit={create} className="flex flex-wrap gap-2">
           <input
             value={name}
@@ -87,37 +87,45 @@ export default function CasesPage() {
             {creating ? "opening…" : "open case"}
           </button>
         </form>
-      </Panel>
+      </Tile>
 
-      {error && <p className="text-sm text-bad">{error}</p>}
+      {error && (
+        <div className="col-span-4 md:col-span-12">
+          <p className="text-sm text-bad">{error}</p>
+        </div>
+      )}
 
-      <Panel title={`Open cases (${cases.length})`} bodyClassName="p-0">
-        {cases.length === 0 ? (
-          <p className="p-4 text-sm text-muted">
+      <div className="col-span-4 flex items-center gap-3 py-1 md:col-span-12">
+        <span className="text-[10px] uppercase tracking-widest text-muted">
+          open cases ({cases.length})
+        </span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      {cases.length === 0 ? (
+        <Tile className="col-span-4 md:col-span-12">
+          <p className="text-sm text-muted">
             No cases yet. Open one above, then pin wallets to it from any
             investigation to start building a disclosure-ready record.
           </p>
-        ) : (
-          <ul className="divide-y divide-border">
-            {cases.map((c) => (
-              <li key={c.id}>
-                <Link
-                  href={`/cases/${c.id}`}
-                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-panel2"
-                >
-                  <span className="font-mono text-xs text-dim">{caseRef(c.id)}</span>
-                  <span className="font-display font-semibold text-text">{c.name}</span>
-                  <Pill tone={STATUS_TONE[c.status]}>{c.status}</Pill>
-                  {c.investigator && (
-                    <span className="text-xs text-muted">· {c.investigator}</span>
-                  )}
-                  <span className="ml-auto text-xs text-dim">{fmtTime(c.created_at)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Panel>
-    </div>
+        </Tile>
+      ) : (
+        cases.map((c) => (
+          <Tile key={c.id} interactive className="col-span-4 md:col-span-4">
+            <Link href={`/cases/${c.id}`} className="flex h-full flex-col">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] text-dim">{caseRef(c.id)}</span>
+                <Pill tone={STATUS_TONE[c.status]}>{c.status}</Pill>
+              </div>
+              <div className="mt-2 font-display font-semibold text-text">{c.name}</div>
+              {c.investigator && (
+                <div className="mt-1 text-xs text-muted">{c.investigator}</div>
+              )}
+              <div className="mt-auto pt-3 text-[11px] text-dim">{fmtTime(c.created_at)}</div>
+            </Link>
+          </Tile>
+        ))
+      )}
+    </BentoGrid>
   );
 }

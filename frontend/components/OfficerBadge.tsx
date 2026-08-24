@@ -32,12 +32,12 @@ export function OfficerBadge() {
   }
 
   return (
-    <span className="ml-auto flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted">
-      <span className="h-1.5 w-1.5 rounded-full bg-good" />
-      <span className="normal-case tracking-normal text-text">
+    <span className="ml-auto flex shrink-0 items-center gap-3 text-[10px] uppercase tracking-widest text-muted">
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-good" />
+      <span className="hidden whitespace-nowrap normal-case tracking-normal text-text sm:inline">
         {officer.full_name}
       </span>
-      {officer.badge_no && <span>{officer.badge_no}</span>}
+      {officer.badge_no && <span className="hidden sm:inline">{officer.badge_no}</span>}
       <button
         onClick={logout}
         className="rounded border border-border px-2 py-1 hover:border-accent hover:text-accent"
