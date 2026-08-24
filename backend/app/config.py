@@ -53,6 +53,15 @@ class Settings(BaseSettings):
         alias="CORS_ORIGINS",
     )
 
+    # Auth (officer login). The default secret is fine for the offline demo
+    # (single-machine, no real case data); override JWT_SECRET for any
+    # non-demo deployment.
+    jwt_secret: str = Field(
+        default="chaintrace-demo-secret-change-in-production", alias="JWT_SECRET"
+    )
+    jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
+    jwt_expire_minutes: int = Field(default=480, alias="JWT_EXPIRE_MINUTES")
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

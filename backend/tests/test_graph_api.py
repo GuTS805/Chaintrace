@@ -9,6 +9,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_graph_repository
+from app.auth import get_current_officer
 from app.main import app
 from app.repositories.sql_graph_repository import SqlGraphRepository
 from app.synthetic import build_all_scenarios
@@ -21,10 +22,11 @@ RANSOM = next(
 
 
 @pytest_asyncio.fixture
-async def client(session: AsyncSession) -> AsyncIterator[AsyncClient]:
+async def client(session: AsyncSession, test_officer) -> AsyncIterator[AsyncClient]:
     await seed_demo(session)
     await session.commit()
     app.dependency_overrides[get_graph_repository] = lambda: SqlGraphRepository(session)
+    app.dependency_overrides[get_current_officer] = lambda: test_officer
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
         yield c

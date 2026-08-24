@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.attribution import get_context_builder
 from app.attribution.context_builder import ContextBuilder
 from app.attribution.model import DEFAULT_MODEL_PATH
+from app.auth import get_current_officer
 from app.main import app
 from app.synthetic import build_all_scenarios
 from app.synthetic.seed import seed_demo
@@ -24,10 +25,11 @@ SCN = {s.key: s for s in build_all_scenarios()}
 
 
 @pytest_asyncio.fixture
-async def client(session: AsyncSession) -> AsyncIterator[AsyncClient]:
+async def client(session: AsyncSession, test_officer) -> AsyncIterator[AsyncClient]:
     await seed_demo(session)
     await session.commit()
     app.dependency_overrides[get_context_builder] = lambda: ContextBuilder(session)
+    app.dependency_overrides[get_current_officer] = lambda: test_officer
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
         yield c

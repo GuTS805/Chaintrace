@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AuthGate } from "@/components/AuthGate";
+import { OfficerBadge } from "@/components/OfficerBadge";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -40,13 +42,12 @@ export default function RootLayout({
                 cases
               </Link>
             </nav>
-            <span className="ml-auto flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-good" />
-              SIH 26182 · crypto attribution
-            </span>
+            <OfficerBadge />
           </div>
         </header>
-        <main className="mx-auto max-w-[1400px] px-5 py-8">{children}</main>
+        <main className="mx-auto max-w-[1400px] px-5 py-8">
+          <AuthGate>{children}</AuthGate>
+        </main>
       </body>
     </html>
   );

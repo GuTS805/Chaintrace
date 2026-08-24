@@ -29,3 +29,23 @@ async def session() -> AsyncIterator[AsyncSession]:
         yield s
 
     await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def test_officer(session: AsyncSession):
+    """A persisted Officer for tests that exercise protected endpoints —
+    persisted (not just constructed) so FK-backed audit logging has a real row
+    to reference."""
+    from app.auth.security import hash_password
+    from app.models import Officer
+
+    officer = Officer(
+        username="test.officer",
+        password_hash=hash_password("test-password"),
+        full_name="Test Officer",
+        badge_no="TEST-01",
+        department="Test Department",
+    )
+    session.add(officer)
+    await session.flush()
+    return officer

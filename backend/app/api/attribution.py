@@ -11,12 +11,16 @@ from app.attribution.context_builder import ContextBuilder
 from app.attribution.engine import AttributionEngine
 from app.attribution.model import AttributionModel
 from app.attribution.risk import RiskScorer
+from app.auth import audit, get_current_officer
 from app.config import get_settings
 from app.db.session import get_session
+from app.models import Officer
 from app.schemas.attribution import AttributionResult
 from app.schemas.risk import RiskResult
 
-router = APIRouter(prefix="/wallets", tags=["attribution"])
+router = APIRouter(
+    prefix="/wallets", tags=["attribution"], dependencies=[Depends(get_current_officer)]
+)
 
 
 @lru_cache
@@ -47,9 +51,13 @@ async def attribution(
     depth: int = Query(6, ge=1, le=8),
     builder: ContextBuilder = Depends(get_context_builder),
     engine: AttributionEngine = Depends(get_engine),
+    officer: Officer = Depends(get_current_officer),
+    session: AsyncSession = Depends(get_session),
 ) -> AttributionResult:
     context = await builder.build(address, depth=depth)
-    return engine.attribute(context.candidates)
+    result = engine.attribute(context.candidates)
+    await audit.record(session, officer, "WALLET_QUERY", target=address)
+    return result
 
 
 @router.get("/{address}/risk", response_model=RiskResult)

@@ -11,7 +11,9 @@ from app.api.cases import get_case
 from app.attribution.context_builder import ContextBuilder
 from app.attribution.engine import AttributionEngine
 from app.attribution.risk import RiskScorer
+from app.auth import audit, get_current_officer
 from app.db.session import get_session
+from app.models import Officer
 from app.report import (
     build_case_report,
     build_disclosure_request,
@@ -19,7 +21,7 @@ from app.report import (
     disclosure_filename,
 )
 
-router = APIRouter(tags=["report"])
+router = APIRouter(tags=["report"], dependencies=[Depends(get_current_officer)])
 
 
 def _pdf(content: bytes, filename: str) -> Response:
@@ -36,11 +38,14 @@ async def wallet_report(
     depth: int = Query(6, ge=1, le=8),
     builder: ContextBuilder = Depends(get_context_builder),
     engine: AttributionEngine = Depends(get_engine),
+    officer: Officer = Depends(get_current_officer),
+    session: AsyncSession = Depends(get_session),
 ) -> Response:
     context = await builder.build(address, depth=depth)
     attribution = engine.attribute(context.candidates)
     risk = RiskScorer().score(context)
     pdf = build_wallet_report(address, attribution, risk, context.forward_graph)
+    await audit.record(session, officer, "WALLET_REPORT", target=address)
     return _pdf(pdf, f"wallet-{address[:10]}.pdf")
 
 
@@ -50,6 +55,8 @@ async def disclosure_request(
     depth: int = Query(6, ge=1, le=8),
     builder: ContextBuilder = Depends(get_context_builder),
     engine: AttributionEngine = Depends(get_engine),
+    officer: Officer = Depends(get_current_officer),
+    session: AsyncSession = Depends(get_session),
 ) -> Response:
     """SAHYOG-Portal lawful disclosure-request draft for the attributed VASP."""
     context = await builder.build(address, depth=depth)
@@ -71,15 +78,29 @@ async def disclosure_request(
             if h not in tx_hashes:
                 tx_hashes.append(h)
     pdf = build_disclosure_request(
-        address.lower(), attribution, risk, hops=hops, tx_hashes=tx_hashes[:12]
+        address.lower(),
+        attribution,
+        risk,
+        hops=hops,
+        tx_hashes=tx_hashes[:12],
+        officer_name=f"{officer.full_name} ({officer.badge_no})"
+        if officer.badge_no
+        else officer.full_name,
+        officer_department=officer.department,
+    )
+    await audit.record(
+        session, officer, "DISCLOSURE_REQUEST", target=address, detail=top.vasp_name
     )
     return _pdf(pdf, disclosure_filename(address.lower(), top.vasp_name))
 
 
 @router.get("/cases/{case_id}/report")
 async def case_report(
-    case_id: int, session: AsyncSession = Depends(get_session)
+    case_id: int,
+    officer: Officer = Depends(get_current_officer),
+    session: AsyncSession = Depends(get_session),
 ) -> Response:
     detail = await get_case(case_id, session)
     pdf = build_case_report(detail)
+    await audit.record(session, officer, "CASE_REPORT", target=str(case_id))
     return _pdf(pdf, f"case-{case_id}.pdf")

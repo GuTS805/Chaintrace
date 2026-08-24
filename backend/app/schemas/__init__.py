@@ -5,6 +5,7 @@ from app.schemas.attribution import (
     Evidence,
     VaspCandidate,
 )
+from app.schemas.auth import LoginRequest, LoginResponse, OfficerOut
 from app.schemas.graph import (
     GraphEdge,
     GraphNode,
@@ -21,6 +22,9 @@ __all__ = [
     "GraphNode",
     "GraphResult",
     "LabeledPath",
+    "LoginRequest",
+    "LoginResponse",
+    "OfficerOut",
     "PruneInfo",
     "RiskIndicator",
     "RiskLevel",

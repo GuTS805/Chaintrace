@@ -79,6 +79,9 @@ Push-Location $backend
 Write-Step "Seeding demo scenarios (offline)"
 & $venvPy -m app.synthetic.seed | Out-Null
 
+Write-Step "Seeding demo officer login"
+& $venvPy -m app.auth.seed_officer
+
 Write-Step "Importing real on-chain snapshots (offline replay)"
 & $venvPy -m app.ingest.chain_import --file data/realchain/kraken_depositor_216b7523.json | Out-Null
 & $venvPy -m app.ingest.chain_import --file data/realchain/binance_depositor_5b271663.json | Out-Null
@@ -133,6 +136,7 @@ if ($ready) {
   Write-Host "  READY" -ForegroundColor Green
   Write-Host "  Frontend : http://localhost:3000" -ForegroundColor Green
   Write-Host "  API docs : http://localhost:8000/docs" -ForegroundColor Green
+  Write-Host "  Login    : i4c.analyst / Chain@2026" -ForegroundColor Green
   Write-Host "  Stop     : .\run.ps1 -Stop" -ForegroundColor Green
   Write-Host "==============================================`n" -ForegroundColor Green
 } else {

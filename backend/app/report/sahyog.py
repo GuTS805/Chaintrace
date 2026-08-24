@@ -52,10 +52,28 @@ def disclosure_sections(
     tx_hashes: list[str],
     risk_level: str,
     risk_notes: list[str],
+    *,
+    officer_name: str | None = None,
+    officer_department: str | None = None,
 ) -> list[tuple[str, list[str]]]:
-    """Ordered (heading, body_lines) for a SAHYOG disclosure-request draft."""
+    """Ordered (heading, body_lines) for a SAHYOG disclosure-request draft.
+
+    `officer_name`/`officer_department` come from the authenticated session that
+    requested the report; when absent the field stays an explicit placeholder for
+    manual completion, same as every other field a signing officer must supply.
+    """
     hop_word = "hop" if hops == 1 else "hops"
     confidence_pct = f"{probability * 100:.1f}%"
+    officer_line = (
+        f"Investigating Officer (Name & Designation): {officer_name}"
+        if officer_name
+        else "Investigating Officer (Name & Designation): [Insert Officer Details]"
+    )
+    lea_line = (
+        f"Requesting Law Enforcement Agency: {officer_department}"
+        if officer_department
+        else "Requesting Law Enforcement Agency: [Insert LEA Name]"
+    )
 
     return [
         (
@@ -75,8 +93,8 @@ def disclosure_sections(
                 "Cyber & Information Security (CIS) Division",
                 "Ministry of Home Affairs, Government of India",
                 "Channel of submission: SAHYOG Portal",
-                "Requesting Law Enforcement Agency: [Insert LEA Name]",
-                "Investigating Officer (Name & Designation): [Insert Officer Details]",
+                lea_line,
+                officer_line,
                 "Case / FIR No.: [Insert Case or FIR Number]",
                 "Date of Request: [Insert Date]",
                 "Internal Reference No.: [Insert Reference Number]",
@@ -176,6 +194,8 @@ def build_disclosure_request(
     *,
     hops: int,
     tx_hashes: list[str],
+    officer_name: str | None = None,
+    officer_department: str | None = None,
     generated_at: datetime | None = None,
 ) -> bytes:
     if not attribution.candidates:
@@ -208,6 +228,8 @@ def build_disclosure_request(
         risk_level=risk.level,
         risk_notes=[i.description for i in risk.indicators]
         + [t.description for t in risk.typology_tags],
+        officer_name=officer_name,
+        officer_department=officer_department,
     )
 
     buf = BytesIO()
