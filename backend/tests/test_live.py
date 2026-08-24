@@ -13,6 +13,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import app.ingest.live as live
+from app.auth import get_current_officer
 from app.db.session import get_session
 from app.ingest.labels import ingest_all
 from app.ingest.live import ensure_ingested
@@ -55,11 +56,12 @@ async def test_ensure_ingested_fetches_then_caches(
 
 @pytest_asyncio.fixture
 async def client(
-    session: AsyncSession, _mock_fetch: None
+    session: AsyncSession, _mock_fetch: None, test_officer
 ) -> AsyncIterator[AsyncClient]:
     await ingest_all(session)
     await session.commit()
     app.dependency_overrides[get_session] = lambda: session
+    app.dependency_overrides[get_current_officer] = lambda: test_officer
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
         yield c

@@ -12,6 +12,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.attribution.cluster_builder import rebuild_cluster_for_vasp
+from app.auth import get_current_officer
 from app.db.session import get_session
 from app.ingest.chain_import import import_provider_txs
 from app.ingest.labels import ingest_all
@@ -51,7 +52,7 @@ def _sweep_txs() -> list[ProviderTx]:
 
 
 @pytest_asyncio.fixture
-async def client(session: AsyncSession) -> AsyncIterator[AsyncClient]:
+async def client(session: AsyncSession, test_officer) -> AsyncIterator[AsyncClient]:
     await ingest_all(session)
     await import_provider_txs(session, _sweep_txs())
     await session.commit()
@@ -59,6 +60,7 @@ async def client(session: AsyncSession) -> AsyncIterator[AsyncClient]:
     await session.commit()
 
     app.dependency_overrides[get_session] = lambda: session
+    app.dependency_overrides[get_current_officer] = lambda: test_officer
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
         yield c

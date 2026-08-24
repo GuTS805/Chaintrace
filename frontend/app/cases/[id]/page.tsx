@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { CaseDetail, FindingSeverity } from "@/lib/types";
+import { PdfButton } from "@/components/PdfButton";
 import { Panel, Pill } from "@/components/ui";
 import { fmtTime, shortAddr } from "@/lib/format";
 
@@ -85,14 +86,12 @@ export default function CaseDetailPage({
         </Link>
         <h1 className="text-base font-semibold">{detail.name}</h1>
         <Pill tone="accent">{detail.status}</Pill>
-        <a
-          href={`${api.base}/cases/${caseId}/report`}
-          target="_blank"
-          rel="noreferrer"
+        <PdfButton
+          path={`/cases/${caseId}/report`}
           className="ml-auto rounded border border-border px-2 py-1 text-xs text-muted hover:border-accent hover:text-accent"
         >
           ↓ report (PDF)
-        </a>
+        </PdfButton>
         <button
           onClick={remove}
           className="rounded border border-bad/40 px-2 py-1 text-xs text-bad hover:bg-bad/10"

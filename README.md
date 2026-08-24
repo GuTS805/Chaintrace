@@ -23,6 +23,30 @@ every wallet.
 See **[RUNBOOK.md](RUNBOOK.md)** for the 90-second judge walkthrough
 (unknown wallet → graph → attribution → why → risk → case → PDF).
 
+## Officer login (authentication)
+
+Every wallet/case/report/live-trace endpoint requires an authenticated officer —
+there is no unauthenticated access to investigation data. `run.ps1` seeds a demo
+account automatically:
+
+```
+username: i4c.analyst
+password: Chain@2026
+```
+
+- Login issues a JWT (`POST /auth/login`); the frontend attaches it as a Bearer
+  token and redirects to `/login` if it's missing or a request comes back 401.
+- Every wallet query, report, disclosure request, and live-trace is written to an
+  **audit log** (`AuditLog`: officer, action, target, timestamp) — who looked up
+  what, and when, which real investigative use requires.
+- The SAHYOG disclosure request auto-fills the **signed-in officer's name and
+  badge number** instead of a placeholder.
+- Passwords are hashed with salted PBKDF2 (stdlib, no native dependency). The
+  default `JWT_SECRET` is a demo fixture — override it via the environment for
+  any non-demo deployment.
+- Add more officers via `app/auth/seed_officer.py` as a pattern, or the ORM
+  directly; there's no self-signup UI (an investigative tool doesn't want one).
+
 ## Real-chain ready
 
 The pipeline consumes the standard **Etherscan `txlist` schema**, so traversal +

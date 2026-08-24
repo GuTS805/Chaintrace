@@ -9,6 +9,7 @@ import { GraphView } from "@/components/GraphView";
 import { AddToCase } from "@/components/AddToCase";
 import { WalletSearch } from "@/components/WalletSearch";
 import { LiveTrace } from "@/components/LiveTrace";
+import { PdfButton } from "@/components/PdfButton";
 import { Panel } from "@/components/ui";
 
 export default function WalletPage({
@@ -71,25 +72,21 @@ export default function WalletPage({
             {chain}
           </span>
         </h1>
-        <a
-          href={`${api.base}/wallets/${address}/report`}
-          target="_blank"
-          rel="noreferrer"
+        <PdfButton
+          path={`/wallets/${address}/report`}
           className="rounded border border-border px-3 py-2 text-xs text-muted hover:border-accent hover:text-accent"
         >
           ↓ report (PDF)
-        </a>
+        </PdfButton>
         {attribution &&
           !attribution.insufficient_evidence &&
           attribution.candidates.length > 0 && (
-            <a
-              href={`${api.base}/wallets/${address}/disclosure-request`}
-              target="_blank"
-              rel="noreferrer"
+            <PdfButton
+              path={`/wallets/${address}/disclosure-request`}
               className="rounded border border-accent/50 bg-accent/10 px-3 py-2 text-xs text-accent hover:bg-accent/20"
             >
               ⚖ disclosure request (SAHYOG)
-            </a>
+            </PdfButton>
           )}
         <div className="ml-auto w-full max-w-md">
           <WalletSearch />

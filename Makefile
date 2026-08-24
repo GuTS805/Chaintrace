@@ -48,6 +48,7 @@ ingest-labels:
 
 seed-demo:
 	cd $(BACKEND) && $(PY) -m app.synthetic.seed
+	cd $(BACKEND) && $(PY) -m app.auth.seed_officer
 
 train:
 	cd $(BACKEND) && $(PY) -m app.attribution.train

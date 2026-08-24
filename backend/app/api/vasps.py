@@ -7,11 +7,14 @@ from collections.abc import AsyncIterator
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth import get_current_officer
 from app.db.session import get_session
 from app.repositories.cluster_repository import ClusterRepository
 from app.schemas.cluster import ClusterOut
 
-router = APIRouter(prefix="/vasps", tags=["clusters"])
+router = APIRouter(
+    prefix="/vasps", tags=["clusters"], dependencies=[Depends(get_current_officer)]
+)
 
 
 async def get_cluster_repository(

@@ -8,13 +8,15 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth import get_current_officer
 from app.db.session import get_session
 from app.main import app
 
 
 @pytest_asyncio.fixture
-async def client(session: AsyncSession) -> AsyncIterator[AsyncClient]:
+async def client(session: AsyncSession, test_officer) -> AsyncIterator[AsyncClient]:
     app.dependency_overrides[get_session] = lambda: session
+    app.dependency_overrides[get_current_officer] = lambda: test_officer
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
         yield c

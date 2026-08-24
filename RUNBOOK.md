@@ -21,14 +21,28 @@ Stop everything: `.\run.ps1 -Stop`
 > First run installs dependencies (a few minutes). After that it's seconds.
 > Needs Python 3.11+ and Node.js on the machine.
 
+The browser opens to a **sign-in screen** — the platform requires an authenticated
+officer for every wallet/case/report action (no anonymous access). Log in with the
+seeded demo account:
+
+```
+username: i4c.analyst
+password: Chain@2026
+```
+
+*"This isn't a toy — every lookup is tied to a signed-in officer and written to
+an audit log, exactly like a real investigative system would require."*
+
 ---
 
 ## 2. The 90-second demo flow
 
 ```
-Unknown wallet → Investigate → Graph → Attribution → WHY? → Risk → Case → PDF
+Login → Unknown wallet → Investigate → Graph → Attribution → WHY? → Risk → Case → PDF
 ```
 
+0. **Login** — `i4c.analyst` / `Chain@2026` (see above). The header shows the
+   signed-in officer's name and badge for the rest of the session.
 1. **Unknown wallet** — On the home page, open **CASE-01 · Ransomware → exchange**
    (or paste its address into `trace>`).
 2. **Investigate** — The wallet page loads attribution, risk, and the graph together.
@@ -122,6 +136,10 @@ actually moves through."*
   `typology_tags` (e.g. layering through a mixer) and `flagged`/`flag_reason`, so
   a case queue or watchlist can surface high-risk wallets without an analyst
   reading every report.
+- **Every action is auditable.** Officer login is required end-to-end; every
+  wallet query, report, disclosure request, and live-trace writes an audit-log
+  row (who, what, when) — necessary for a tool whose output can trigger an asset
+  freeze.
 
 ---
 
@@ -133,6 +151,11 @@ actually moves through."*
 - **Nothing starts** → confirm `python --version` (3.11+) and `npm --version` work,
   then run `.\run.ps1 -Fresh`.
 - **Re-seed / reset data** → delete `backend\chaintrace.db` and run `.\run.ps1`.
+- **Login rejected** → confirm you're using `i4c.analyst` / `Chain@2026` exactly
+  (case-sensitive). If the account is missing, run
+  `python -m app.auth.seed_officer` in `backend\`.
+- **Everything 401s after a while** → the session token expired (8-hour default);
+  log in again.
 
 ---
 

@@ -8,11 +8,14 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_graph_repository
+from app.auth import get_current_officer
 from app.repositories.graph_repository import Direction, TraversalBounds
 from app.repositories.sql_graph_repository import SqlGraphRepository
 from app.schemas.graph import GraphResult, LabeledPath
 
-router = APIRouter(prefix="/wallets", tags=["graph"])
+router = APIRouter(
+    prefix="/wallets", tags=["graph"], dependencies=[Depends(get_current_officer)]
+)
 
 
 def _bounds(

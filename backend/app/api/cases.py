@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth import get_current_officer
 from app.db.session import get_session
 from app.models import Case, Finding
 from app.schemas.case import (
@@ -16,7 +17,9 @@ from app.schemas.case import (
     FindingOut,
 )
 
-router = APIRouter(prefix="/cases", tags=["cases"])
+router = APIRouter(
+    prefix="/cases", tags=["cases"], dependencies=[Depends(get_current_officer)]
+)
 
 
 async def _get_case(session: AsyncSession, case_id: int) -> Case:
