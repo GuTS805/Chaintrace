@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.providers.resilience import classify_httpx_error
+
 
 async def _fetch(
     action: str, address: str, base_url: str, limit: int, timeout: float
@@ -23,11 +25,14 @@ async def _fetch(
         "page": 1,
         "offset": limit,
     }
-    async with httpx.AsyncClient(timeout=timeout) as client:
-        resp = await client.get(base_url, params=params)
-        resp.raise_for_status()
-        data: dict[str, Any] = resp.json()
-        return data
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(base_url, params=params)
+            resp.raise_for_status()
+            data: dict[str, Any] = resp.json()
+            return data
+    except httpx.HTTPError as exc:
+        raise classify_httpx_error(exc) from exc
 
 
 async def fetch_blockscout_txlist(

@@ -34,10 +34,31 @@ def _payload() -> dict[str, Any]:
 
 @pytest.fixture
 def _mock_fetch(monkeypatch: pytest.MonkeyPatch) -> None:
-    async def fake(address: str, *, base_url: str, limit: int = 100, timeout: float = 20.0):
+    async def fake_txlist(address: str, *, base_url: str, limit: int = 100, timeout: float = 20.0):
         return _payload()
 
-    monkeypatch.setattr(live, "fetch_blockscout_txlist", fake)
+    async def fake_tokentx(address: str, *, base_url: str, limit: int = 100, timeout: float = 20.0):
+        return {"result": []}
+
+    monkeypatch.setattr(live, "fetch_blockscout_txlist", fake_txlist)
+    monkeypatch.setattr(live, "fetch_blockscout_tokentx", fake_tokentx)
+
+
+@pytest.fixture
+def _mock_fetch_tokentx_degraded(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Native txlist succeeds; the token-transfer call fails every time (even
+    after retries) — the case the old silent `except Exception: pass` used to
+    hide from the caller entirely."""
+    from app.providers.resilience import ProviderUnavailable
+
+    async def fake_txlist(address: str, *, base_url: str, limit: int = 100, timeout: float = 20.0):
+        return _payload()
+
+    async def fake_tokentx_fails(address: str, *, base_url: str, limit: int = 100, timeout: float = 20.0):
+        raise ProviderUnavailable("simulated Blockscout 503")
+
+    monkeypatch.setattr(live, "fetch_blockscout_txlist", fake_txlist)
+    monkeypatch.setattr(live, "fetch_blockscout_tokentx", fake_tokentx_fails)
 
 
 async def test_ensure_ingested_fetches_then_caches(
@@ -52,6 +73,26 @@ async def test_ensure_ingested_fetches_then_caches(
     assert second.source == "cache"
     assert second.imported_transactions == 0
     assert second.total_transactions == first.total_transactions
+
+
+async def test_degraded_tokentx_surfaces_a_warning_not_silence(
+    session: AsyncSession, _mock_fetch_tokentx_degraded: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Native ETH still imports (the primary data), but the caller must be
+    told token data is missing rather than getting a silently-incomplete
+    'success' with no indication anything went wrong."""
+    from app.config import get_settings
+
+    fast_settings = get_settings().model_copy(
+        update={"provider_max_retries": 1, "provider_retry_base_delay": 0.001}
+    )
+    monkeypatch.setattr(live, "get_settings", lambda: fast_settings)
+
+    result = await ensure_ingested(session, REAL_ADDR)
+    assert result.source == "blockscout"
+    assert result.imported_transactions >= 10  # native transfers still came through
+    assert result.warnings
+    assert "token" in result.warnings[0].lower()
 
 
 @pytest_asyncio.fixture

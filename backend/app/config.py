@@ -73,6 +73,20 @@ class Settings(BaseSettings):
         default=20.0, alias="TRAVERSAL_TIMEOUT_SECONDS"
     )
 
+    # Provider resilience (retry + circuit breaker around Blockscout/TronGrid
+    # calls). A provider failure must never be reported as an attribution or
+    # risk result — see app/providers/resilience.py.
+    provider_max_retries: int = Field(default=2, alias="PROVIDER_MAX_RETRIES")
+    provider_retry_base_delay: float = Field(
+        default=0.5, alias="PROVIDER_RETRY_BASE_DELAY"
+    )
+    provider_circuit_failure_threshold: int = Field(
+        default=3, alias="PROVIDER_CIRCUIT_FAILURE_THRESHOLD"
+    )
+    provider_circuit_cooldown_seconds: float = Field(
+        default=30.0, alias="PROVIDER_CIRCUIT_COOLDOWN_SECONDS"
+    )
+
     # App.
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     env: str = Field(default="development", alias="ENV")
