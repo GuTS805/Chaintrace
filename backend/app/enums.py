@@ -54,6 +54,8 @@ class TypologyCategory(StrEnum):
     PEEL_CHAIN = "PEEL_CHAIN"
     LAYERING = "LAYERING"
     SMURFING = "SMURFING"
+    BRIDGE_HOP = "BRIDGE_HOP"
+    MIXER_USE = "MIXER_USE"
 
 
 class SignalType(StrEnum):

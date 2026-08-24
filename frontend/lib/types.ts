@@ -41,7 +41,12 @@ export interface RiskIndicator {
   contribution: number;
 }
 
-export type TypologyCategory = "PEEL_CHAIN" | "LAYERING" | "SMURFING";
+export type TypologyCategory =
+  | "PEEL_CHAIN"
+  | "LAYERING"
+  | "SMURFING"
+  | "BRIDGE_HOP"
+  | "MIXER_USE";
 
 export interface TypologyTag {
   category: TypologyCategory;
