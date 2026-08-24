@@ -21,6 +21,7 @@ from decimal import Decimal
 from typing import Any
 
 from app.providers.base import ProviderTx, normalize_address
+from app.providers.resilience import classify_httpx_error
 
 # Tron base58 addresses start with "T" and are 34 characters long.
 TRON_ADDRESS_PREFIX = "T"
@@ -54,11 +55,14 @@ async def fetch_trongrid_trc20(
     if contract_address:
         params["contract_address"] = contract_address
     url = f"{base_url.rstrip('/')}/v1/accounts/{address}/transactions/trc20"
-    async with httpx.AsyncClient(timeout=timeout) as client:
-        resp = await client.get(url, params=params)
-        resp.raise_for_status()
-        data: dict[str, Any] = resp.json()
-        return data
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data: dict[str, Any] = resp.json()
+            return data
+    except httpx.HTTPError as exc:
+        raise classify_httpx_error(exc) from exc
 
 
 def parse_trongrid_trc20(payload: dict[str, Any]) -> list[ProviderTx]:
