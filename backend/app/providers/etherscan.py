@@ -16,8 +16,15 @@ from typing import Any
 from app.providers.base import ProviderTx
 
 
-def parse_etherscan_txlist(payload: dict[str, Any]) -> list[ProviderTx]:
-    """Normalize an Etherscan ``txlist`` JSON payload into ProviderTx rows."""
+def parse_etherscan_txlist(
+    payload: dict[str, Any], *, native_asset: str = "ETH"
+) -> list[ProviderTx]:
+    """Normalize an Etherscan ``txlist`` JSON payload into ProviderTx rows.
+
+    ``native_asset`` is the chain's gas/native token symbol (ETH, BNB, POL/MATIC,
+    ...) — the payload schema itself is identical across Blockscout-compatible
+    EVM chains, only the native currency name differs.
+    """
     results = payload.get("result", [])
     if not isinstance(results, list):
         raise ValueError("Unexpected Etherscan payload: 'result' is not a list")
@@ -39,7 +46,7 @@ def parse_etherscan_txlist(payload: dict[str, Any]) -> list[ProviderTx]:
                 value_wei=Decimal(str(item.get("value", "0"))),
                 gas_used=int(item["gasUsed"]) if item.get("gasUsed") else None,
                 gas_price_wei=Decimal(str(item["gasPrice"])) if item.get("gasPrice") else None,
-                asset="ETH",
+                asset=native_asset,
             )
         )
     return txs

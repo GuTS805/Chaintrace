@@ -94,11 +94,16 @@ async def import_provider_txs(
     return stats
 
 
+# Native gas-token symbol per EVM chain — the Etherscan/Blockscout txlist
+# schema itself is identical across these chains.
+NATIVE_ASSET = {"ethereum": "ETH", "polygon": "POL"}
+
+
 async def _from_file(path: Path, chain: str) -> list[ProviderTx]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if chain == "tron":
         return parse_trongrid_trc20(payload)
-    return parse_etherscan_txlist(payload)
+    return parse_etherscan_txlist(payload, native_asset=NATIVE_ASSET.get(chain, "ETH"))
 
 
 async def _from_live(address: str, save: Path | None, chain: str) -> list[ProviderTx]:
@@ -114,6 +119,11 @@ async def _from_live(address: str, save: Path | None, chain: str) -> list[Provid
             log.info("snapshot_saved", path=str(save), count=len(payload.get("data", [])))
         return parse_trongrid_trc20(payload)
 
+    if chain != "ethereum":
+        raise SystemExit(
+            f"--chain {chain} has no keyed Etherscan-style live endpoint; use the "
+            "keyless Blockscout live-trace API instead, or fetch a snapshot manually."
+        )
     api_key = get_settings().etherscan_api_key
     if not api_key:
         raise SystemExit("ETHERSCAN_API_KEY is not set; cannot fetch live data.")
@@ -135,9 +145,9 @@ async def _main() -> None:
     parser.add_argument("--save", type=Path, help="Save a live fetch to this JSON path.")
     parser.add_argument(
         "--chain",
-        choices=["ethereum", "tron"],
+        choices=["ethereum", "polygon", "tron"],
         default=None,
-        help="Defaults to auto-detect from --address (T… = tron); required with --file.",
+        help="Defaults to auto-detect from --address (T… = tron, else ethereum); required with --file.",
     )
     args = parser.parse_args()
 

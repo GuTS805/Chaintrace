@@ -22,6 +22,8 @@ const ASSET_DECIMALS: Record<string, number> = {
   USDC: 6,
   BUSD: 18,
   TRX: 6,
+  POL: 18,
+  MATIC: 18, // legacy symbol, some indexers still label Polygon's native asset this way
 };
 
 export function assetAmount(value: string, asset: string): number {
