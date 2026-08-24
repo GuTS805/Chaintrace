@@ -18,11 +18,11 @@ import { Eyebrow, Pill, Tile } from "./ui";
 type Role = "root" | "risk" | "bridge" | "vasp" | "plain";
 
 const ROLE_COLOR: Record<Role, string> = {
-  root: "#6366f1",
-  risk: "#ef4444",
-  bridge: "#22d3ee",
-  vasp: "#22c55e",
-  plain: "#5b6472",
+  root: "#6C5DD3",
+  risk: "#EF4444",
+  bridge: "#0EA5E9",
+  vasp: "#1E8A5E",
+  plain: "#9B9BB4",
 };
 
 function roleOf(n: GraphNode): Role {
@@ -34,12 +34,11 @@ function roleOf(n: GraphNode): Role {
   return "plain";
 }
 
-// Distinct deposit clusters (same cluster_id -> swept into the same hot
-// wallet) get a shared subtle background tint so they read as a group.
-const CLUSTER_TINTS = ["#121319", "#141219", "#0f1613", "#171213", "#0f1517", "#131017"];
+// Light pastel tints for cluster grouping
+const CLUSTER_TINTS = ["#F4F1FE", "#FDF1F6", "#F0F9F4", "#FEF3E2", "#EFF6FF", "#F5F0FF"];
 
 function clusterTint(clusterId: number | null | undefined): string {
-  if (clusterId == null) return "#0e0e0e";
+  if (clusterId == null) return "#FFFFFF";
   return CLUSTER_TINTS[clusterId % CLUSTER_TINTS.length];
 }
 
@@ -48,14 +47,16 @@ function nodeStyle(role: Role, clusterId: number | null | undefined, isHighlight
   const special = role !== "plain";
   return {
     background: clusterTint(clusterId),
-    border: `${special || isHighlighted ? 1.5 : 1}px solid ${isHighlighted ? "#6366f1" : color}`,
-    borderRadius: 6,
-    color: "#f5f5f5",
+    border: `${special || isHighlighted ? 2 : 1}px solid ${isHighlighted ? "#6C5DD3" : color}`,
+    borderRadius: 12,
+    color: "#2B2B43",
     fontSize: 11,
-    fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
-    padding: "6px 10px",
+    fontFamily: "var(--font-jetbrains-mono), ui-monospace, monospace",
+    padding: "8px 12px",
     width: 178,
-    boxShadow: isHighlighted ? "0 0 0 3px rgba(99,102,241,0.2)" : "none",
+    boxShadow: isHighlighted
+      ? "0 0 0 4px rgba(108,93,211,0.15)"
+      : "0 4px 12px -4px rgba(108,93,211,0.08)",
     transition: "box-shadow 150ms ease, border-color 150ms ease",
   };
 }
@@ -98,7 +99,7 @@ export function GraphView({
             <div className="relative">
               {flagged && (
                 <span
-                  className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-bad"
+                  className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-bad-text"
                   title="Risk indicator on this address"
                 />
               )}
@@ -107,14 +108,14 @@ export function GraphView({
                 <div style={{ color: ROLE_COLOR[role], marginTop: 2, fontWeight: 600 }}>{title}</div>
               )}
               {n.cluster_id != null && (
-                <div style={{ color: "#71717a", marginTop: 2, fontSize: 9 }}>
+                <div style={{ color: "#9B9BB4", marginTop: 2, fontSize: 9 }}>
                   cluster #{n.cluster_id}
                 </div>
               )}
             </div>
           ),
         },
-        className: isHl ? "animate-pulse-ring rounded-lg" : undefined,
+        className: isHl ? "animate-pulse-ring rounded-xl" : undefined,
         style: nodeStyle(role, n.cluster_id, isHl),
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
@@ -131,14 +132,14 @@ export function GraphView({
       const width = Math.max(1, Math.min(4, 1 + Math.log10(1 + amt)));
       const toVasp = roleByAddr.get(e.to_address) === "vasp";
       const isHl = highlightedTx.has(e.tx_hash);
-      const stroke = isHl ? "#6366f1" : toVasp ? "#22c55e" : "#3a4150";
+      const stroke = isHl ? "#6C5DD3" : toVasp ? "#1E8A5E" : "#D5D0F0";
       rfEdges.push({
         id: e.tx_hash,
         source: e.from_address,
         target: e.to_address,
         label: formatAsset(e.value_wei, e.asset),
-        labelStyle: { fill: isHl ? "#a5b4fc" : "#a1a1aa", fontSize: 9, fontWeight: isHl ? 600 : 400 },
-        labelBgStyle: { fill: "#050505", fillOpacity: 0.85 },
+        labelStyle: { fill: isHl ? "#6C5DD3" : "#9B9BB4", fontSize: 9, fontWeight: isHl ? 600 : 400 },
+        labelBgStyle: { fill: "#FFFFFF", fillOpacity: 0.9 },
         style: { stroke, strokeWidth: isHl ? width + 1.5 : width },
         className: isHl ? "trace-edge" : undefined,
         markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 16, height: 16 },
@@ -159,7 +160,7 @@ export function GraphView({
           <Pill tone="muted">{graph.prune.nodes_visited} nodes</Pill>
         )}
       </div>
-      <div className="h-[640px] w-full overflow-hidden rounded-md">
+      <div className="h-[640px] w-full overflow-hidden rounded-card">
         {graph.nodes.length === 0 ? (
           <p className="p-6 text-sm text-muted">No outgoing activity within bounds.</p>
         ) : (
@@ -173,25 +174,28 @@ export function GraphView({
             minZoom={0.2}
             proOptions={{ hideAttribution: true }}
           >
-            <Background color="#161616" gap={28} />
-            <Controls showInteractive={false} className="!border-border !bg-panel [&_button]:!border-border [&_button]:!bg-panel [&_button]:!fill-muted [&_button]:hover:!bg-panel2" />
+            <Background color="#E7E4F5" gap={28} />
+            <Controls
+              showInteractive={false}
+              className="!rounded-btn !border-soft-border !bg-white !shadow-card [&_button]:!border-soft-border [&_button]:!bg-white [&_button]:!fill-muted [&_button]:hover:!bg-surface-lavender"
+            />
             <MiniMap
               pannable
               zoomable
               nodeColor={(n) => {
                 const gn = graph.nodes.find((x) => x.address === n.id);
-                return gn ? ROLE_COLOR[roleOf(gn)] : "#5b6472";
+                return gn ? ROLE_COLOR[roleOf(gn)] : "#9B9BB4";
               }}
-              maskColor="rgba(5,5,5,0.75)"
-              style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)" }}
+              maskColor="rgba(255,255,255,0.75)"
+              style={{ background: "#FFFFFF", border: "1px solid #E7E4F5", borderRadius: 12 }}
             />
           </ReactFlow>
         )}
       </div>
-      <p className="pt-4 text-[11px] text-dim">
-        Click a node to inspect inline · root <span className="text-accent">indigo</span> · attributed{" "}
-        <span className="text-good">green</span> · mixer <span className="text-bad">red</span> · bridge{" "}
-        <span style={{ color: "#22d3ee" }}>cyan</span> · hovering evidence traces the matching edge here
+      <p className="pt-4 text-[11px] text-muted">
+        Click a node to inspect inline · root <span className="text-primary">violet</span> · attributed{" "}
+        <span className="text-good-text">green</span> · mixer <span className="text-bad-text">red</span> · bridge{" "}
+        <span style={{ color: "#0EA5E9" }}>blue</span> · hovering evidence traces the matching edge here
       </p>
     </Tile>
   );

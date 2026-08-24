@@ -20,7 +20,7 @@ export function OfficerBadge() {
   if (!officer) {
     return (
       <span className="ml-auto flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-good" />
+        <span className="h-2 w-2 animate-pulse rounded-full bg-[#34C77B]" />
         SIH 26182 · crypto attribution
       </span>
     );
@@ -32,15 +32,19 @@ export function OfficerBadge() {
   }
 
   return (
-    <span className="ml-auto flex shrink-0 items-center gap-3 text-[10px] uppercase tracking-widest text-muted">
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-good" />
-      <span className="hidden whitespace-nowrap normal-case tracking-normal text-text sm:inline">
+    <span className="ml-auto flex shrink-0 items-center gap-3 text-[12px]">
+      <span className="h-2 w-2 shrink-0 rounded-full bg-[#34C77B]" />
+      <span className="hidden whitespace-nowrap font-medium text-heading sm:inline">
         {officer.full_name}
       </span>
-      {officer.badge_no && <span className="hidden sm:inline">{officer.badge_no}</span>}
+      {officer.badge_no && (
+        <span className="hidden font-mono text-[11px] text-muted sm:inline">
+          {officer.badge_no}
+        </span>
+      )}
       <button
         onClick={logout}
-        className="rounded-md border border-border px-2.5 py-1 normal-case tracking-normal transition-colors hover:border-borderStrong hover:text-text"
+        className="rounded-btn border border-soft-border px-3 py-1.5 text-[11px] text-muted transition-all hover:bg-surface-lavender hover:text-heading"
       >
         Logout
       </button>

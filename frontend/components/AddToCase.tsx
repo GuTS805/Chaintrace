@@ -54,14 +54,14 @@ export function AddToCase({
   return (
     <Tile title="Pin to case">
       {cases.length === 0 ? (
-        <p className="text-[13px] text-muted">No cases yet. Create one under “cases”.</p>
+        <p className="text-[13px] text-muted">No cases yet. Create one under &ldquo;cases&rdquo;.</p>
       ) : (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <select
               value={selected}
               onChange={(e) => setSelected(e.target.value)}
-              className="flex-1 rounded-md border border-border bg-panel2 px-2.5 py-2 text-[13px] outline-none focus:border-accent"
+              className="flex-1 rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-[13px] text-heading outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft"
             >
               {cases.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -78,7 +78,7 @@ export function AddToCase({
             onChange={(e) => setNote(e.target.value)}
             placeholder={`Why does this matter? (default: "${defaultSummary}")`}
             rows={2}
-            className="w-full resize-none rounded-md border border-border bg-panel2 px-2.5 py-2 text-[13px] text-text outline-none placeholder:text-dim focus:border-accent"
+            className="w-full resize-none rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-[13px] text-heading outline-none placeholder:text-muted transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft"
           />
         </div>
       )}

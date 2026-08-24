@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cases Workspace - ChainTrace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&amp;family=JetBrains+Mono:wght@500&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "status-info-bg": "#E9E5FB",
+                        "on-secondary-fixed-variant": "#6c3452",
+                        "surface": "#fcf8ff",
+                        "bg-gradient-mid": "#F7F3FA",
+                        "text-mono": "#7C6FD9",
+                        "on-primary-fixed-variant": "#4331a8",
+                        "primary": "#5343b9",
+                        "surface-container-high": "#ebe6f1",
+                        "error-container": "#ffdad6",
+                        "status-success-text": "#1E8A5E",
+                        "secondary-fixed-dim": "#fcb0d5",
+                        "tertiary-fixed": "#ffddba",
+                        "primary-container": "#6c5dd3",
+                        "primary-fixed": "#e5deff",
+                        "surface-tint-lavender": "#F4F1FE",
+                        "background": "#fcf8ff",
+                        "on-tertiary-fixed": "#2b1700",
+                        "on-primary-container": "#f5f0ff",
+                        "status-warning-bg": "#FDEEDC",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "secondary-fixed": "#ffd8e8",
+                        "tertiary-container": "#9e6100",
+                        "inverse-primary": "#c7bfff",
+                        "on-secondary-container": "#7c4160",
+                        "error": "#ba1a1a",
+                        "outline": "#787584",
+                        "text-muted": "#9B9BB4",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#f1ecf7",
+                        "status-warning-text": "#C97B1D",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#c9c4d5",
+                        "inverse-surface": "#312f37",
+                        "bg-gradient-start": "#EDEBFB",
+                        "primary-fixed-dim": "#c7bfff",
+                        "secondary-container": "#ffb3d8",
+                        "tertiary-fixed-dim": "#ffb866",
+                        "bg-gradient-end": "#FDF4F9",
+                        "on-tertiary": "#ffffff",
+                        "text-heading": "#2B2B43",
+                        "on-primary-fixed": "#180065",
+                        "surface-variant": "#e5e1eb",
+                        "surface-tint": "#5b4cc1",
+                        "surface-bright": "#fcf8ff",
+                        "text-body": "#5F5F7E",
+                        "on-surface-variant": "#474553",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#1c1b22",
+                        "on-background": "#1c1b22",
+                        "status-info-text": "#6C5DD3",
+                        "on-tertiary-container": "#fff1e5",
+                        "surface-dim": "#ddd8e3",
+                        "secondary": "#874b6b",
+                        "surface-container-low": "#f6f2fc",
+                        "on-secondary-fixed": "#380726",
+                        "surface-tint-blush": "#FDF1F6",
+                        "status-success-bg": "#DFF5E9",
+                        "inverse-on-surface": "#f4eff9",
+                        "surface-container-highest": "#e5e1eb",
+                        "tertiary": "#7c4b00",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "64px",
+                        "margin": "32px",
+                        "sm": "12px",
+                        "md": "24px",
+                        "lg": "40px",
+                        "base": "8px",
+                        "gutter": "24px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-mono": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-lg": ["DM Sans"],
+                        "body-sm": ["DM Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["DM Sans"],
+                        "headline-xl": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "label-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-xl": ["40px", { "lineHeight": "48px", "fontWeight": "700" }]
+                    },
+                    "boxShadow": {
+                        "card": "0 10px 40px -10px rgba(108, 93, 211, 0.12)",
+                        "nav": "0 4px 20px -2px rgba(108, 93, 211, 0.08)"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-bg-gradient-start via-bg-gradient-mid to-bg-gradient-end min-h-screen text-on-surface font-body-md antialiased selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Top Navigation Bar -->
+<header class="sticky top-4 mx-auto w-[95%] rounded-full shadow-nav shadow-primary/10 bg-surface-container-lowest/80 dark:bg-surface-container-lowest/80 backdrop-blur-md z-50">
+<div class="flex justify-between items-center px-8 py-3 max-w-7xl mx-auto">
+<!-- Brand -->
+<div class="flex items-center gap-8">
+<a class="font-headline-md text-headline-md font-bold tracking-tight text-primary dark:text-primary-fixed-dim" href="#">
+                    ChainTrace
+                </a>
+<!-- Search (Left aligned as per JSON) -->
+<div class="hidden md:flex relative group w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm">search</span>
+<input class="w-full bg-surface-tint-lavender/50 text-body-sm font-body-sm text-text-heading placeholder:text-text-muted rounded-full py-2 pl-9 pr-4 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all border-none" placeholder="Search anywhere ⌘K" type="text"/>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-6 font-body-md text-body-md font-medium">
+<a class="text-text-muted dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors hover:bg-surface-tint-lavender/50 dark:hover:bg-surface-variant/20 rounded-full px-4 py-2 transition-all" href="#">TRACE</a>
+<a class="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary pb-1 px-4 py-2" href="#">CASES</a>
+</nav>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center gap-2 bg-status-info-bg/50 px-3 py-1.5 rounded-full text-primary font-body-sm">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                    Demo Investigating Officer
+                </div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-text-muted hover:text-primary hover:bg-surface-tint-lavender/50 rounded-full transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-text-muted hover:text-primary hover:bg-surface-tint-lavender/50 rounded-full transition-all">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-px h-6 bg-outline-variant/50 mx-2"></div>
+<button class="text-body-sm font-body-sm text-text-muted hover:text-primary transition-colors pr-2">
+                        Logout
+                    </button>
+</div>
+<!-- Mobile Menu Toggle -->
+<button class="md:hidden p-2 text-text-muted">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Workspace -->
+<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-xl pb-32">
+<!-- Header Section -->
+<header class="mb-lg">
+<span class="text-xs font-bold tracking-widest text-primary uppercase mb-2 block">INVESTIGATION WORKSPACE</span>
+<h1 class="font-headline-lg text-headline-lg text-text-heading mb-xs">Cases</h1>
+<p class="font-body-md text-body-md text-text-body max-w-2xl">
+                Group wallets, evidence, and notes under a case for reporting and disclosure.
+            </p>
+</header>
+<!-- Open A Case Panel -->
+<section class="bg-surface-container-lowest rounded-[24px] shadow-card p-margin mb-xl relative overflow-hidden">
+<!-- Decorative gradient blur behind the card -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary-fixed/30 rounded-full blur-3xl pointer-events-none"></div>
+<div class="relative z-10">
+<h2 class="text-xs font-bold tracking-widest text-text-muted uppercase mb-md">OPEN A CASE</h2>
+<form class="flex flex-col md:flex-row gap-4 items-start md:items-end">
+<div class="flex-1 w-full">
+<label class="sr-only" for="caseName">Case name</label>
+<input class="w-full bg-surface-tint-lavender text-body-md font-body-md text-text-heading placeholder:text-text-muted rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all border-none" id="caseName" placeholder="Case name, e.g. 'Ransomware payout — Q1'" type="text"/>
+</div>
+<div class="w-full md:w-[220px] shrink-0">
+<label class="sr-only" for="investigator">Investigator (optional)</label>
+<input class="w-full bg-surface-tint-lavender text-body-md font-body-md text-text-heading placeholder:text-text-muted rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all border-none" id="investigator" placeholder="Investigator (optional)" type="text"/>
+</div>
+<button class="w-full md:w-auto bg-primary text-on-primary font-body-md font-medium px-6 py-3 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-200 shrink-0" type="submit">
+                        Open case
+                    </button>
+</form>
+</div>
+</section>
+<!-- Open Cases List Section -->
+<section>
+<div class="flex items-center gap-4 mb-md">
+<h3 class="text-xs font-bold tracking-widest text-text-muted uppercase shrink-0">OPEN CASES (0)</h3>
+<div class="h-px bg-surface-dim/50 w-full"></div>
+</div>
+<!-- Empty State Card -->
+<div class="bg-surface-container-lowest rounded-[20px] shadow-card p-margin flex flex-col items-center justify-center text-center min-h-[400px]">
+<div class="relative w-48 h-48 mb-6 flex items-center justify-center">
+<!-- Soft pastel illustration elements built with CSS -->
+<div class="absolute inset-0 bg-primary-fixed/20 rounded-full blur-xl"></div>
+<div class="relative z-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[120px] text-primary-fixed-dim/80" data-weight="fill">folder_open</span>
+<span class="material-symbols-outlined absolute -bottom-2 -right-4 text-[64px] text-primary drop-shadow-lg" data-weight="fill">search</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-body max-w-md mx-auto leading-relaxed">
+                    No cases yet. Open one above, then pin wallets to it from any investigation to start building a disclosure-ready record.
+                </p>
+</div>
+</section>
+</main>
+</body></html>
