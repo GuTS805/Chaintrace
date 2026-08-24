@@ -15,11 +15,12 @@ import type { GraphNode, GraphResult } from "@/lib/types";
 import { assetAmount, formatAsset, shortAddr } from "@/lib/format";
 import { Panel, Pill } from "./ui";
 
-type Role = "root" | "risk" | "vasp" | "plain";
+type Role = "root" | "risk" | "bridge" | "vasp" | "plain";
 
 const ROLE_COLOR: Record<Role, string> = {
   root: "#8b7cff",
   risk: "#ff5c72",
+  bridge: "#3dd6e8",
   vasp: "#e8a33d",
   plain: "#565a72",
 };
@@ -27,6 +28,8 @@ const ROLE_COLOR: Record<Role, string> = {
 function roleOf(n: GraphNode): Role {
   if (n.depth === 0) return "root";
   if (n.label_name && /tornado|mixer|sanction|ofac/i.test(n.label_name)) return "risk";
+  if (n.label_name && /bridge|wormhole|stargate|multichain|across protocol/i.test(n.label_name))
+    return "bridge";
   if (n.vasp_name) return "vasp";
   return "plain";
 }
@@ -192,8 +195,8 @@ export function GraphView({
       </div>
       <p className="border-t border-border px-4 py-2 text-[10px] uppercase tracking-widest text-muted">
         click a node to inspect inline · root <span className="text-accent">violet</span> · attributed{" "}
-        <span className="text-gold">gold</span> · mixer <span className="text-bad">rose</span> · hovering
-        evidence traces the matching edge here
+        <span className="text-gold">gold</span> · mixer <span className="text-bad">rose</span> · bridge{" "}
+        <span style={{ color: "#3dd6e8" }}>cyan</span> · hovering evidence traces the matching edge here
       </p>
     </Panel>
   );

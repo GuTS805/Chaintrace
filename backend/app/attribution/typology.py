@@ -13,7 +13,7 @@ from collections import defaultdict
 
 from app.attribution.context_builder import AttributionContext
 from app.enums import TypologyCategory
-from app.schemas.graph import GraphEdge, GraphResult
+from app.schemas.graph import GraphEdge, GraphNode, GraphResult
 from app.schemas.risk import TypologyTag
 
 # Peel chain: at each hop the dominant continuation must carry a clear majority
@@ -74,6 +74,18 @@ def detect_peel_chain(forward_graph: GraphResult) -> TypologyTag | None:
 
 
 _LAYERING_CATEGORIES = {"MIXER", "SANCTIONED"}
+_BRIDGE_CATEGORIES = {"BRIDGE"}
+_MIXER_CATEGORIES = {"MIXER", "SANCTIONED"}
+
+
+def _labeled_nodes(context: AttributionContext, categories: set[str]) -> list[GraphNode]:
+    return [
+        n
+        for n in (*context.forward_graph.nodes, *context.reverse_graph.nodes)
+        if n.depth > 0
+        and n.address in context.labels
+        and context.labels[n.address].category in categories
+    ]
 
 
 def detect_layering(context: AttributionContext) -> TypologyTag | None:
@@ -106,6 +118,47 @@ def detect_layering(context: AttributionContext) -> TypologyTag | None:
     )
 
 
+def detect_bridge_hop(context: AttributionContext) -> TypologyTag | None:
+    """Funds pass through a known cross-chain bridge / swap contract.
+
+    Flagged independent of whether a VASP is reached: a bridge hop matters on
+    its own — the trail likely continues on a different chain this tool
+    doesn't trace, which is itself an investigative dead end worth surfacing.
+    """
+    nodes = _labeled_nodes(context, _BRIDGE_CATEGORIES)
+    if not nodes:
+        return None
+    names = ", ".join(sorted({n.label_name or n.address for n in nodes})[:3])
+    return TypologyTag(
+        category=TypologyCategory.BRIDGE_HOP,
+        description=(
+            f"Funds pass through a known cross-chain bridge ({names}) — the "
+            "trail likely continues on a different chain this trace can't follow."
+        ),
+        confidence=0.75,
+    )
+
+
+def detect_mixer_use(context: AttributionContext) -> TypologyTag | None:
+    """Funds pass through a known mixer/tumbler, reported even when no VASP
+    is reached afterward (``detect_layering`` only fires in that narrower,
+    mixer-then-cash-out case — this covers the standalone mixer exposure)."""
+    if any(c.reachable for c in context.candidates):
+        return None  # already covered by the more specific LAYERING tag
+    nodes = _labeled_nodes(context, _MIXER_CATEGORIES)
+    if not nodes:
+        return None
+    names = ", ".join(sorted({n.label_name or n.address for n in nodes})[:3])
+    return TypologyTag(
+        category=TypologyCategory.MIXER_USE,
+        description=(
+            f"Funds pass through a known mixer/tumbler ({names}) — provenance "
+            "on either side of it cannot be assumed to be linked."
+        ),
+        confidence=0.85,
+    )
+
+
 def detect_smurfing(forward_graph: GraphResult) -> TypologyTag | None:
     """The wallet fans out to many recipients at similar values (structuring)."""
     direct = [e for e in forward_graph.edges if e.from_address == forward_graph.root]
@@ -133,6 +186,8 @@ def detect_typology(context: AttributionContext) -> list[TypologyTag]:
     tags = [
         detect_peel_chain(context.forward_graph),
         detect_layering(context),
+        detect_bridge_hop(context),
+        detect_mixer_use(context),
         detect_smurfing(context.forward_graph),
     ]
     return [t for t in tags if t is not None]
