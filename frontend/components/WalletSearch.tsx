@@ -44,9 +44,9 @@ export function WalletSearch({
       />
       <button
         type="submit"
-        className="rounded border border-accent/50 bg-accent/10 px-4 py-1.5 text-xs uppercase tracking-widest text-accent hover:bg-accent/20"
+        className="rounded-md bg-accent px-4 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-accent/90"
       >
-        run
+        Run
       </button>
     </form>
   );

@@ -63,7 +63,7 @@ export function CommandPalette() {
         role="dialog"
         aria-label="Command palette"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-borderStrong bg-panel shadow-2xl"
+        className="w-full max-w-lg overflow-hidden rounded-lg border border-borderStrong bg-panel shadow-2xl"
       >
         <form onSubmit={submit} className="flex items-center gap-2 border-b border-border px-4 py-3">
           <span className="text-accent">trace&gt;</span>

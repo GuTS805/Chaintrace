@@ -19,8 +19,8 @@ export function Mark({ size = 22, className = "" }: { size?: number; className?:
         strokeLinejoin="round"
         className="text-accent"
       />
-      <circle cx="7" cy="24" r="2.4" fill="#0b0d12" stroke="currentColor" strokeWidth="1.6" className="text-accent" />
-      <circle cx="15" cy="13" r="2" fill="#0b0d12" stroke="currentColor" strokeWidth="1.6" className="text-accent" />
+      <circle cx="7" cy="24" r="2.4" fill="#050505" stroke="currentColor" strokeWidth="1.6" className="text-accent" />
+      <circle cx="15" cy="13" r="2" fill="#050505" stroke="currentColor" strokeWidth="1.6" className="text-accent" />
       <circle cx="25" cy="8" r="3" fill="currentColor" className="text-good" />
     </svg>
   );

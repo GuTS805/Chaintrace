@@ -1,18 +1,12 @@
 import type { RiskResult } from "@/lib/types";
-import { pct, shortAddr } from "@/lib/format";
-import { Panel, Pill } from "./ui";
+import { shortAddr } from "@/lib/format";
+import { Eyebrow, Pill, Tile } from "./ui";
 
-const LEVELS = ["LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
 const LEVEL_TONE: Record<string, "muted" | "warn" | "bad"> = {
   LOW: "muted",
   MEDIUM: "warn",
   HIGH: "bad",
   CRITICAL: "bad",
-};
-const FILL: Record<string, string> = {
-  muted: "bg-muted",
-  warn: "bg-warn",
-  bad: "bg-bad",
 };
 
 export function RiskPanel({
@@ -23,65 +17,67 @@ export function RiskPanel({
   onHoverIndicator: (address: string | null) => void;
 }) {
   const tone = LEVEL_TONE[risk.level] ?? "muted";
-  const activeIdx = LEVELS.indexOf(risk.level as (typeof LEVELS)[number]);
+  const scoreTone = tone === "bad" ? "text-bad" : tone === "warn" ? "text-warn" : "text-text";
 
   return (
-    <Panel title="Risk" right={<Pill tone={tone}>{risk.level}</Pill>}>
+    <Tile bodyClassName="p-8">
+      <div className="flex items-start justify-between gap-6">
+        <Eyebrow>Risk</Eyebrow>
+        {risk.flagged && <Pill tone="bad">Flagged</Pill>}
+      </div>
+
+      <div className="mt-3 flex items-end gap-4">
+        <div className={`font-display text-[44px] font-semibold leading-none tabular-nums ${scoreTone}`}>
+          {Math.round(risk.score * 100)}
+        </div>
+        <div className="pb-1 text-[13px] text-dim">/ 100</div>
+        <div className="ml-auto pb-1 text-[15px] font-medium text-text">{risk.level}</div>
+      </div>
+
       {risk.flagged && (
-        <div className="mb-3 rounded border border-bad/50 bg-bad/10 px-3 py-2 text-xs text-bad">
-          <span className="font-semibold uppercase tracking-wider">⚠ High-risk flag</span>{" "}
-          {risk.flag_reason}
+        <p className="mt-3 text-[13px] leading-relaxed text-muted">{risk.flag_reason}</p>
+      )}
+
+      {risk.typology_tags.length > 0 && (
+        <div className="mt-5 flex flex-wrap gap-1.5">
+          {risk.typology_tags.map((tag, i) => (
+            <Pill key={i} tone="warn">
+              {tag.category.replace("_", " ")}
+            </Pill>
+          ))}
         </div>
       )}
 
-      {/* Stepped threat meter. */}
-      <div className="flex items-center gap-3">
-        <div className="flex flex-1 gap-1">
-          {LEVELS.map((lvl, i) => (
-            <div key={lvl}>
-              <div className={`h-1.5 rounded-full ${i <= activeIdx ? FILL[tone] : "bg-panel3"}`} />
-              <div className="mt-1 text-center text-[9px] uppercase tracking-wider text-dim">
-                {lvl.slice(0, 4)}
-              </div>
-            </div>
-          ))}
-        </div>
-        <span className={`font-display text-xl tabular-nums text-${tone}`}>{pct(risk.score, 0)}</span>
-      </div>
-
-      <ul className="mt-4 space-y-1">
-        {risk.indicators.length === 0 && (
-          <li className="text-xs text-muted">No sanctioned / mixer / scam exposure detected.</li>
-        )}
-        {risk.indicators.slice(0, 6).map((ind, i) => (
-          <li
-            key={i}
-            onMouseEnter={() => onHoverIndicator(ind.address)}
-            onMouseLeave={() => onHoverIndicator(null)}
-            className="flex items-start gap-2 rounded border border-transparent px-2 py-1.5 text-xs transition-colors hover:border-bad/30 hover:bg-panel2"
-          >
-            <Pill tone="bad">{ind.category}</Pill>
-            <span className="flex-1 text-text">
-              {ind.description} <span className="font-mono text-muted">({shortAddr(ind.address)})</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      {risk.typology_tags.length > 0 && (
-        <ul className="mt-3 space-y-1.5 border-t border-border pt-2">
-          {risk.typology_tags.map((tag, i) => (
-            <li key={i} className="flex items-start gap-2 text-xs">
-              <Pill tone="warn">{tag.category.replace("_", " ")}</Pill>
-              <span className="flex-1 text-text">{tag.description}</span>
+      <div className="mt-8 border-t border-border pt-6">
+        <Eyebrow>Indicators</Eyebrow>
+        <ul className="mt-3">
+          {risk.indicators.length === 0 && (
+            <li className="py-2 text-[13px] text-muted">
+              No sanctioned / mixer / scam exposure detected.
+            </li>
+          )}
+          {risk.indicators.slice(0, 6).map((ind, i) => (
+            <li
+              key={i}
+              onMouseEnter={() => onHoverIndicator(ind.address)}
+              onMouseLeave={() => onHoverIndicator(null)}
+              className="-mx-2 flex items-start gap-3 rounded-md px-2 py-2 text-[13px] transition-colors hover:bg-panel2"
+            >
+              <Pill tone="bad" className="mt-0.5 shrink-0">
+                {ind.category}
+              </Pill>
+              <span className="text-muted">
+                {ind.description}{" "}
+                <span className="font-mono text-[11px] text-dim">({shortAddr(ind.address)})</span>
+              </span>
             </li>
           ))}
         </ul>
-      )}
+      </div>
 
-      <p className="mt-3 border-t border-border pt-2 text-[10px] uppercase tracking-widest text-muted">
-        computed independently of attribution
+      <p className="mt-6 border-t border-border pt-4 text-[11px] text-dim">
+        Computed independently of attribution
       </p>
-    </Panel>
+    </Tile>
   );
 }
