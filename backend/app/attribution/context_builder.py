@@ -41,6 +41,12 @@ class AttributionContext:
     forward_graph: GraphResult
     reverse_graph: GraphResult
     labels: dict[str, LabelInfo] = field(default_factory=dict)
+    # The bounds actually applied after ceiling-clamping — not just what the
+    # caller asked for. An investigation snapshot needs these to be
+    # reproducible: "depth=50 was requested" is a different fact from
+    # "depth=8 was what actually ran".
+    hops_used: int = 0
+    max_nodes_used: int = 0
 
 
 def _to_provider_tx(t: Transaction) -> ProviderTx:
@@ -183,4 +189,6 @@ class ContextBuilder:
             forward_graph=forward,
             reverse_graph=reverse,
             labels=labels,
+            hops_used=hops,
+            max_nodes_used=nodes,
         )

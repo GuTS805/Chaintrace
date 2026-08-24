@@ -4,6 +4,7 @@ from app.models.audit_log import AuditLog
 from app.models.case import Case
 from app.models.cluster import Cluster, ClusterMember
 from app.models.finding import Finding
+from app.models.investigation import Investigation
 from app.models.label import Label
 from app.models.officer import Officer
 from app.models.transaction import Transaction
@@ -16,6 +17,7 @@ __all__ = [
     "Cluster",
     "ClusterMember",
     "Finding",
+    "Investigation",
     "Label",
     "Officer",
     "Transaction",
