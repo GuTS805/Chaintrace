@@ -2,6 +2,7 @@ import type {
   AttributionResult,
   CaseDetail,
   CaseOut,
+  EvmChain,
   Finding,
   GraphResult,
   LiveTraceResult,
@@ -107,9 +108,9 @@ export const api = {
     getJSON<GraphResult>(
       `/wallets/${address}/graph?depth=${depth}&direction=${direction}`,
     ),
-  liveTrace: async (address: string): Promise<LiveTraceResult> => {
+  liveTrace: async (address: string, chain: EvmChain = "ethereum"): Promise<LiveTraceResult> => {
     const r = await sendJSON<LiveTraceResult>(
-      `/wallets/${address}/live-trace`,
+      `/wallets/${address}/live-trace?chain=${chain}`,
       "POST",
     );
     return r as LiveTraceResult;

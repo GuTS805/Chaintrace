@@ -119,9 +119,12 @@ export interface CaseDetail extends CaseOut {
   findings: Finding[];
 }
 
+export type EvmChain = "ethereum" | "polygon";
+
 export interface LiveTraceResult {
   address: string;
   imported_transactions: number;
   total_transactions: number;
-  source: "cache" | "blockscout";
+  source: "cache" | "blockscout" | "trongrid";
+  chain: string;
 }

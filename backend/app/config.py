@@ -35,6 +35,13 @@ class Settings(BaseSettings):
     blockscout_base_url: str = Field(
         default="https://eth.blockscout.com/api", alias="BLOCKSCOUT_BASE_URL"
     )
+    # Same Blockscout instance software, different EVM chain — same keyless
+    # account/txlist + tokentx schema, just a different base URL. (BNB Smart
+    # Chain has no public Blockscout instance and BscScan's keyless API was
+    # retired, so it isn't offered here — would need a paid/free-tier key.)
+    polygon_blockscout_base_url: str = Field(
+        default="https://polygon.blockscout.com/api", alias="POLYGON_BLOCKSCOUT_BASE_URL"
+    )
     # TronGrid: keyless like Blockscout for low-volume use; an optional API key
     # (header, not this URL) only raises rate limits.
     trongrid_base_url: str = Field(

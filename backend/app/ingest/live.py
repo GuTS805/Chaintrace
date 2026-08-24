@@ -23,6 +23,16 @@ from app.providers.tron import fetch_trongrid_trc20, is_tron_address, parse_tron
 
 log = structlog.get_logger(__name__)
 
+# EVM chains reachable through a Blockscout-compatible instance — same
+# account/txlist + tokentx schema as Ethereum, so they share fetch/parse code
+# and differ only in base URL + native gas-token symbol. (BNB Smart Chain has
+# no public Blockscout instance and BscScan's keyless API was retired, so it
+# isn't offered here — adding it would need a paid/free-tier BscScan key.)
+EVM_CHAINS: dict[str, str] = {
+    "ethereum": "ETH",
+    "polygon": "POL",
+}
+
 
 @dataclass
 class LiveResult:
@@ -30,6 +40,7 @@ class LiveResult:
     imported_transactions: int
     total_transactions: int
     source: str  # "cache" | "blockscout" | "trongrid"
+    chain: str = "ethereum"
 
 
 async def _rebuild_clusters(session: AsyncSession) -> None:
@@ -56,10 +67,23 @@ async def _tx_count(session: AsyncSession, address: str) -> int:
     )
 
 
+def _evm_base_url(chain: str) -> str:
+    settings = get_settings()
+    return {
+        "ethereum": settings.blockscout_base_url,
+        "polygon": settings.polygon_blockscout_base_url,
+    }[chain]
+
+
 async def ensure_ingested(
-    session: AsyncSession, address: str, *, limit: int = 100
+    session: AsyncSession, address: str, *, limit: int = 100, chain: str = "ethereum"
 ) -> LiveResult:
-    """Ensure the wallet's transactions are in the store, fetching live if not."""
+    """Ensure the wallet's transactions are in the store, fetching live if not.
+
+    ``chain`` picks the EVM chain to query (ethereum/polygon) — it's ignored
+    for Tron addresses, which are auto-detected by address shape since Tron's
+    base58 format can't be confused with an EVM address.
+    """
     addr = normalize_address(address)
     existing = await _tx_count(session, addr)
     if existing > 0:
@@ -76,13 +100,17 @@ async def ensure_ingested(
         log.info(
             "live_ingest", address=addr, chain="tron", imported=stats.transactions, total=total
         )
-        return LiveResult(addr, stats.transactions, total, "trongrid")
+        return LiveResult(addr, stats.transactions, total, "trongrid", chain="tron")
 
-    base_url = get_settings().blockscout_base_url
+    if chain not in EVM_CHAINS:
+        raise ValueError(f"Unsupported chain: {chain!r}")
+    native_asset = EVM_CHAINS[chain]
+    base_url = _evm_base_url(chain)
     eth_payload = await fetch_blockscout_txlist(addr, base_url=base_url, limit=limit)
-    eth_txs = parse_etherscan_txlist(eth_payload)
+    eth_txs = parse_etherscan_txlist(eth_payload, native_asset=native_asset)
 
-    # ERC-20 (USDT/USDC/…) transfers — best-effort so ETH still imports if this fails.
+    # ERC-20-style token transfers — best-effort so the native asset still
+    # imports if this fails.
     token_txs: list[ProviderTx] = []
     try:
         token_payload = await fetch_blockscout_tokentx(addr, base_url=base_url, limit=limit)
@@ -93,9 +121,9 @@ async def ensure_ingested(
     # Tokens first: a token transfer's tx hash also appears in txlist as a value-0
     # call to the token contract; importing the token edge first keeps the real
     # sender->recipient transfer instead of the contract-call duplicate.
-    stats = await import_provider_txs(session, token_txs + eth_txs, chain="ethereum")
+    stats = await import_provider_txs(session, token_txs + eth_txs, chain=chain)
     await session.commit()
     await _rebuild_clusters(session)
     total = await _tx_count(session, addr)
-    log.info("live_ingest", address=addr, imported=stats.transactions, total=total)
-    return LiveResult(addr, stats.transactions, total, "blockscout")
+    log.info("live_ingest", address=addr, chain=chain, imported=stats.transactions, total=total)
+    return LiveResult(addr, stats.transactions, total, "blockscout", chain=chain)

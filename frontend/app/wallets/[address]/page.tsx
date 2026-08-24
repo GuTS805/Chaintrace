@@ -23,7 +23,11 @@ export default function WalletPage({
   // EVM addresses are case-insensitive hex; Tron (and other base58) addresses
   // are case-sensitive/checksummed and must not be lowercased.
   const address = decoded.toLowerCase().startsWith("0x") ? decoded.toLowerCase() : decoded;
-  const chain = address.startsWith("T") ? "TRON" : "ETHEREUM";
+  // A live trace tells us the real chain queried; until then, EVM addresses
+  // default to "ethereum" in the badge (0x… format is shared across EVM
+  // chains, so it can't be inferred from shape alone).
+  const [resolvedChain, setResolvedChain] = useState<string | null>(null);
+  const chain = (resolvedChain ?? (address.startsWith("T") ? "tron" : "ethereum")).toUpperCase();
   const [attribution, setAttribution] = useState<AttributionResult | null>(null);
   const [risk, setRisk] = useState<RiskResult | null>(null);
   const [graph, setGraph] = useState<GraphResult | null>(null);
@@ -119,7 +123,13 @@ export default function WalletPage({
       )}
 
       {!loading && !error && isEmpty && (
-        <LiveTrace address={address} onDone={load} />
+        <LiveTrace
+          address={address}
+          onDone={(usedChain) => {
+            setResolvedChain(usedChain);
+            void load();
+          }}
+        />
       )}
 
       {!loading && !error && !isEmpty && (
