@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight, Clock, Search } from "lucide-react";
 import { getRecents } from "@/lib/recents";
 import { shortAddr } from "@/lib/format";
 import { Kbd } from "./ui";
@@ -65,7 +66,7 @@ export function CommandPalette() {
         className="w-full max-w-lg overflow-hidden rounded-card bg-white shadow-card-hover"
       >
         <form onSubmit={submit} className="flex items-center gap-2 border-b border-soft-border px-4 py-3">
-          <span className="font-mono text-primary">trace&gt;</span>
+          <Search size={16} className="shrink-0 text-primary" />
           <input
             ref={inputRef}
             value={value}
@@ -84,10 +85,24 @@ export function CommandPalette() {
               onClick={() => go(trimmed.toLowerCase().startsWith("0x") ? trimmed.toLowerCase() : trimmed)}
               className="flex w-full items-center gap-2 rounded-btn px-3 py-2 text-left text-sm text-body hover:bg-surface-lavender"
             >
-              <span className="text-primary">→</span>
+              <ArrowRight size={14} className="shrink-0 text-primary" />
               <span>
                 Trace <span className="font-mono text-heading">{trimmed}</span>
               </span>
+            </button>
+          )}
+
+          {!trimmed && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                router.push("/trace");
+              }}
+              className="flex w-full items-center gap-2 rounded-btn px-3 py-2 text-left text-sm text-body hover:bg-surface-lavender"
+            >
+              <ArrowRight size={14} className="shrink-0 text-primary" />
+              <span>Start a trace</span>
             </button>
           )}
 
@@ -99,13 +114,14 @@ export function CommandPalette() {
             }}
             className="flex w-full items-center gap-2 rounded-btn px-3 py-2 text-left text-sm text-body hover:bg-surface-lavender"
           >
-            <span className="text-primary">→</span>
+            <ArrowRight size={14} className="shrink-0 text-primary" />
             <span>Go to cases</span>
           </button>
 
           {filteredRecents.length > 0 && (
             <div className="mt-2 border-t border-soft-border pt-2">
-              <div className="px-3 pb-1 text-[10px] uppercase tracking-widest text-muted">
+              <div className="flex items-center gap-1.5 px-3 pb-1 text-[10px] uppercase tracking-widest text-muted">
+                <Clock size={11} />
                 Recent lookups
               </div>
               {filteredRecents.map((r) => (
@@ -115,7 +131,7 @@ export function CommandPalette() {
                   onClick={() => go(r.address)}
                   className="flex w-full items-center gap-2 rounded-btn px-3 py-2 text-left text-sm hover:bg-surface-lavender"
                 >
-                  <span className="text-muted">◇</span>
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted" />
                   <span className="font-mono text-heading">{shortAddr(r.address, 8, 6)}</span>
                   {r.label && <span className="text-xs text-muted">{r.label}</span>}
                 </button>

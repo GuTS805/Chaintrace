@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ArrowRight, Search } from "lucide-react";
 import { pushRecent } from "@/lib/recents";
 
 export function WalletSearch({
@@ -32,7 +33,7 @@ export function WalletSearch({
       onSubmit={submit}
       className="flex h-14 items-center gap-2 rounded-input bg-surface-lavender px-4 transition-all focus-within:border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary-soft"
     >
-      <span className="select-none font-mono text-primary">trace&gt;</span>
+      <Search size={16} className="shrink-0 text-primary" />
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -44,9 +45,10 @@ export function WalletSearch({
       />
       <button
         type="submit"
-        className="rounded-btn bg-primary px-6 py-2.5 text-[12px] font-medium text-white shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
+        className="flex items-center gap-1.5 rounded-btn bg-primary px-6 py-2.5 text-[12px] font-medium text-white shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
       >
         Run
+        <ArrowRight size={14} />
       </button>
     </form>
   );

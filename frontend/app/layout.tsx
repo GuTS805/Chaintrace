@@ -8,6 +8,7 @@ import { NavLinks } from "@/components/NavLinks";
 import { Mark } from "@/components/Mark";
 import { Kbd } from "@/components/ui";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -44,7 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${poppins.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
+      className={cn(poppins.variable, dmSans.variable, jetbrainsMono.variable, "font-sans")}
     >
       <body className="min-h-screen font-sans text-sm text-body">
         {/* ── Floating navbar ── */}

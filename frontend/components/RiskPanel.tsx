@@ -1,5 +1,7 @@
+import { ShieldAlert, ShieldCheck } from "lucide-react";
 import type { RiskResult } from "@/lib/types";
 import { shortAddr } from "@/lib/format";
+import { AnimatedNumber } from "./AnimatedNumber";
 import { Eyebrow, Pill, Tile } from "./ui";
 
 const LEVEL_TONE: Record<string, "muted" | "warn" | "bad"> = {
@@ -23,12 +25,22 @@ export function RiskPanel({
     <Tile bodyClassName="p-8">
       <div className="flex items-start justify-between gap-6">
         <Eyebrow>Risk</Eyebrow>
-        {risk.flagged && <Pill tone="bad">Flagged</Pill>}
+        {risk.flagged ? (
+          <Pill tone="bad" className="inline-flex items-center gap-1.5">
+            <ShieldAlert size={12} />
+            Flagged
+          </Pill>
+        ) : (
+          <Pill tone="good" className="inline-flex items-center gap-1.5">
+            <ShieldCheck size={12} />
+            Clear
+          </Pill>
+        )}
       </div>
 
       <div className="mt-3 flex items-end gap-4">
         <div className={`font-display text-[44px] font-semibold leading-none tabular-nums ${scoreTone}`}>
-          {Math.round(risk.score * 100)}
+          <AnimatedNumber value={risk.score * 100} />
         </div>
         <div className="pb-1 text-[13px] text-muted">/ 100</div>
         <div className="ml-auto pb-1 text-[15px] font-medium text-heading">{risk.level}</div>
