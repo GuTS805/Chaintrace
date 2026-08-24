@@ -13,7 +13,7 @@ export function BentoGrid({
   className?: string;
 }) {
   return (
-    <div className={`grid grid-cols-4 gap-4 md:grid-cols-12 ${className}`}>
+    <div className={`grid grid-cols-4 gap-6 md:grid-cols-12 ${className}`}>
       {children}
     </div>
   );
@@ -34,8 +34,8 @@ export function Eyebrow({
 }) {
   return (
     <div
-      className={`text-[11px] font-medium uppercase tracking-[0.1em] ${
-        tone === "accent" ? "text-accent" : "text-muted"
+      className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${
+        tone === "accent" ? "text-primary" : "text-muted"
       } ${className}`}
     >
       {children}
@@ -46,8 +46,6 @@ export function Eyebrow({
 /**
  * Section: an unboxed content group — eyebrow + optional heading + body,
  * separated by whitespace and a hairline top border, not a bordered card.
- * Use this for most content; reach for Tile only for a handful of major
- * conceptual containers (attribution, graph, risk).
  */
 export function Section({
   eyebrow,
@@ -63,7 +61,7 @@ export function Section({
   bordered?: boolean;
 }) {
   return (
-    <section className={`${bordered ? "border-t border-border pt-6" : ""} ${className}`}>
+    <section className={`${bordered ? "border-t border-soft-border pt-6" : ""} ${className}`}>
       {eyebrow && (
         <div className="mb-4 flex items-center justify-between">
           <Eyebrow>{eyebrow}</Eyebrow>
@@ -76,8 +74,8 @@ export function Section({
 }
 
 /**
- * Tile: a bordered surface, reserved for major conceptual sections (not
- * every data point). Thin translucent border, minimal radius, no glow.
+ * Tile: a white floating card — the signature Soft UI element.
+ * Large diffused violet-tinted shadow, rounded corners, no border.
  */
 export function Tile({
   title,
@@ -93,17 +91,19 @@ export function Tile({
   /** Include col-span and row-span classes here to place the tile in a BentoGrid. */
   className?: string;
   bodyClassName?: string;
-  /** Subtle border-brightness lift on hover, for tiles that lead somewhere. */
+  /** Subtle lift on hover, for tiles that lead somewhere. */
   interactive?: boolean;
 }) {
   return (
     <section
-      className={`flex flex-col overflow-hidden rounded-lg border border-border bg-panel transition-colors duration-200 ${
-        interactive ? "hover:border-borderStrong" : ""
+      className={`flex flex-col overflow-hidden rounded-card bg-white shadow-card ${
+        interactive
+          ? "transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover"
+          : ""
       } ${className}`}
     >
       {title && (
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4">
           <Eyebrow>{title}</Eyebrow>
           {right}
         </div>
@@ -116,18 +116,9 @@ export function Tile({
 /** @deprecated alias kept from the bento-grid migration — same as Tile. */
 export const Panel = Tile;
 
-const TONE_BG: Record<string, string> = {
-  accent: "bg-accent",
-  gold: "bg-gold",
-  good: "bg-good",
-  warn: "bg-warn",
-  bad: "bg-bad",
-  muted: "bg-muted",
-};
-
 export function Bar({
   value,
-  tone = "accent",
+  tone = "primary",
   threshold,
   height = "h-1.5",
 }: {
@@ -137,15 +128,22 @@ export function Bar({
   height?: string;
 }) {
   const clamped = Math.max(0, Math.min(1, value));
+  const toneMap: Record<string, string> = {
+    primary: "bg-primary",
+    good: "bg-good-text",
+    warn: "bg-warn-text",
+    bad: "bg-bad-text",
+    muted: "bg-muted",
+  };
   return (
-    <div className={`relative w-full overflow-hidden rounded-full bg-panel3 ${height}`}>
+    <div className={`relative w-full overflow-hidden rounded-full bg-neutral-fill ${height}`}>
       <div
-        className={`h-full rounded-full transition-[width] duration-500 ease-out ${TONE_BG[tone] ?? "bg-accent"}`}
+        className={`h-full rounded-full transition-[width] duration-500 ease-out ${toneMap[tone] ?? "bg-primary"}`}
         style={{ width: `${clamped * 100}%` }}
       />
       {threshold !== undefined && (
         <span
-          className="absolute top-0 h-full w-px bg-text/40"
+          className="absolute top-0 h-full w-px bg-heading/30"
           style={{ left: `${Math.max(0, Math.min(1, threshold)) * 100}%` }}
           aria-hidden
         />
@@ -160,20 +158,22 @@ export function Pill({
   className = "",
 }: {
   children: ReactNode;
-  tone?: "muted" | "accent" | "gold" | "good" | "warn" | "bad";
+  tone?: "muted" | "accent" | "gold" | "good" | "warn" | "bad" | "info" | "neutral";
   className?: string;
 }) {
   const map: Record<string, string> = {
-    muted: "border-border text-muted",
-    accent: "border-accent/40 text-accent",
-    gold: "border-gold/40 text-gold",
-    good: "border-good/40 text-good",
-    warn: "border-warn/40 text-warn",
-    bad: "border-bad/40 text-bad",
+    good: "bg-good-fill text-good-text",
+    warn: "bg-warn-fill text-warn-text",
+    muted: "bg-neutral-fill text-neutral-text",
+    neutral: "bg-neutral-fill text-neutral-text",
+    accent: "bg-info-fill text-info-text",
+    info: "bg-info-fill text-info-text",
+    gold: "bg-info-fill text-info-text",
+    bad: "bg-bad-fill text-bad-text",
   };
   return (
     <span
-      className={`inline-block rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider ${map[tone]} ${className}`}
+      className={`inline-block rounded-full px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${map[tone] ?? map.muted} ${className}`}
     >
       {children}
     </span>
@@ -183,7 +183,7 @@ export function Pill({
 /** A single keyboard-key hint, e.g. for the command palette shortcut. */
 export function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="rounded border border-border bg-panel2 px-1.5 py-0.5 font-mono text-[10px] text-muted">
+    <kbd className="rounded-lg bg-white px-1.5 py-0.5 font-mono text-[10px] text-muted shadow-sm">
       {children}
     </kbd>
   );
@@ -208,10 +208,10 @@ export function GhostButton({
       type="button"
       onClick={onClick}
       title={title}
-      className={`rounded-md border px-2 py-1 text-[11px] transition-colors ${
+      className={`rounded-btn border px-2.5 py-1 text-[11px] font-medium transition-all ${
         active
-          ? "border-accent/50 bg-accent/10 text-accent"
-          : "border-border text-muted hover:border-borderStrong hover:text-text"
+          ? "border-primary/30 bg-primary-soft text-primary"
+          : "border-soft-border text-muted hover:bg-surface-lavender hover:text-primary"
       } ${className}`}
     >
       {children}
@@ -220,9 +220,8 @@ export function GhostButton({
 }
 
 /**
- * Button: the two understated button styles the whole app should use for
- * real actions — solid indigo for the primary action per view, thin-border
- * transparent for everything else. Small radius, no glow, no pill shape.
+ * Button: two clean button styles — solid primary for the main action per
+ * view, thin-border secondary for everything else.
  */
 export function Button({
   children,
@@ -239,10 +238,13 @@ export function Button({
   disabled?: boolean;
   className?: string;
 }) {
-  const base = "rounded-md px-4 py-2 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40";
+  const base =
+    "rounded-btn px-5 py-2.5 text-[13px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40";
   const variants: Record<string, string> = {
-    primary: "bg-accent text-white hover:bg-accent/90",
-    secondary: "border border-border text-text hover:border-borderStrong",
+    primary:
+      "bg-primary text-white shadow-button hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0",
+    secondary:
+      "border border-soft-border text-heading hover:bg-surface-lavender",
   };
   return (
     <button

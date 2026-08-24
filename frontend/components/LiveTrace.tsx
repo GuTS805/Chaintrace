@@ -8,8 +8,7 @@ import { Panel, Pill } from "./ui";
 type Status = "idle" | "loading" | "error" | "done";
 
 // EVM address format is chain-agnostic (0x… looks the same on every EVM
-// chain), so unlike Tron this can't be auto-detected — the investigator has
-// to say which chain the address was reported on.
+// chain), so unlike Tron this can't be auto-detected.
 const EVM_CHAIN_LABEL: Record<EvmChain, string> = {
   ethereum: "Ethereum",
   polygon: "Polygon",
@@ -57,10 +56,10 @@ export function LiveTrace({
               key={c}
               type="button"
               onClick={() => setChain(c)}
-              className={`rounded border px-2.5 py-1 text-[11px] transition-colors ${
+              className={`rounded-btn border px-3 py-1.5 text-[11px] font-medium transition-all ${
                 chain === c
-                  ? "border-accent/50 bg-accent/10 text-accent"
-                  : "border-border text-muted hover:border-accent/40 hover:text-accent"
+                  ? "border-primary/30 bg-primary-soft text-primary"
+                  : "border-soft-border text-muted hover:border-primary/30 hover:text-primary"
               }`}
             >
               {EVM_CHAIN_LABEL[c]}
@@ -72,25 +71,25 @@ export function LiveTrace({
       {status === "idle" && (
         <button
           onClick={runTrace}
-          className="rounded-md border border-accent/50 bg-accent/10 px-4 py-2 text-accent hover:bg-accent/20"
+          className="rounded-btn bg-primary-soft px-5 py-2.5 text-sm font-medium text-primary transition-all hover:bg-primary/10"
         >
           ⚡ Fetch from {isEvmAddress(address) ? EVM_CHAIN_LABEL[chain] : "Tron"} (live)
         </button>
       )}
 
       {status === "loading" && (
-        <div className="flex items-center gap-2 text-muted motion-safe:animate-pulse">
-          <span className="h-2 w-2 rounded-full bg-accent" />
+        <div className="flex items-center gap-2 text-body motion-safe:animate-pulse">
+          <span className="h-2 w-2 rounded-full bg-primary" />
           Querying {isEvmAddress(address) ? EVM_CHAIN_LABEL[chain] : "Tron"}…
         </div>
       )}
 
       {status === "error" && (
         <div className="flex flex-col gap-2">
-          <p className="text-bad">{error ?? "Something went wrong."}</p>
+          <p className="text-bad-text">{error ?? "Something went wrong."}</p>
           <button
             onClick={runTrace}
-            className="self-start rounded border border-border px-3 py-1.5 text-xs text-muted hover:text-accent"
+            className="self-start rounded-btn border border-soft-border px-3 py-1.5 text-xs text-muted hover:text-primary"
           >
             retry
           </button>
@@ -99,7 +98,7 @@ export function LiveTrace({
 
       {status === "done" && result && (
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-good">
+          <span className="text-good-text">
             imported {result.imported_transactions} txs
           </span>
           <Pill tone="muted">

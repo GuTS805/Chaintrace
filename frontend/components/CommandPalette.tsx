@@ -8,8 +8,7 @@ import { Kbd } from "./ui";
 
 /** Global ⌘K / Ctrl+K lookup — an investigator running many wallet lookups a
  * day shouldn't have to leave the keyboard or navigate to the home page to
- * start the next trace. Also surfaces recent lookups (Elliptic/TRM's
- * "hotkeys + quick-arrange for volume caseloads" pattern). */
+ * start the next trace. Also surfaces recent lookups. */
 export function CommandPalette() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -56,24 +55,24 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-bg/70 pt-[14vh] backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-white/60 pt-[14vh] backdrop-blur-sm"
       onClick={() => setOpen(false)}
     >
       <div
         role="dialog"
         aria-label="Command palette"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg overflow-hidden rounded-lg border border-borderStrong bg-panel shadow-2xl"
+        className="w-full max-w-lg overflow-hidden rounded-card bg-white shadow-card-hover"
       >
-        <form onSubmit={submit} className="flex items-center gap-2 border-b border-border px-4 py-3">
-          <span className="text-accent">trace&gt;</span>
+        <form onSubmit={submit} className="flex items-center gap-2 border-b border-soft-border px-4 py-3">
+          <span className="font-mono text-primary">trace&gt;</span>
           <input
             ref={inputRef}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="0x… or T… address, or jump to cases"
             spellCheck={false}
-            className="w-full bg-transparent text-sm text-text outline-none placeholder:text-dim"
+            className="w-full bg-transparent text-sm text-heading outline-none placeholder:text-muted"
           />
           <Kbd>esc</Kbd>
         </form>
@@ -83,11 +82,11 @@ export function CommandPalette() {
             <button
               type="button"
               onClick={() => go(trimmed.toLowerCase().startsWith("0x") ? trimmed.toLowerCase() : trimmed)}
-              className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-panel2"
+              className="flex w-full items-center gap-2 rounded-btn px-3 py-2 text-left text-sm text-body hover:bg-surface-lavender"
             >
-              <span className="text-accent">→</span>
+              <span className="text-primary">→</span>
               <span>
-                Trace <span className="font-mono text-text">{trimmed}</span>
+                Trace <span className="font-mono text-heading">{trimmed}</span>
               </span>
             </button>
           )}
@@ -98,15 +97,15 @@ export function CommandPalette() {
               setOpen(false);
               router.push("/cases");
             }}
-            className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-panel2"
+            className="flex w-full items-center gap-2 rounded-btn px-3 py-2 text-left text-sm text-body hover:bg-surface-lavender"
           >
-            <span className="text-accent">→</span>
+            <span className="text-primary">→</span>
             <span>Go to cases</span>
           </button>
 
           {filteredRecents.length > 0 && (
-            <div className="mt-2 border-t border-border pt-2">
-              <div className="px-3 pb-1 text-[10px] uppercase tracking-widest text-dim">
+            <div className="mt-2 border-t border-soft-border pt-2">
+              <div className="px-3 pb-1 text-[10px] uppercase tracking-widest text-muted">
                 Recent lookups
               </div>
               {filteredRecents.map((r) => (
@@ -114,10 +113,10 @@ export function CommandPalette() {
                   key={r.address}
                   type="button"
                   onClick={() => go(r.address)}
-                  className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-panel2"
+                  className="flex w-full items-center gap-2 rounded-btn px-3 py-2 text-left text-sm hover:bg-surface-lavender"
                 >
-                  <span className="text-dim">◇</span>
-                  <span className="font-mono text-text">{shortAddr(r.address, 8, 6)}</span>
+                  <span className="text-muted">◇</span>
+                  <span className="font-mono text-heading">{shortAddr(r.address, 8, 6)}</span>
                   {r.label && <span className="text-xs text-muted">{r.label}</span>}
                 </button>
               ))}

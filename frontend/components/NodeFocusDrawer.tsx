@@ -16,9 +16,7 @@ const LEVEL_TONE: Record<string, "muted" | "warn" | "bad"> = {
 
 /** Clicking a non-root graph node opens this instead of a hard page
  * navigation — the investigator stays inside the current investigation and
- * only "opens" the new wallet as its own page if they deliberately choose to
- * (research finding: professional tools keep the graph as the surface you
- * stay inside, not something that navigates you away). */
+ * only "opens" the new wallet as its own page if they deliberately choose to. */
 export function NodeFocusDrawer({ address, onClose }: { address: string; onClose: () => void }) {
   const [attribution, setAttribution] = useState<AttributionResult | null>(null);
   const [risk, setRisk] = useState<RiskResult | null>(null);
@@ -53,19 +51,19 @@ export function NodeFocusDrawer({ address, onClose }: { address: string; onClose
   const top = attribution?.candidates[0];
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end bg-bg/60 backdrop-blur-[2px]" onClick={onClose}>
+    <div className="fixed inset-0 z-40 flex justify-end bg-white/60 backdrop-blur-sm" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex h-full w-full max-w-sm flex-col border-l border-borderStrong bg-panel shadow-2xl"
+        className="flex h-full w-full max-w-sm flex-col border-l border-soft-border bg-white shadow-card-hover"
       >
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <div className="flex items-center justify-between border-b border-soft-border px-4 py-3">
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-dim">inspecting</div>
-            <div className="font-mono text-xs text-text">{shortAddr(address, 10, 8)}</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted">inspecting</div>
+            <div className="font-mono text-xs text-heading">{shortAddr(address, 10, 8)}</div>
           </div>
           <button
             onClick={onClose}
-            className="rounded border border-border px-2 py-1 text-xs text-muted hover:border-accent/40 hover:text-accent"
+            className="rounded-btn border border-soft-border px-2.5 py-1 text-xs text-muted hover:bg-surface-lavender hover:text-primary"
           >
             close
           </button>
@@ -73,17 +71,17 @@ export function NodeFocusDrawer({ address, onClose }: { address: string; onClose
 
         <div className="flex-1 overflow-y-auto p-4">
           {loading && <p className="text-sm text-muted">Loading…</p>}
-          {error && <p className="text-sm text-bad">{error}</p>}
+          {error && <p className="text-sm text-bad-text">{error}</p>}
 
           {!loading && attribution && (
             <div className="space-y-4">
               <div>
-                <div className="text-[10px] uppercase tracking-widest text-dim">attribution</div>
+                <div className="text-[10px] uppercase tracking-widest text-muted">attribution</div>
                 {top ? (
                   <>
                     <div className="mt-1 flex items-baseline justify-between">
-                      <span className="font-display text-lg font-semibold text-gold">{top.vasp_name}</span>
-                      <span className="font-display text-xl font-bold text-good">{pct(top.probability, 1)}</span>
+                      <span className="font-display text-lg font-semibold text-primary">{top.vasp_name}</span>
+                      <span className="font-display text-xl font-bold text-good-text">{pct(top.probability, 1)}</span>
                     </div>
                     <Bar value={top.probability} tone="good" threshold={attribution.confidence_threshold} height="h-2" />
                   </>
@@ -97,13 +95,13 @@ export function NodeFocusDrawer({ address, onClose }: { address: string; onClose
               {risk && (
                 <div>
                   <div className="mb-1 flex items-center justify-between">
-                    <span className="text-[10px] uppercase tracking-widest text-dim">risk</span>
+                    <span className="text-[10px] uppercase tracking-widest text-muted">risk</span>
                     <Pill tone={LEVEL_TONE[risk.level] ?? "muted"}>{risk.level}</Pill>
                   </div>
                   {risk.indicators.length > 0 ? (
                     <ul className="space-y-1">
                       {risk.indicators.slice(0, 3).map((ind, i) => (
-                        <li key={i} className="text-xs text-muted">
+                        <li key={i} className="text-xs text-body">
                           <Pill tone="bad">{ind.category}</Pill> {ind.description}
                         </li>
                       ))}
@@ -116,10 +114,10 @@ export function NodeFocusDrawer({ address, onClose }: { address: string; onClose
 
               {top && top.evidence.length > 0 && (
                 <div>
-                  <div className="mb-1 text-[10px] uppercase tracking-widest text-dim">top evidence</div>
+                  <div className="mb-1 text-[10px] uppercase tracking-widest text-muted">top evidence</div>
                   <ul className="space-y-1.5">
                     {top.evidence.slice(0, 3).map((ev, i) => (
-                      <li key={i} className="text-xs text-text">
+                      <li key={i} className="text-xs text-heading">
                         {ev.description}
                       </li>
                     ))}
@@ -130,10 +128,10 @@ export function NodeFocusDrawer({ address, onClose }: { address: string; onClose
           )}
         </div>
 
-        <div className="border-t border-border p-4">
+        <div className="border-t border-soft-border p-4">
           <Link
             href={`/wallets/${address}`}
-            className="block rounded border border-accent/50 bg-accent/10 px-3 py-2 text-center text-xs uppercase tracking-widest text-accent hover:bg-accent/20"
+            className="block rounded-btn bg-primary-soft px-3 py-2.5 text-center text-xs font-medium uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
           >
             open full investigation ↗
           </Link>

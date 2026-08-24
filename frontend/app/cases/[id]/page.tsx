@@ -84,28 +84,28 @@ export default function CaseDetailPage({
     router.push("/cases");
   }
 
-  if (error) return <p className="text-sm text-bad">{error}</p>;
+  if (error) return <p className="text-sm text-bad-text">{error}</p>;
   if (!detail) return <p className="text-sm text-muted">Loading…</p>;
 
   return (
     <BentoGrid>
       <div className="col-span-4 md:col-span-12">
-        <Link href="/cases" className="text-xs text-muted hover:text-accent">
+        <Link href="/cases" className="text-xs font-medium text-primary hover:underline">
           ← cases
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <span className="font-mono text-xs text-dim">{caseRef(detail.id)}</span>
-          <h1 className="font-display text-[26px] font-semibold tracking-tight text-text">{detail.name}</h1>
+          <span className="font-mono text-xs text-muted">{caseRef(detail.id)}</span>
+          <h1 className="font-display text-[26px] font-bold tracking-tight text-heading">{detail.name}</h1>
           <Pill tone={STATUS_TONE[detail.status]}>{detail.status}</Pill>
           <PdfButton
             path={`/cases/${caseId}/report`}
-            className="ml-auto rounded-md border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-borderStrong hover:text-text"
+            className="ml-auto rounded-btn border border-soft-border px-3 py-1.5 text-xs text-muted transition-all hover:bg-surface-lavender hover:text-heading"
           >
             Report (PDF)
           </PdfButton>
           <button
             onClick={remove}
-            className="rounded-md border border-bad/40 px-3 py-1.5 text-xs text-bad hover:bg-bad/10"
+            className="rounded-btn bg-bad-fill px-3 py-1.5 text-xs font-medium text-bad-text transition-all hover:bg-bad-fill/80"
           >
             Delete
           </button>
@@ -115,18 +115,18 @@ export default function CaseDetailPage({
         )}
       </div>
 
-      <Tile title="Add finding / note" className="col-span-4 md:col-span-5">
-        <form onSubmit={addFinding} className="space-y-2">
+      <Tile title="Add finding / note" className="col-span-4 md:col-span-5" bodyClassName="p-6">
+        <form onSubmit={addFinding} className="space-y-3">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What did you find?"
-            className="w-full rounded-md border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
+            className="w-full rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-sm text-heading outline-none placeholder:text-muted transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft"
           />
           <select
             value={severity}
             onChange={(e) => setSeverity(e.target.value as FindingSeverity)}
-            className="w-full rounded-md border border-border bg-panel2 px-2 py-2 text-xs text-text outline-none focus:border-accent"
+            className="w-full rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-xs text-heading outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft"
           >
             {SEVERITIES.map((s) => (
               <option key={s} value={s}>
@@ -138,14 +138,14 @@ export default function CaseDetailPage({
             value={wallet}
             onChange={(e) => setWallet(e.target.value)}
             placeholder="Wallet address (optional)"
-            className="w-full rounded-md border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
+            className="w-full rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-sm text-heading outline-none placeholder:text-muted transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft"
           />
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Notes (optional)"
             rows={2}
-            className="w-full resize-none rounded-md border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
+            className="w-full resize-none rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-sm text-heading outline-none placeholder:text-muted transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft"
           />
           <Button type="submit" variant="primary" disabled={saving || !title.trim()} className="w-full">
             {saving ? "Adding…" : "Add"}
@@ -155,10 +155,8 @@ export default function CaseDetailPage({
 
       {/* Findings as a chain-of-custody spine — same visual grammar as the
           evidence chain on a wallet page: this case's record IS a chain of
-          evidence, accumulated over time. Order carries real meaning here
-          (chronological), so it stays one sequential tile, not scattered
-          into individual bento cells. */}
-      <Tile title={`Findings (${detail.findings.length})`} className="col-span-4 md:col-span-7">
+          evidence, accumulated over time. */}
+      <Tile title={`Findings (${detail.findings.length})`} className="col-span-4 md:col-span-7" bodyClassName="p-6">
         {detail.findings.length === 0 ? (
           <p className="text-sm text-muted">
             No findings yet. Add one above, or pin a wallet to this case from
@@ -166,25 +164,25 @@ export default function CaseDetailPage({
           </p>
         ) : (
           <ol className="relative space-y-4 pl-9">
-            <span className="absolute left-[13px] top-1 h-[calc(100%-0.5rem)] w-px bg-border" />
+            <span className="absolute left-[13px] top-1 h-[calc(100%-0.5rem)] w-px bg-soft-border" />
             {detail.findings.map((f) => (
               <li key={f.id} className="relative">
-                <span className="absolute -left-[30px] top-1 h-2.5 w-2.5 rounded-full border border-accent/60 bg-bg" />
+                <span className="absolute -left-[30px] top-1 h-2.5 w-2.5 rounded-full border-2 border-primary bg-white" />
                 <div className="flex items-center gap-2">
                   <Pill tone={SEV_TONE[f.severity]}>{f.severity}</Pill>
-                  <span className="font-display font-semibold text-text">{f.title}</span>
-                  <span className="ml-auto text-[10px] text-dim">{fmtTime(f.created_at)}</span>
+                  <span className="font-display font-semibold text-heading">{f.title}</span>
+                  <span className="ml-auto text-[10px] text-muted">{fmtTime(f.created_at)}</span>
                 </div>
                 {f.wallet_address && (
                   <Link
                     href={`/wallets/${f.wallet_address}`}
-                    className="mt-1 inline-block font-mono text-xs text-accent hover:underline"
+                    className="mt-1 inline-block font-mono text-xs text-primary hover:underline"
                   >
                     {shortAddr(f.wallet_address)} ↗
                   </Link>
                 )}
                 {f.description && (
-                  <p className="mt-1 text-[13px] leading-snug text-text">{f.description}</p>
+                  <p className="mt-1 text-[13px] leading-snug text-body">{f.description}</p>
                 )}
               </li>
             ))}

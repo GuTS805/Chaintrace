@@ -40,18 +40,18 @@ function EvidenceRow({
     <li
       onMouseEnter={() => ev.tx_hashes.length > 0 && onHover(ev.tx_hashes)}
       onMouseLeave={() => onHover(null)}
-      className="group -mx-6 px-6 py-4 transition-colors hover:bg-panel2"
+      className="group -mx-6 px-6 py-4 transition-colors hover:bg-surface-lavender"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] font-medium text-text">
+          <span className="text-[13px] font-medium text-heading">
             {SIGNAL_LABEL[ev.signal_type] ?? ev.signal_type}
           </span>
-          {multiCandidate && <Pill tone="gold">{row.vasp}</Pill>}
+          {multiCandidate && <Pill tone="info">{row.vasp}</Pill>}
         </div>
         <div className="flex items-center gap-3 text-[12px] tabular-nums">
-          <span className="text-dim">{strengthLabel(ev.weight, scale)}</span>
-          <span className={ev.weight >= 0 ? "text-muted" : "text-bad"}>
+          <span className="text-muted">{strengthLabel(ev.weight, scale)}</span>
+          <span className={ev.weight >= 0 ? "text-body" : "text-bad-text"}>
             {ev.weight >= 0 ? "+" : ""}
             {ev.weight.toFixed(3)}
           </span>
@@ -61,20 +61,20 @@ function EvidenceRow({
       {ev.tx_hashes.length > 0 && (
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
           {ev.tx_hashes.slice(0, 6).map((h) => (
-            <span key={h} className="font-mono text-[11px] text-dim">
+            <span key={h} className="font-mono text-[11px] text-mono">
               {shortAddr(h, 8, 6)}
             </span>
           ))}
           {ev.tx_hashes.length > 6 && (
-            <span className="text-[11px] text-dim">+{ev.tx_hashes.length - 6} more</span>
+            <span className="text-[11px] text-muted">+{ev.tx_hashes.length - 6} more</span>
           )}
-          <span className="text-[11px] text-dim opacity-0 transition-opacity group-hover:opacity-100">
+          <span className="text-[11px] text-muted opacity-0 transition-opacity group-hover:opacity-100">
             traced in graph ↦
           </span>
         </div>
       )}
       {ev.timestamps.length > 0 && (
-        <div className="mt-1 font-mono text-[11px] text-dim">
+        <div className="mt-1 font-mono text-[11px] text-muted">
           {fmtTime(ev.timestamps[0])}
           {ev.timestamps.length > 1 && ` → ${fmtTime(ev.timestamps[ev.timestamps.length - 1])}`}
         </div>
@@ -119,6 +119,12 @@ export function AttributionPanel({
 
   const scale = Math.max(1e-6, ...rows.map((r) => Math.abs(r.evidence.weight)));
 
+  const toneColor: Record<string, string> = {
+    good: "text-good-text",
+    warn: "text-warn-text",
+    muted: "text-muted",
+  };
+
   return (
     <Tile bodyClassName="p-8">
       {/* Verdict — the largest, most visually dominant element on the page. */}
@@ -130,39 +136,39 @@ export function AttributionPanel({
       </div>
 
       <div className="mt-3 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-        <div className="font-display text-[44px] font-semibold leading-[1.05] tracking-tight text-text">
+        <div className="font-display text-[44px] font-semibold leading-[1.05] tracking-tight text-heading">
           {top ? top.vasp_name : "—"}
         </div>
-        <div className={`font-display text-[56px] font-semibold leading-none tabular-nums text-${topTone}`}>
+        <div className={`font-display text-[56px] font-semibold leading-none tabular-nums ${toneColor[topTone] ?? "text-muted"}`}>
           {top ? pct(top.probability, 1) : "—"}
         </div>
       </div>
       {confidenceWord && <p className="mt-1 text-[13px] text-muted">{confidenceWord}</p>}
 
       <div className="mt-6">
-        <div className="h-px w-full overflow-hidden rounded-full bg-panel3">
+        <div className="h-px w-full overflow-hidden rounded-full bg-neutral-fill">
           <div
             className={`h-full transition-[width] duration-500 ease-out ${
-              topTone === "good" ? "bg-good" : topTone === "warn" ? "bg-warn" : "bg-muted"
+              topTone === "good" ? "bg-good-text" : topTone === "warn" ? "bg-warn-text" : "bg-muted"
             }`}
             style={{ width: `${(top ? Math.max(0, Math.min(1, top.probability)) : 0) * 100}%` }}
           />
         </div>
-        <div className="mt-1.5 flex justify-between text-[11px] text-dim">
+        <div className="mt-1.5 flex justify-between text-[11px] text-muted">
           <span>Calibrated probability</span>
           <span>Threshold {pct(result.confidence_threshold, 0)}</span>
         </div>
       </div>
 
       {result.explanation && (
-        <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-muted">{result.explanation}</p>
+        <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-body">{result.explanation}</p>
       )}
 
       {/* Evidence — unboxed rows, not cards-inside-a-card. */}
-      <div className="mt-10 border-t border-border pt-6">
+      <div className="mt-10 border-t border-soft-border pt-6">
         <div className="flex items-center justify-between">
           <Eyebrow>Why this attribution?</Eyebrow>
-          <span className="text-[11px] text-dim">
+          <span className="text-[11px] text-muted">
             {rows.length} signal{rows.length === 1 ? "" : "s"}
           </span>
         </div>
@@ -183,7 +189,7 @@ export function AttributionPanel({
         {rows.length === 0 ? (
           <p className="mt-4 text-[13px] text-muted">No evidence signals fired for any candidate.</p>
         ) : (
-          <ul className="mt-2 max-h-[440px] divide-y divide-border overflow-y-auto">
+          <ul className="mt-2 max-h-[440px] divide-y divide-soft-border overflow-y-auto">
             {rows.map((row, i) => (
               <EvidenceRow
                 key={`${row.vasp}-${row.evidence.signal_type}-${i}`}
@@ -197,7 +203,7 @@ export function AttributionPanel({
         )}
       </div>
 
-      <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-[11px] text-dim">
+      <div className="mt-6 flex items-center justify-between border-t border-soft-border pt-4 text-[11px] text-muted">
         <span>Model · {result.model_version}</span>
         <span>No LLM in attribution path</span>
       </div>

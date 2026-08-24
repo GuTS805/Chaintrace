@@ -24,8 +24,7 @@ export default function WalletPage({
   // are case-sensitive/checksummed and must not be lowercased.
   const address = decoded.toLowerCase().startsWith("0x") ? decoded.toLowerCase() : decoded;
   // A live trace tells us the real chain queried; until then, EVM addresses
-  // default to "ethereum" in the badge (0x… format is shared across EVM
-  // chains, so it can't be inferred from shape alone).
+  // default to "ethereum" in the badge.
   const [resolvedChain, setResolvedChain] = useState<string | null>(null);
   const chain = (resolvedChain ?? (address.startsWith("T") ? "tron" : "ethereum")).toUpperCase();
   const [attribution, setAttribution] = useState<AttributionResult | null>(null);
@@ -35,9 +34,7 @@ export default function WalletPage({
   const [loading, setLoading] = useState(true);
 
   // Cross-highlight state, shared by AttributionPanel/RiskPanel (source) and
-  // GraphView (destination) — hovering evidence or a risk indicator traces
-  // the matching edge/node in the graph in place, instead of three panels
-  // that don't reference each other.
+  // GraphView (destination).
   const [highlightedTx, setHighlightedTx] = useState<Set<string>>(new Set());
   const [highlightedNode, setHighlightedNode] = useState<string | null>(null);
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
@@ -85,12 +82,12 @@ export default function WalletPage({
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <Eyebrow>Trace wallet · {chain}</Eyebrow>
-          <h1 className="mt-2 break-all font-mono text-[15px] text-text">{address}</h1>
+          <h1 className="mt-2 break-all font-mono text-[15px] text-mono">{address}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <PdfButton
             path={`/wallets/${address}/report`}
-            className="rounded-md border border-border px-3 py-2 text-[12px] text-muted transition-colors hover:border-borderStrong hover:text-text"
+            className="rounded-btn border border-soft-border px-3 py-2 text-[12px] text-muted transition-all hover:bg-surface-lavender hover:text-heading"
           >
             Report (PDF)
           </PdfButton>
@@ -99,7 +96,7 @@ export default function WalletPage({
             attribution.candidates.length > 0 && (
               <PdfButton
                 path={`/wallets/${address}/disclosure-request`}
-                className="rounded-md bg-gold px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-gold/90"
+                className="rounded-btn bg-primary px-3 py-2 text-[12px] font-medium text-white shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
               >
                 Prepare disclosure request (SAHYOG)
               </PdfButton>
@@ -114,10 +111,10 @@ export default function WalletPage({
       {loading && <p className="text-sm text-muted">Tracing…</p>}
       {error && (
         <Tile title="Error">
-          <p className="text-sm text-bad">{error}</p>
+          <p className="text-sm text-bad-text">{error}</p>
           <p className="mt-2 text-xs text-muted">
-            Start the backend (<code className="text-text">make dev</code>) and
-            seed data (<code className="text-text">make seed-demo</code>).
+            Start the backend (<code className="rounded-lg bg-surface-lavender px-1.5 py-0.5 font-mono text-mono">make dev</code>) and
+            seed data (<code className="rounded-lg bg-surface-lavender px-1.5 py-0.5 font-mono text-mono">make seed-demo</code>).
           </p>
         </Tile>
       )}
@@ -133,10 +130,6 @@ export default function WalletPage({
       )}
 
       {!loading && !error && !isEmpty && (
-        // Verdict, then evidence, then the graph — each given the full page
-        // width to breathe, in the order an investigator actually reads them
-        // (wallet → attribution → confidence → evidence → graph → risk →
-        // action), instead of packed side-by-side panels competing for room.
         <div className="space-y-10">
           {attribution && (
             <AttributionPanel
