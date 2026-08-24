@@ -11,42 +11,42 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // ── Surfaces ──
-        surface: "#FFFFFF",
-        "surface-lavender": "#F4F1FE",
-        "surface-blush": "#FDF1F6",
+        // ── Surfaces ── (near-black workstation body)
+        surface: "#131313",
+        "surface-lavender": "#1C1930",
+        "surface-blush": "#1A1712",
 
-        // ── Brand & accent ──
-        primary: "#6C5DD3",
-        "primary-hover": "#5A4BC4",
-        "primary-soft": "#E9E5FB",
-        "accent-pink": "#F0A6CA",
+        // ── Brand & accent — amber/gold, the single warm accent ──
+        primary: "#F2A93B",
+        "primary-hover": "#E0972B",
+        "primary-soft": "#2E230F",
+        "accent-pink": "#E0972B",
 
         // ── Text ──
-        heading: "#2B2B43",
-        body: "#5F5F7E",
-        muted: "#9B9BB4",
-        mono: "#7C6FD9",
+        heading: "#F3F1EA",
+        body: "#B4AFA4",
+        muted: "#847F73",
+        mono: "#BBA9F5",
 
         // ── Semantic fills ──
-        "good-fill": "#DFF5E9",
-        "good-text": "#1E8A5E",
-        "warn-fill": "#FDEEDC",
-        "warn-text": "#C97B1D",
-        "neutral-fill": "#EEEEF4",
-        "neutral-text": "#6B7280",
-        "info-fill": "#E9E5FB",
-        "info-text": "#6C5DD3",
-        "bad-fill": "#FEE2E2",
-        "bad-text": "#EF4444",
+        "good-fill": "#12301F",
+        "good-text": "#3ED18E",
+        "warn-fill": "#332108",
+        "warn-text": "#F2A93B",
+        "neutral-fill": "#1C1C1E",
+        "neutral-text": "#9A968D",
+        "info-fill": "#1C1930",
+        "info-text": "#BBA9F5",
+        "bad-fill": "#341313",
+        "bad-text": "#F16B5C",
 
         // ── Borders ──
-        "soft-border": "#E7E4F5",
+        "soft-border": "rgba(243, 241, 234, 0.1)",
 
         // ── Legacy compat aliases (keeps old references compiling) ──
-        good: "#1E8A5E",
-        warn: "#C97B1D",
-        bad: "#EF4444",
+        good: "#3ED18E",
+        warn: "#F2A93B",
+        bad: "#F16B5C",
       },
       fontFamily: {
         display: ["var(--font-poppins)", "Poppins", "ui-sans-serif", "system-ui", "sans-serif"],
@@ -62,10 +62,10 @@ const config: Config = {
         ],
       },
       boxShadow: {
-        card: "0 20px 40px -12px rgba(108, 93, 211, 0.12)",
-        "card-hover": "0 28px 56px -12px rgba(108, 93, 211, 0.20)",
-        button: "0 12px 24px -8px rgba(108, 93, 211, 0.45)",
-        nav: "0 8px 32px -8px rgba(43, 43, 67, 0.08)",
+        card: "0 20px 40px -14px rgba(0, 0, 0, 0.55)",
+        "card-hover": "0 28px 56px -14px rgba(0, 0, 0, 0.65)",
+        button: "0 12px 24px -8px rgba(242, 169, 59, 0.35)",
+        nav: "0 8px 32px -8px rgba(0, 0, 0, 0.5)",
       },
       borderRadius: {
         card: "20px",
@@ -75,9 +75,9 @@ const config: Config = {
       },
       keyframes: {
         "pulse-ring": {
-          "0%": { boxShadow: "0 0 0 0 rgba(108,93,211,0.35)" },
-          "70%": { boxShadow: "0 0 0 6px rgba(108,93,211,0)" },
-          "100%": { boxShadow: "0 0 0 0 rgba(108,93,211,0)" },
+          "0%": { boxShadow: "0 0 0 0 rgba(242,169,59,0.35)" },
+          "70%": { boxShadow: "0 0 0 6px rgba(242,169,59,0)" },
+          "100%": { boxShadow: "0 0 0 0 rgba(242,169,59,0)" },
         },
         "fade-up": {
           "0%": { opacity: "0", transform: "translateY(12px)" },

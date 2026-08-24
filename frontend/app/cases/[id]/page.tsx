@@ -152,7 +152,7 @@ export default function CaseDetailPage({
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Listbox.Options className="absolute z-10 mt-1.5 w-full overflow-auto rounded-card bg-white p-1.5 shadow-card-hover focus:outline-none">
+                <Listbox.Options className="absolute z-10 mt-1.5 w-full overflow-auto rounded-card border border-soft-border bg-surface p-1.5 shadow-card-hover focus:outline-none">
                   {SEVERITIES.map((s) => (
                     <Listbox.Option
                       key={s}
@@ -203,7 +203,7 @@ export default function CaseDetailPage({
             <span className="absolute left-[13px] top-1 h-[calc(100%-0.5rem)] w-px bg-soft-border" />
             {detail.findings.map((f) => (
               <li key={f.id} className="relative">
-                <span className="absolute -left-[30px] top-1 h-2.5 w-2.5 rounded-full border-2 border-primary bg-white" />
+                <span className="absolute -left-[30px] top-1 h-2.5 w-2.5 rounded-full border-2 border-primary bg-surface" />
                 <div className="flex items-center gap-2">
                   <Pill tone={SEV_TONE[f.severity]}>{f.severity}</Pill>
                   <span className="font-display font-semibold text-heading">{f.title}</span>

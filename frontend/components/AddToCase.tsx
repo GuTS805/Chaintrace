@@ -74,7 +74,7 @@ export function AddToCase({
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                 >
-                  <Listbox.Options className="absolute z-10 mt-1.5 max-h-56 w-full overflow-auto rounded-card bg-white p-1.5 text-[13px] shadow-card-hover focus:outline-none">
+                  <Listbox.Options className="absolute z-10 mt-1.5 max-h-56 w-full overflow-auto rounded-card border border-soft-border bg-surface p-1.5 text-[13px] shadow-card-hover focus:outline-none">
                     {cases.map((c) => (
                       <Listbox.Option
                         key={c.id}

@@ -51,7 +51,7 @@ export function OfficerBadge() {
         <DropdownMenu.Content
           align="end"
           sideOffset={10}
-          className="z-50 w-56 overflow-hidden rounded-card bg-white p-1.5 shadow-card-hover data-[state=open]:animate-fade-up"
+          className="z-50 w-56 overflow-hidden rounded-card border border-soft-border bg-surface p-1.5 shadow-card-hover data-[state=open]:animate-fade-up"
         >
           <div className="flex items-center gap-2 px-3 py-2.5">
             <span className="h-2 w-2 shrink-0 rounded-full bg-[#34C77B]" />

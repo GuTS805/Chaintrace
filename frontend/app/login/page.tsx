@@ -36,7 +36,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="rounded-hero bg-white p-8 shadow-card"
+        className="rounded-hero border border-soft-border bg-surface p-8 shadow-card"
       >
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 w-fit">

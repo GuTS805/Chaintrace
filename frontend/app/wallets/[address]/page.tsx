@@ -112,7 +112,7 @@ export default function WalletPage({
             attribution.candidates.length > 0 && (
               <PdfButton
                 path={`/wallets/${address}/disclosure-request`}
-                className="flex items-center gap-1.5 rounded-btn bg-primary px-3 py-2 text-[12px] font-medium text-white shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
+                className="flex items-center gap-1.5 rounded-btn bg-primary px-3 py-2 text-[12px] font-medium text-[#1A1206] shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
               >
                 <Scale size={13} />
                 Prepare disclosure request (SAHYOG)
@@ -148,28 +148,35 @@ export default function WalletPage({
 
       {!loading && !error && !isEmpty && (
         <div className="space-y-10">
-          {attribution && (
-            <FadeIn index={0}>
-              <AttributionPanel
-                result={attribution}
-                onHoverEvidence={(hashes) => setHighlightedTx(new Set(hashes ?? []))}
-              />
-            </FadeIn>
-          )}
-
-          {graph && (
-            <FadeIn index={1}>
-              <GraphView
-                graph={graph}
-                highlightedTx={highlightedTx}
-                highlightedNode={highlightedNode}
-                riskAddresses={riskAddresses}
-                onNodeFocus={(addr, isRoot) => {
-                  if (!isRoot) setFocusedNode(addr);
-                }}
-              />
-            </FadeIn>
-          )}
+          {/* Details on the left, the graph on the right — the evidence
+              chain and the diagram it references, side by side. */}
+          <BentoGrid>
+            <div className="col-span-4 md:col-span-5">
+              {attribution && (
+                <FadeIn index={0}>
+                  <AttributionPanel
+                    result={attribution}
+                    onHoverEvidence={(hashes) => setHighlightedTx(new Set(hashes ?? []))}
+                  />
+                </FadeIn>
+              )}
+            </div>
+            <div className="col-span-4 md:col-span-7">
+              {graph && (
+                <FadeIn index={1}>
+                  <GraphView
+                    graph={graph}
+                    highlightedTx={highlightedTx}
+                    highlightedNode={highlightedNode}
+                    riskAddresses={riskAddresses}
+                    onNodeFocus={(addr, isRoot) => {
+                      if (!isRoot) setFocusedNode(addr);
+                    }}
+                  />
+                </FadeIn>
+              )}
+            </div>
+          </BentoGrid>
 
           <FadeIn index={2}>
             <BentoGrid>

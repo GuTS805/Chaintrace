@@ -4,13 +4,22 @@ import { useMemo } from "react";
 import ReactFlow, {
   Background,
   Controls,
+  Handle,
   MarkerType,
   MiniMap,
   Position,
   type Edge,
   type Node,
+  type NodeProps,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import {
+  AlertTriangle,
+  Building2,
+  Crosshair,
+  Waypoints,
+  Wallet as WalletIcon,
+} from "lucide-react";
 import type { GraphNode, GraphResult } from "@/lib/types";
 import { assetAmount, formatAsset, shortAddr } from "@/lib/format";
 import { Eyebrow, Pill, Tile } from "./ui";
@@ -18,11 +27,27 @@ import { Eyebrow, Pill, Tile } from "./ui";
 type Role = "root" | "risk" | "bridge" | "vasp" | "plain";
 
 const ROLE_COLOR: Record<Role, string> = {
-  root: "#6C5DD3",
-  risk: "#EF4444",
-  bridge: "#0EA5E9",
-  vasp: "#1E8A5E",
-  plain: "#9B9BB4",
+  root: "#F2A93B",
+  risk: "#F16B5C",
+  bridge: "#38BDF8",
+  vasp: "#3ED18E",
+  plain: "#847F73",
+};
+
+const ROLE_ICON: Record<Role, typeof WalletIcon> = {
+  root: Crosshair,
+  risk: AlertTriangle,
+  bridge: Waypoints,
+  vasp: Building2,
+  plain: WalletIcon,
+};
+
+const ROLE_LABEL: Record<Role, string> = {
+  root: "Subject wallet",
+  risk: "Risk exposure",
+  bridge: "Bridge / mixer",
+  vasp: "Exchange (VASP)",
+  plain: "Wallet",
 };
 
 function roleOf(n: GraphNode): Role {
@@ -34,32 +59,76 @@ function roleOf(n: GraphNode): Role {
   return "plain";
 }
 
-// Light pastel tints for cluster grouping
-const CLUSTER_TINTS = ["#F4F1FE", "#FDF1F6", "#F0F9F4", "#FEF3E2", "#EFF6FF", "#F5F0FF"];
+// Low-key dark tints for cluster grouping — same hue family as the node's
+// role color, just enough to read as "grouped" against the near-black canvas.
+const CLUSTER_TINTS = ["#1C1930", "#231C14", "#122619", "#2A1414", "#0F1E26", "#1E1A28"];
 
 function clusterTint(clusterId: number | null | undefined): string {
-  if (clusterId == null) return "#FFFFFF";
+  if (clusterId == null) return "#161616";
   return CLUSTER_TINTS[clusterId % CLUSTER_TINTS.length];
 }
 
-function nodeStyle(role: Role, clusterId: number | null | undefined, isHighlighted: boolean): React.CSSProperties {
-  const color = ROLE_COLOR[role];
-  const special = role !== "plain";
-  return {
-    background: clusterTint(clusterId),
-    border: `${special || isHighlighted ? 2 : 1}px solid ${isHighlighted ? "#6C5DD3" : color}`,
-    borderRadius: 12,
-    color: "#2B2B43",
-    fontSize: 11,
-    fontFamily: "var(--font-jetbrains-mono), ui-monospace, monospace",
-    padding: "8px 12px",
-    width: 178,
-    boxShadow: isHighlighted
-      ? "0 0 0 4px rgba(108,93,211,0.15)"
-      : "0 4px 12px -4px rgba(108,93,211,0.08)",
-    transition: "box-shadow 150ms ease, border-color 150ms ease",
-  };
+interface WalletNodeData {
+  address: string;
+  role: Role;
+  title: string;
+  clusterId: number | null | undefined;
+  flagged: boolean;
+  isHighlighted: boolean;
+  isRoot: boolean;
 }
+
+/** A wallet/exchange card, not a generic React Flow box — an icon badge for
+ * what the address *is*, its role spelled out, and a persistent role-tinted
+ * glow so the graph reads at a glance before you look at any single node. */
+function WalletNode({ data }: NodeProps<WalletNodeData>) {
+  const color = ROLE_COLOR[data.role];
+  const Icon = ROLE_ICON[data.role];
+  const special = data.role !== "plain";
+
+  return (
+    <div
+      className="relative flex items-center gap-2.5 rounded-2xl px-3.5 py-3 transition-shadow duration-150"
+      style={{
+        background: clusterTint(data.clusterId),
+        border: `${special || data.isHighlighted ? 2 : 1}px solid ${data.isHighlighted ? "#F2A93B" : color}`,
+        width: 208,
+        boxShadow: data.isHighlighted
+          ? "0 0 0 5px rgba(242,169,59,0.16), 0 8px 24px -8px rgba(242,169,59,0.35)"
+          : `0 8px 20px -10px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.2), 0 0 22px -6px ${color}33`,
+      }}
+    >
+      <Handle type="target" position={Position.Left} style={{ opacity: 0, left: -2 }} />
+      <Handle type="source" position={Position.Right} style={{ opacity: 0, right: -2 }} />
+
+      {data.flagged && (
+        <span
+          className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full border-2 border-[#0A0A0A] bg-bad-text"
+          title="Risk indicator on this address"
+        />
+      )}
+
+      <div
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+        style={{ background: `${color}22`, color }}
+      >
+        <Icon size={15} />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="font-mono text-[11px] font-medium text-heading">{shortAddr(data.address)}</div>
+        <div className="mt-0.5 truncate text-[10px] font-semibold" style={{ color }}>
+          {data.title || ROLE_LABEL[data.role]}
+        </div>
+        {data.clusterId != null && (
+          <div className="mt-0.5 text-[9px] text-muted">cluster #{data.clusterId}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const nodeTypes = { wallet: WalletNode };
 
 export function GraphView({
   graph,
@@ -84,39 +153,25 @@ export function GraphView({
     const nodeIds = new Set(graph.nodes.map((n) => n.address));
     const roleByAddr = new Map(graph.nodes.map((n) => [n.address, roleOf(n)]));
 
-    const rfNodes: Node[] = graph.nodes.map((n) => {
+    const rfNodes: Node<WalletNodeData>[] = graph.nodes.map((n) => {
       const peers = byDepth.get(n.depth) ?? [];
       const idx = peers.indexOf(n);
       const role = roleOf(n);
-      const title = n.vasp_name ?? n.label_name ?? "";
-      const flagged = riskAddresses.has(n.address);
       const isHl = highlightedNode === n.address;
       return {
         id: n.address,
-        position: { x: 40 + n.depth * 250, y: 30 + idx * 84 },
+        type: "wallet",
+        position: { x: 40 + n.depth * 280, y: 30 + idx * 100 },
         data: {
-          label: (
-            <div className="relative">
-              {flagged && (
-                <span
-                  className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-bad-text"
-                  title="Risk indicator on this address"
-                />
-              )}
-              <div>{shortAddr(n.address)}</div>
-              {title && (
-                <div style={{ color: ROLE_COLOR[role], marginTop: 2, fontWeight: 600 }}>{title}</div>
-              )}
-              {n.cluster_id != null && (
-                <div style={{ color: "#9B9BB4", marginTop: 2, fontSize: 9 }}>
-                  cluster #{n.cluster_id}
-                </div>
-              )}
-            </div>
-          ),
+          address: n.address,
+          role,
+          title: n.vasp_name ?? n.label_name ?? "",
+          clusterId: n.cluster_id,
+          flagged: riskAddresses.has(n.address),
+          isHighlighted: isHl,
+          isRoot: n.depth === 0,
         },
-        className: isHl ? "animate-pulse-ring rounded-xl" : undefined,
-        style: nodeStyle(role, n.cluster_id, isHl),
+        className: isHl ? "animate-pulse-ring rounded-2xl" : undefined,
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
       };
@@ -132,17 +187,25 @@ export function GraphView({
       const width = Math.max(1, Math.min(4, 1 + Math.log10(1 + amt)));
       const toVasp = roleByAddr.get(e.to_address) === "vasp";
       const isHl = highlightedTx.has(e.tx_hash);
-      const stroke = isHl ? "#6C5DD3" : toVasp ? "#1E8A5E" : "#D5D0F0";
+      const stroke = isHl ? "#F2A93B" : toVasp ? "#3ED18E" : "#3A3A3A";
       rfEdges.push({
         id: e.tx_hash,
         source: e.from_address,
         target: e.to_address,
+        type: "smoothstep",
+        pathOptions: { borderRadius: 16 },
         label: formatAsset(e.value_wei, e.asset),
-        labelStyle: { fill: isHl ? "#6C5DD3" : "#9B9BB4", fontSize: 9, fontWeight: isHl ? 600 : 400 },
-        labelBgStyle: { fill: "#FFFFFF", fillOpacity: 0.9 },
+        labelStyle: {
+          fill: isHl ? "#F2A93B" : "#B4AFA4",
+          fontSize: 10,
+          fontWeight: isHl ? 700 : 500,
+        },
+        labelBgStyle: { fill: "#131313", fillOpacity: 1 },
+        labelBgPadding: [6, 3],
+        labelBgBorderRadius: 5,
         style: { stroke, strokeWidth: isHl ? width + 1.5 : width },
         className: isHl ? "trace-edge" : undefined,
-        markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 16, height: 16 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 18, height: 18 },
         animated: toVasp && !isHl,
         zIndex: isHl ? 10 : 0,
       });
@@ -167,6 +230,7 @@ export function GraphView({
           <ReactFlow
             nodes={nodes}
             edges={edges}
+            nodeTypes={nodeTypes}
             onNodeClick={(_, node) => onNodeFocus(node.id, node.id === graph.root)}
             nodesDraggable={false}
             nodesConnectable={false}
@@ -174,28 +238,28 @@ export function GraphView({
             minZoom={0.2}
             proOptions={{ hideAttribution: true }}
           >
-            <Background color="#E7E4F5" gap={28} />
+            <Background color="#1C1C1C" gap={28} />
             <Controls
               showInteractive={false}
-              className="!rounded-btn !border-soft-border !bg-white !shadow-card [&_button]:!border-soft-border [&_button]:!bg-white [&_button]:!fill-muted [&_button]:hover:!bg-surface-lavender"
+              className="!rounded-btn !border-soft-border !bg-surface !shadow-card [&_button]:!border-soft-border [&_button]:!bg-surface [&_button]:!fill-muted [&_button]:hover:!bg-surface-lavender"
             />
             <MiniMap
               pannable
               zoomable
               nodeColor={(n) => {
                 const gn = graph.nodes.find((x) => x.address === n.id);
-                return gn ? ROLE_COLOR[roleOf(gn)] : "#9B9BB4";
+                return gn ? ROLE_COLOR[roleOf(gn)] : "#847F73";
               }}
-              maskColor="rgba(255,255,255,0.75)"
-              style={{ background: "#FFFFFF", border: "1px solid #E7E4F5", borderRadius: 12 }}
+              maskColor="rgba(10,10,10,0.75)"
+              style={{ background: "#131313", border: "1px solid rgba(243,241,234,0.1)", borderRadius: 12 }}
             />
           </ReactFlow>
         )}
       </div>
       <p className="pt-4 text-[11px] text-muted">
-        Click a node to inspect inline · root <span className="text-primary">violet</span> · attributed{" "}
+        Click a node to inspect inline · root <span className="text-primary">gold</span> · attributed{" "}
         <span className="text-good-text">green</span> · mixer <span className="text-bad-text">red</span> · bridge{" "}
-        <span style={{ color: "#0EA5E9" }}>blue</span> · hovering evidence traces the matching edge here
+        <span style={{ color: "#38BDF8" }}>blue</span> · hovering evidence traces the matching edge here
       </p>
     </Tile>
   );

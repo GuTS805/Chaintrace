@@ -103,10 +103,10 @@ export default function CasesPage() {
               {/* Empty state illustration */}
               <div className="mb-4 flex h-[120px] w-[120px] items-center justify-center rounded-full bg-primary-soft">
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-                  <rect x="10" y="14" width="28" height="24" rx="4" stroke="#6C5DD3" strokeWidth="2" fill="#E9E5FB" />
-                  <path d="M10 22h28" stroke="#6C5DD3" strokeWidth="2" />
-                  <circle cx="24" cy="32" r="4" fill="#F0A6CA" />
-                  <path d="M24 28v8M20 32h8" stroke="#6C5DD3" strokeWidth="1.5" strokeLinecap="round" />
+                  <rect x="10" y="14" width="28" height="24" rx="4" stroke="#F2A93B" strokeWidth="2" fill="#2E230F" />
+                  <path d="M10 22h28" stroke="#F2A93B" strokeWidth="2" />
+                  <circle cx="24" cy="32" r="4" fill="#BBA9F5" />
+                  <path d="M24 28v8M20 32h8" stroke="#F2A93B" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
               </div>
               <p className="text-[14px] text-body">
