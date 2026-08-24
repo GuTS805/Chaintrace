@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { pushRecent } from "@/lib/recents";
 
 export function WalletSearch({
   initial = "",
@@ -20,7 +21,10 @@ export function WalletSearch({
     // (and other base58) addresses are case-sensitive/checksummed, so leave
     // them untouched.
     const addr = trimmed.toLowerCase().startsWith("0x") ? trimmed.toLowerCase() : trimmed;
-    if (addr) router.push(`/wallets/${addr}`);
+    if (addr) {
+      pushRecent(addr);
+      router.push(`/wallets/${addr}`);
+    }
   }
 
   return (

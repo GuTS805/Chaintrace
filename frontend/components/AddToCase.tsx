@@ -15,6 +15,7 @@ export function AddToCase({
 }) {
   const [cases, setCases] = useState<CaseOut[]>([]);
   const [selected, setSelected] = useState<string>("");
+  const [note, setNote] = useState("");
   const [status, setStatus] = useState<string>("");
 
   useEffect(() => {
@@ -27,51 +28,61 @@ export function AddToCase({
       .catch(() => setStatus("Could not load cases."));
   }, []);
 
+  const top = attribution?.candidates[0];
+  const defaultSummary = top
+    ? `Attributed to ${top.vasp_name} (${pct(top.probability, 1)})`
+    : "No confident attribution.";
+
   async function attach() {
     if (!selected) return;
-    setStatus("Saving…");
-    const top = attribution?.candidates[0];
+    setStatus("Pinning…");
     try {
       await api.addFinding(Number(selected), {
         title: `Wallet ${shortAddr(address)}`,
         wallet_address: address,
         severity: attribution?.insufficient_evidence ? "INFO" : "MEDIUM",
-        description: top
-          ? `Attributed to ${top.vasp_name} (${pct(top.probability, 1)})`
-          : "No confident attribution.",
+        description: note.trim() || defaultSummary,
         evidence: attribution ? { model_version: attribution.model_version } : undefined,
       });
-      setStatus("Attached to case.");
+      setStatus("Pinned to case.");
+      setNote("");
     } catch {
-      setStatus("Failed to attach.");
+      setStatus("Failed to pin.");
     }
   }
 
   return (
-    <Panel title="Case">
+    <Panel title="Pin to case">
       {cases.length === 0 ? (
-        <p className="text-xs text-muted">
-          No cases yet. Create one under “cases”.
-        </p>
+        <p className="text-xs text-muted">No cases yet. Create one under “cases”.</p>
       ) : (
-        <div className="flex items-center gap-2">
-          <select
-            value={selected}
-            onChange={(e) => setSelected(e.target.value)}
-            className="flex-1 rounded border border-border bg-panel2 px-2 py-1.5 text-xs outline-none focus:border-accent"
-          >
-            {cases.map((c) => (
-              <option key={c.id} value={c.id}>
-                #{c.id} · {c.name}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={attach}
-            className="rounded border border-accent/50 bg-accent/10 px-3 py-1.5 text-xs text-accent hover:bg-accent/20"
-          >
-            attach
-          </button>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <select
+              value={selected}
+              onChange={(e) => setSelected(e.target.value)}
+              className="flex-1 rounded border border-border bg-panel2 px-2 py-1.5 text-xs outline-none focus:border-accent"
+            >
+              {cases.map((c) => (
+                <option key={c.id} value={c.id}>
+                  #{c.id} · {c.name}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={attach}
+              className="rounded border border-accent/50 bg-accent/10 px-3 py-1.5 text-xs text-accent hover:bg-accent/20"
+            >
+              pin
+            </button>
+          </div>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={`Why does this matter? (default: "${defaultSummary}")`}
+            rows={2}
+            className="w-full resize-none rounded border border-border bg-panel2 px-2 py-1.5 text-xs text-text outline-none placeholder:text-dim focus:border-accent"
+          />
         </div>
       )}
       {status && <p className="mt-2 text-[11px] text-muted">{status}</p>}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { Mark } from "@/components/Mark";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,8 +29,8 @@ export default function LoginPage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-sm flex-col justify-center">
       <div className="mb-6 text-center">
-        <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-md border border-accent/50 text-lg text-accent">
-          ◆
+        <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-lg border border-border bg-panel">
+          <Mark size={26} />
         </div>
         <h1 className="font-display text-lg font-semibold text-text">
           CHAIN<span className="text-accent">TRACE</span>
@@ -41,10 +42,10 @@ export default function LoginPage() {
 
       <form
         onSubmit={submit}
-        className="space-y-3 rounded-md border border-border bg-panel p-5 shadow-panel"
+        className="space-y-3 rounded-lg border border-border bg-panel p-5 shadow-panel"
       >
         <div>
-          <label className="mb-1 block text-[10px] uppercase tracking-widest text-muted">
+          <label className="mb-1 block text-[10px] uppercase tracking-widest text-dim">
             Username
           </label>
           <input
@@ -52,11 +53,11 @@ export default function LoginPage() {
             onChange={(e) => setUsername(e.target.value)}
             autoFocus
             autoComplete="username"
-            className="w-full rounded border border-border bg-panel2 px-3 py-2 text-sm outline-none focus:border-accent"
+            className="w-full rounded border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none focus:border-accent"
           />
         </div>
         <div>
-          <label className="mb-1 block text-[10px] uppercase tracking-widest text-muted">
+          <label className="mb-1 block text-[10px] uppercase tracking-widest text-dim">
             Password
           </label>
           <input
@@ -64,7 +65,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
-            className="w-full rounded border border-border bg-panel2 px-3 py-2 text-sm outline-none focus:border-accent"
+            className="w-full rounded border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none focus:border-accent"
           />
         </div>
 
@@ -73,7 +74,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading || !username || !password}
-          className="w-full rounded border border-accent/50 bg-accent/10 py-2 text-xs uppercase tracking-widest text-accent hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full rounded border border-accent/50 bg-accent/10 py-2 text-xs uppercase tracking-widest text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>

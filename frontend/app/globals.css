@@ -1,38 +1,39 @@
 /* Runtime font load (keeps the production build offline-safe; falls back to the
-   mono/sans stacks in tailwind.config if the network is unavailable). */
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap");
+   sans/mono stacks in tailwind.config if the network is unavailable). */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html,
 body {
-  background-color: #f6f7f9;
-  color: #0f1720;
+  background-color: #0a0b10;
+  color: #e7e7f0;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
-  /* Faint blueprint grid — instrument backdrop, not decoration. */
+  /* Faint instrument-panel grid, barely visible — depth, not decoration. */
   background-image:
-    linear-gradient(#eceff4 1px, transparent 1px),
-    linear-gradient(90deg, #eceff4 1px, transparent 1px);
-  background-size: 44px 44px;
-  background-position: -1px -1px;
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139, 124, 255, 0.08), transparent),
+    linear-gradient(#101219 1px, transparent 1px),
+    linear-gradient(90deg, #101219 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+  background-position: 0 0, -1px -1px, -1px -1px;
 }
 
-/* Focus ring — visible for keyboard users across all interactives. */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid #4f46e5;
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #8b7cff;
   outline-offset: 2px;
   border-radius: 3px;
 }
@@ -42,18 +43,32 @@ textarea:focus-visible {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #f6f7f9;
+  background: #0a0b10;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d8dee7;
+  background: #272a3b;
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #c2cad6;
+  background: #3a3e56;
 }
 
 .react-flow__attribution {
   display: none;
+}
+
+/* The "trace thread" signature: an animated dashed overlay drawn along a
+   graph edge when its evidence row is hovered — literally the redesign's
+   thesis (evidence and graph reference each other in place) made visible. */
+.trace-edge path {
+  stroke-dasharray: 6 6;
+  animation: trace-dash 0.6s linear infinite;
+}
+
+@keyframes trace-dash {
+  to {
+    stroke-dashoffset: -12;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

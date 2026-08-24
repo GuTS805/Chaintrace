@@ -1,23 +1,23 @@
 import Link from "next/link";
 import { WalletSearch } from "@/components/WalletSearch";
-import { Pill } from "@/components/ui";
+import { Pill, Kbd } from "@/components/ui";
 import { DEMO_WALLETS, shortAddr } from "@/lib/format";
 
-const OUTCOME_TONE: Record<string, "good" | "warn" | "accent" | "muted" | "vasp"> = {
+const OUTCOME_TONE: Record<string, "good" | "warn" | "accent" | "muted" | "gold"> = {
   "clean attribution (Binance)": "good",
   "peel chain → Kraken": "warn",
   "insufficient evidence": "muted",
   "ambiguous split": "accent",
   "real: Kraken deposit": "good",
   "real: Binance deposit": "good",
-  "real: multi-chain": "vasp",
+  "real: multi-chain": "gold",
 };
 
 export default function Home() {
   return (
     <div className="mx-auto max-w-4xl space-y-10 pt-6">
       <section className="space-y-5">
-        <div className="text-[11px] uppercase tracking-widest2 text-accent">
+        <div className="text-[11px] uppercase tracking-widest text-accent">
           forensic wallet attribution
         </div>
         <h1 className="font-display text-4xl font-bold leading-[1.1] text-text sm:text-5xl">
@@ -31,16 +31,20 @@ export default function Home() {
           rather than guess. No LLM in the attribution path.
         </p>
         <WalletSearch autoFocus />
-        <p className="text-xs text-muted">
-          Not just the demo wallets — paste{" "}
-          <span className="text-accent">any real Ethereum address</span> and fetch
-          it live from chain.
-        </p>
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
+          <span>
+            Paste <span className="text-accent">any real wallet</span> (Ethereum or
+            Tron) and fetch it live from chain.
+          </span>
+          <span className="flex items-center gap-1.5">
+            or press <Kbd>⌘K</Kbd> to jump anywhere
+          </span>
+        </div>
       </section>
 
       <section className="space-y-3">
         <div className="flex items-center gap-3">
-          <span className="text-[10px] uppercase tracking-widest2 text-muted">
+          <span className="text-[10px] uppercase tracking-widest text-muted">
             case files · offline seeded
           </span>
           <span className="h-px flex-1 bg-border" />
@@ -50,10 +54,10 @@ export default function Home() {
             <Link
               key={w.address}
               href={`/wallets/${w.address}`}
-              className="group rounded-md border border-border bg-panel p-4 transition-colors hover:border-accent/50 hover:bg-panel2"
+              className="group rounded-lg border border-border bg-panel p-4 transition-colors hover:border-accent/50 hover:bg-panel2"
             >
               <div className="flex items-center justify-between">
-                <span className="font-display text-[10px] tabular-nums text-muted">
+                <span className="font-display text-[10px] tabular-nums text-dim">
                   CASE-{String(i + 1).padStart(2, "0")}
                 </span>
                 <Pill tone={OUTCOME_TONE[w.note] ?? "muted"}>{w.note}</Pill>
@@ -61,7 +65,9 @@ export default function Home() {
               <div className="mt-2 font-display text-base font-semibold text-text group-hover:text-accent">
                 {w.label}
               </div>
-              <div className="mt-1 text-xs text-muted">{shortAddr(w.address, 10, 8)}</div>
+              <div className="mt-1 font-mono text-xs text-muted">
+                {shortAddr(w.address, 10, 8)}
+              </div>
             </Link>
           ))}
         </div>
