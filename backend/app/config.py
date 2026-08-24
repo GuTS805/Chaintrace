@@ -52,6 +52,27 @@ class Settings(BaseSettings):
     model_version: str = Field(default="phase1-dev", alias="MODEL_VERSION")
     confidence_threshold: float = Field(default=0.55, alias="CONFIDENCE_THRESHOLD")
 
+    # Traversal bounds (HARD REQUIREMENT #5 — every traversal is bounded).
+    # `traversal_max_nodes` is the default a caller gets when it doesn't ask
+    # for a specific size (this is what ContextBuilder — i.e. every
+    # /attribution and /risk request — actually uses; it previously hardcoded
+    # 2000 with no config knob at all). `traversal_max_nodes_ceiling` is the
+    # absolute server-side cap: a caller (e.g. the /graph API's max_nodes
+    # query param) can ask for less, never more — "configurable" is not
+    # "unlimited". `traversal_timeout_seconds` bounds wall-clock time, not
+    # just row count, since a slow query on a large real deployment could
+    # still hang a request even inside the row/node caps.
+    traversal_max_nodes: int = Field(default=2000, alias="TRAVERSAL_MAX_NODES")
+    traversal_max_nodes_ceiling: int = Field(
+        default=10_000, alias="TRAVERSAL_MAX_NODES_CEILING"
+    )
+    traversal_max_hops: int = Field(default=6, alias="TRAVERSAL_MAX_HOPS")
+    traversal_max_hops_ceiling: int = Field(default=8, alias="TRAVERSAL_MAX_HOPS_CEILING")
+    traversal_min_value_wei: int = Field(default=0, alias="TRAVERSAL_MIN_VALUE_WEI")
+    traversal_timeout_seconds: float = Field(
+        default=20.0, alias="TRAVERSAL_TIMEOUT_SECONDS"
+    )
+
     # App.
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     env: str = Field(default="development", alias="ENV")

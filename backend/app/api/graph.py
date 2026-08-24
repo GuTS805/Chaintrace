@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_graph_repository
 from app.auth import get_current_officer
+from app.config import get_settings
 from app.repositories.graph_repository import Direction, TraversalBounds
 from app.repositories.sql_graph_repository import SqlGraphRepository
 from app.schemas.graph import GraphResult, LabeledPath
@@ -16,6 +18,28 @@ from app.schemas.graph import GraphResult, LabeledPath
 router = APIRouter(
     prefix="/wallets", tags=["graph"], dependencies=[Depends(get_current_officer)]
 )
+
+_settings = get_settings()
+# Default matches the visualization's own bound (smaller than the attribution
+# pipeline's default — a graph view is for a human to look at); the ceiling
+# is the same server-side absolute cap everywhere else in the app uses.
+_MAX_NODES_DEFAULT = min(500, _settings.traversal_max_nodes_ceiling)
+_MAX_NODES_CEILING = _settings.traversal_max_nodes_ceiling
+
+
+async def _traverse_or_504(repo: SqlGraphRepository, address: str, bounds: TraversalBounds) -> GraphResult:
+    try:
+        return await asyncio.wait_for(
+            repo.traverse(address, bounds), timeout=_settings.traversal_timeout_seconds
+        )
+    except TimeoutError as exc:
+        raise HTTPException(
+            status_code=504,
+            detail=(
+                "The graph query took too long to complete and was aborted — "
+                "narrow the depth or max_nodes and retry."
+            ),
+        ) from exc
 
 
 def _bounds(
@@ -44,12 +68,12 @@ async def wallet_graph(
     since: datetime | None = Query(None, description="Only edges at/after this time."),
     until: datetime | None = Query(None, description="Only edges at/before this time."),
     direction: Direction = Query(Direction.FORWARD),
-    max_nodes: int = Query(500, ge=1, le=5000),
+    max_nodes: int = Query(_MAX_NODES_DEFAULT, ge=1, le=_MAX_NODES_CEILING),
     repo: SqlGraphRepository = Depends(get_graph_repository),
 ) -> GraphResult:
     """Bounded neighborhood of a wallet with node/edge and prune metadata."""
     bounds = _bounds(depth, min_value, since, until, direction, max_nodes)
-    return await repo.traverse(address, bounds)
+    return await _traverse_or_504(repo, address, bounds)
 
 
 @router.get("/{address}/paths-to-labeled", response_model=list[LabeledPath])
@@ -60,13 +84,13 @@ async def paths_to_labeled(
     since: datetime | None = Query(None),
     until: datetime | None = Query(None),
     direction: Direction = Query(Direction.FORWARD),
-    max_nodes: int = Query(500, ge=1, le=5000),
+    max_nodes: int = Query(_MAX_NODES_DEFAULT, ge=1, le=_MAX_NODES_CEILING),
     limit_per_target: int = Query(3, ge=1, le=20),
     repo: SqlGraphRepository = Depends(get_graph_repository),
 ) -> list[LabeledPath]:
     """Extract bounded paths from an unknown wallet to each reachable labeled wallet."""
     bounds = _bounds(depth, min_value, since, until, direction, max_nodes)
-    graph = await repo.traverse(address, bounds)
+    graph = await _traverse_or_504(repo, address, bounds)
 
     results: list[LabeledPath] = []
     for node in graph.nodes:
