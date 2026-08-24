@@ -15,7 +15,13 @@ const FILL: Record<string, string> = {
   bad: "bg-bad",
 };
 
-export function RiskPanel({ risk }: { risk: RiskResult }) {
+export function RiskPanel({
+  risk,
+  onHoverIndicator,
+}: {
+  risk: RiskResult;
+  onHoverIndicator: (address: string | null) => void;
+}) {
   const tone = LEVEL_TONE[risk.level] ?? "muted";
   const activeIdx = LEVELS.indexOf(risk.level as (typeof LEVELS)[number]);
 
@@ -27,43 +33,41 @@ export function RiskPanel({ risk }: { risk: RiskResult }) {
           {risk.flag_reason}
         </div>
       )}
+
       {/* Stepped threat meter. */}
       <div className="flex items-center gap-3">
         <div className="flex flex-1 gap-1">
           {LEVELS.map((lvl, i) => (
-            <div key={lvl} className="flex-1">
-              <div
-                className={`h-1.5 rounded-full ${
-                  i <= activeIdx ? FILL[tone] : "bg-panel2"
-                }`}
-              />
-              <div className="mt-1 text-center text-[9px] uppercase tracking-wider text-muted">
+            <div key={lvl}>
+              <div className={`h-1.5 rounded-full ${i <= activeIdx ? FILL[tone] : "bg-panel3"}`} />
+              <div className="mt-1 text-center text-[9px] uppercase tracking-wider text-dim">
                 {lvl.slice(0, 4)}
               </div>
             </div>
           ))}
         </div>
-        <span className={`font-display text-xl tabular-nums text-${tone}`}>
-          {pct(risk.score, 0)}
-        </span>
+        <span className={`font-display text-xl tabular-nums text-${tone}`}>{pct(risk.score, 0)}</span>
       </div>
 
-      <ul className="mt-4 space-y-1.5">
+      <ul className="mt-4 space-y-1">
         {risk.indicators.length === 0 && (
-          <li className="text-xs text-muted">
-            No sanctioned / mixer / scam exposure detected.
-          </li>
+          <li className="text-xs text-muted">No sanctioned / mixer / scam exposure detected.</li>
         )}
         {risk.indicators.slice(0, 6).map((ind, i) => (
-          <li key={i} className="flex items-start gap-2 text-xs">
+          <li
+            key={i}
+            onMouseEnter={() => onHoverIndicator(ind.address)}
+            onMouseLeave={() => onHoverIndicator(null)}
+            className="flex items-start gap-2 rounded border border-transparent px-2 py-1.5 text-xs transition-colors hover:border-bad/30 hover:bg-panel2"
+          >
             <Pill tone="bad">{ind.category}</Pill>
             <span className="flex-1 text-text">
-              {ind.description}{" "}
-              <span className="text-muted">({shortAddr(ind.address)})</span>
+              {ind.description} <span className="font-mono text-muted">({shortAddr(ind.address)})</span>
             </span>
           </li>
         ))}
       </ul>
+
       {risk.typology_tags.length > 0 && (
         <ul className="mt-3 space-y-1.5 border-t border-border pt-2">
           {risk.typology_tags.map((tag, i) => (
@@ -74,6 +78,7 @@ export function RiskPanel({ risk }: { risk: RiskResult }) {
           ))}
         </ul>
       )}
+
       <p className="mt-3 border-t border-border pt-2 text-[10px] uppercase tracking-widest text-muted">
         computed independently of attribution
       </p>
