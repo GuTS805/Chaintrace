@@ -130,6 +130,7 @@ def test_build_case_report_is_pdf() -> None:
         description="Test case",
         status="OPEN",
         investigator="analyst-1",
+        officer_id=1,
         created_at=datetime(2024, 5, 1, tzinfo=UTC),
         findings=[],
     )

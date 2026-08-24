@@ -24,6 +24,7 @@ class CaseOut(BaseModel):
     description: str | None
     status: CaseStatus
     investigator: str | None
+    officer_id: int | None
     created_at: datetime
 
 

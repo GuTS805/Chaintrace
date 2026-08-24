@@ -100,7 +100,7 @@ async def case_report(
     officer: Officer = Depends(get_current_officer),
     session: AsyncSession = Depends(get_session),
 ) -> Response:
-    detail = await get_case(case_id, session)
+    detail = await get_case(case_id, officer=officer, session=session)
     pdf = build_case_report(detail)
     await audit.record(session, officer, "CASE_REPORT", target=str(case_id))
     return _pdf(pdf, f"case-{case_id}.pdf")

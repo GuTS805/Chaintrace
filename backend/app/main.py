@@ -9,10 +9,21 @@ from app import __version__
 from app.api import attribution, auth, cases, graph, health, investigations, live, report, vasps
 from app.config import get_settings
 from app.logging import configure_logging
+from app.middleware import BodySizeLimitMiddleware, SecurityHeadersMiddleware
 
 
 def create_app() -> FastAPI:
     configure_logging()
+    settings = get_settings()
+    if settings.env == "production" and settings.uses_default_jwt_secret:
+        # Fail loudly at startup rather than silently booting with a secret
+        # anyone can read from this file on GitHub — a comment telling an
+        # operator to change it is not enforcement.
+        raise RuntimeError(
+            "JWT_SECRET is still the default demo value in a production "
+            "environment (ENV=production). Set a real JWT_SECRET before "
+            "starting the app."
+        )
     app = FastAPI(
         title="VASP Attribution & Investigation Platform",
         version=__version__,
@@ -30,6 +41,12 @@ def create_app() -> FastAPI:
         # browsers hide response headers from JS in CORS responses unless
         # explicitly exposed here.
         expose_headers=["Content-Disposition"],
+    )
+    app.add_middleware(SecurityHeadersMiddleware)
+    # Added last so it's outermost — rejects an oversized request before any
+    # other middleware or routing does any work on it.
+    app.add_middleware(
+        BodySizeLimitMiddleware, max_bytes=settings.max_request_body_bytes
     )
     app.include_router(health.router)
     app.include_router(auth.router)

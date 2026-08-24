@@ -7,6 +7,8 @@ from functools import lru_cache
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+DEFAULT_JWT_SECRET = "chaintrace-demo-secret-change-in-production"
+
 
 class Settings(BaseSettings):
     """Runtime configuration. Values come from the environment or a local .env."""
@@ -97,16 +99,32 @@ class Settings(BaseSettings):
 
     # Auth (officer login). The default secret is fine for the offline demo
     # (single-machine, no real case data); override JWT_SECRET for any
-    # non-demo deployment.
+    # non-demo deployment. `env=production` with this default still set is a
+    # startup-time hard failure (see app/main.py) rather than a silently
+    # forgeable deployment — a comment alone doesn't stop anyone from
+    # forgetting to set it.
     jwt_secret: str = Field(
-        default="chaintrace-demo-secret-change-in-production", alias="JWT_SECRET"
+        default=DEFAULT_JWT_SECRET, alias="JWT_SECRET"
     )
     jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
     jwt_expire_minutes: int = Field(default=480, alias="JWT_EXPIRE_MINUTES")
 
+    # Login brute-force throttling (see app/auth/rate_limit.py).
+    login_max_failures: int = Field(default=5, alias="LOGIN_MAX_FAILURES")
+    login_window_seconds: float = Field(default=900.0, alias="LOGIN_WINDOW_SECONDS")
+    login_cooldown_seconds: float = Field(default=60.0, alias="LOGIN_COOLDOWN_SECONDS")
+
+    # No file uploads anywhere in this API — a generous-but-bounded cap on
+    # plain JSON request bodies is purely a DoS guard.
+    max_request_body_bytes: int = Field(default=2_000_000, alias="MAX_REQUEST_BODY_BYTES")
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def uses_default_jwt_secret(self) -> bool:
+        return self.jwt_secret == DEFAULT_JWT_SECRET
 
     @property
     def sync_database_url(self) -> str:
