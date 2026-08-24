@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Download, Scale } from "lucide-react";
 import { api } from "@/lib/api";
 import type { AttributionResult, GraphResult, RiskResult } from "@/lib/types";
 import { pushRecent } from "@/lib/recents";
@@ -13,6 +15,19 @@ import { WalletSearch } from "@/components/WalletSearch";
 import { LiveTrace } from "@/components/LiveTrace";
 import { PdfButton } from "@/components/PdfButton";
 import { BentoGrid, Eyebrow, Tile } from "@/components/ui";
+
+/** Staggered fade+rise entrance for the verdict → graph → risk reading order. */
+function FadeIn({ index, children }: { index: number; children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function WalletPage({
   params,
@@ -87,8 +102,9 @@ export default function WalletPage({
         <div className="flex flex-wrap items-center gap-2">
           <PdfButton
             path={`/wallets/${address}/report`}
-            className="rounded-btn border border-soft-border px-3 py-2 text-[12px] text-muted transition-all hover:bg-surface-lavender hover:text-heading"
+            className="flex items-center gap-1.5 rounded-btn border border-soft-border px-3 py-2 text-[12px] text-muted transition-all hover:bg-surface-lavender hover:text-heading"
           >
+            <Download size={13} />
             Report (PDF)
           </PdfButton>
           {attribution &&
@@ -96,8 +112,9 @@ export default function WalletPage({
             attribution.candidates.length > 0 && (
               <PdfButton
                 path={`/wallets/${address}/disclosure-request`}
-                className="rounded-btn bg-primary px-3 py-2 text-[12px] font-medium text-white shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
+                className="flex items-center gap-1.5 rounded-btn bg-primary px-3 py-2 text-[12px] font-medium text-white shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
               >
+                <Scale size={13} />
                 Prepare disclosure request (SAHYOG)
               </PdfButton>
             )}
@@ -132,43 +149,51 @@ export default function WalletPage({
       {!loading && !error && !isEmpty && (
         <div className="space-y-10">
           {attribution && (
-            <AttributionPanel
-              result={attribution}
-              onHoverEvidence={(hashes) => setHighlightedTx(new Set(hashes ?? []))}
-            />
+            <FadeIn index={0}>
+              <AttributionPanel
+                result={attribution}
+                onHoverEvidence={(hashes) => setHighlightedTx(new Set(hashes ?? []))}
+              />
+            </FadeIn>
           )}
 
           {graph && (
-            <GraphView
-              graph={graph}
-              highlightedTx={highlightedTx}
-              highlightedNode={highlightedNode}
-              riskAddresses={riskAddresses}
-              onNodeFocus={(addr, isRoot) => {
-                if (!isRoot) setFocusedNode(addr);
-              }}
-            />
+            <FadeIn index={1}>
+              <GraphView
+                graph={graph}
+                highlightedTx={highlightedTx}
+                highlightedNode={highlightedNode}
+                riskAddresses={riskAddresses}
+                onNodeFocus={(addr, isRoot) => {
+                  if (!isRoot) setFocusedNode(addr);
+                }}
+              />
+            </FadeIn>
           )}
 
-          <BentoGrid>
-            <div className="col-span-4 md:col-span-7">
-              {risk && (
-                <RiskPanel
-                  risk={risk}
-                  onHoverIndicator={(addr) => setHighlightedNode(addr)}
-                />
-              )}
-            </div>
-            <div className="col-span-4 md:col-span-5">
-              <AddToCase address={address} attribution={attribution} />
-            </div>
-          </BentoGrid>
+          <FadeIn index={2}>
+            <BentoGrid>
+              <div className="col-span-4 md:col-span-7">
+                {risk && (
+                  <RiskPanel
+                    risk={risk}
+                    onHoverIndicator={(addr) => setHighlightedNode(addr)}
+                  />
+                )}
+              </div>
+              <div className="col-span-4 md:col-span-5">
+                <AddToCase address={address} attribution={attribution} />
+              </div>
+            </BentoGrid>
+          </FadeIn>
         </div>
       )}
 
-      {focusedNode && (
-        <NodeFocusDrawer address={focusedNode} onClose={() => setFocusedNode(null)} />
-      )}
+      <AnimatePresence>
+        {focusedNode && (
+          <NodeFocusDrawer key={focusedNode} address={focusedNode} onClose={() => setFocusedNode(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

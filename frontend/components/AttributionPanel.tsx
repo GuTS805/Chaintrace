@@ -1,9 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { CheckCircle2, HelpCircle, Shuffle } from "lucide-react";
 import type { AttributionResult, Evidence, VaspCandidate } from "@/lib/types";
 import { pct, shortAddr, SIGNAL_LABEL, fmtTime } from "@/lib/format";
+import { AnimatedNumber } from "./AnimatedNumber";
 import { Eyebrow, GhostButton, Pill, Tile } from "./ui";
+
+const BANNER_ICON = {
+  good: CheckCircle2,
+  warn: HelpCircle,
+  accent: Shuffle,
+} as const;
 
 function toneForProb(p: number, threshold: number): "good" | "warn" | "muted" {
   if (p >= threshold) return "good";
@@ -132,7 +140,13 @@ export function AttributionPanel({
         <Eyebrow>
           {result.insufficient_evidence ? "No confident attribution" : "Most likely VASP"}
         </Eyebrow>
-        <Pill tone={banner.tone}>{banner.label}</Pill>
+        <Pill tone={banner.tone} className="inline-flex items-center gap-1.5">
+          {(() => {
+            const Icon = BANNER_ICON[banner.tone as keyof typeof BANNER_ICON];
+            return Icon ? <Icon size={12} /> : null;
+          })()}
+          {banner.label}
+        </Pill>
       </div>
 
       <div className="mt-3 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
@@ -140,7 +154,7 @@ export function AttributionPanel({
           {top ? top.vasp_name : "—"}
         </div>
         <div className={`font-display text-[56px] font-semibold leading-none tabular-nums ${toneColor[topTone] ?? "text-muted"}`}>
-          {top ? pct(top.probability, 1) : "—"}
+          {top ? <AnimatedNumber value={top.probability * 100} format={(n) => `${n.toFixed(1)}%`} /> : "—"}
         </div>
       </div>
       {confidenceWord && <p className="mt-1 text-[13px] text-muted">{confidenceWord}</p>}

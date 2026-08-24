@@ -1,11 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Listbox, Transition } from "@headlessui/react";
+import { ArrowLeft, ChevronsUpDown, Download, ExternalLink, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
 import type { CaseDetail, CaseStatus, FindingSeverity } from "@/lib/types";
 import { PdfButton } from "@/components/PdfButton";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { BentoGrid, Button, Tile, Pill } from "@/components/ui";
 import { fmtTime, shortAddr } from "@/lib/format";
 
@@ -44,6 +47,7 @@ export default function CaseDetailPage({
   const [severity, setSeverity] = useState<FindingSeverity>("INFO");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const load = useCallback(() => {
     api
@@ -79,7 +83,6 @@ export default function CaseDetailPage({
   }
 
   async function remove() {
-    if (!confirm("Delete this case? This cannot be undone.")) return;
     await api.deleteCase(caseId);
     router.push("/cases");
   }
@@ -90,8 +93,9 @@ export default function CaseDetailPage({
   return (
     <BentoGrid>
       <div className="col-span-4 md:col-span-12">
-        <Link href="/cases" className="text-xs font-medium text-primary hover:underline">
-          ← cases
+        <Link href="/cases" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+          <ArrowLeft size={13} />
+          cases
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <span className="font-mono text-xs text-muted">{caseRef(detail.id)}</span>
@@ -99,14 +103,16 @@ export default function CaseDetailPage({
           <Pill tone={STATUS_TONE[detail.status]}>{detail.status}</Pill>
           <PdfButton
             path={`/cases/${caseId}/report`}
-            className="ml-auto rounded-btn border border-soft-border px-3 py-1.5 text-xs text-muted transition-all hover:bg-surface-lavender hover:text-heading"
+            className="ml-auto flex items-center gap-1.5 rounded-btn border border-soft-border px-3 py-1.5 text-xs text-muted transition-all hover:bg-surface-lavender hover:text-heading"
           >
+            <Download size={13} />
             Report (PDF)
           </PdfButton>
           <button
-            onClick={remove}
-            className="rounded-btn bg-bad-fill px-3 py-1.5 text-xs font-medium text-bad-text transition-all hover:bg-bad-fill/80"
+            onClick={() => setConfirmDelete(true)}
+            className="flex items-center gap-1.5 rounded-btn bg-bad-fill px-3 py-1.5 text-xs font-medium text-bad-text transition-all hover:bg-bad-fill/80"
           >
+            <Trash2 size={13} />
             Delete
           </button>
         </div>
@@ -114,6 +120,15 @@ export default function CaseDetailPage({
           <p className="mt-1 text-xs text-muted">investigator: {detail.investigator}</p>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete this case?"
+        description={`${caseRef(detail.id)} · ${detail.name} and all its findings will be permanently removed. This cannot be undone.`}
+        confirmLabel="Delete case"
+        onConfirm={remove}
+      />
 
       <Tile title="Add finding / note" className="col-span-4 md:col-span-5" bodyClassName="p-6">
         <form onSubmit={addFinding} className="space-y-3">
@@ -123,17 +138,38 @@ export default function CaseDetailPage({
             placeholder="What did you find?"
             className="w-full rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-sm text-heading outline-none placeholder:text-muted transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft"
           />
-          <select
-            value={severity}
-            onChange={(e) => setSeverity(e.target.value as FindingSeverity)}
-            className="w-full rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-xs text-heading outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft"
-          >
-            {SEVERITIES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          <Listbox value={severity} onChange={setSeverity}>
+            <div className="relative">
+              <Listbox.Button className="flex w-full items-center justify-between rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-left text-xs text-heading outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft">
+                <span className="flex items-center gap-2">
+                  <Pill tone={SEV_TONE[severity]}>{severity}</Pill>
+                </span>
+                <ChevronsUpDown size={14} className="shrink-0 text-muted" />
+              </Listbox.Button>
+              <Transition
+                as={Fragment}
+                leave="transition ease-in duration-100"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+              >
+                <Listbox.Options className="absolute z-10 mt-1.5 w-full overflow-auto rounded-card bg-white p-1.5 shadow-card-hover focus:outline-none">
+                  {SEVERITIES.map((s) => (
+                    <Listbox.Option
+                      key={s}
+                      value={s}
+                      className={({ active }) =>
+                        `flex cursor-pointer select-none items-center rounded-btn px-3 py-2 text-xs ${
+                          active ? "bg-surface-lavender" : ""
+                        }`
+                      }
+                    >
+                      <Pill tone={SEV_TONE[s]}>{s}</Pill>
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>
+              </Transition>
+            </div>
+          </Listbox>
           <input
             value={wallet}
             onChange={(e) => setWallet(e.target.value)}
@@ -176,9 +212,10 @@ export default function CaseDetailPage({
                 {f.wallet_address && (
                   <Link
                     href={`/wallets/${f.wallet_address}`}
-                    className="mt-1 inline-block font-mono text-xs text-primary hover:underline"
+                    className="mt-1 inline-flex items-center gap-1 font-mono text-xs text-primary hover:underline"
                   >
-                    {shortAddr(f.wallet_address)} ↗
+                    {shortAddr(f.wallet_address)}
+                    <ExternalLink size={11} />
                   </Link>
                 )}
                 {f.description && (
