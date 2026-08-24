@@ -7,18 +7,31 @@ direction, unlike a reversed GraphEdge) so the facts builder sees correct edges.
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
 from app.models import Label, Transaction, Vasp
 from app.providers.base import ProviderTx, normalize_address
 from app.repositories.graph_repository import Direction, TraversalBounds
 from app.repositories.sql_graph_repository import SqlGraphRepository
 from app.schemas.graph import GraphResult
 from app.signals.facts import GraphFacts, LabelInfo, build_graph_facts
+
+
+class TraversalTimeout(Exception):
+    """A traversal exceeded the configured wall-clock budget.
+
+    Deliberately distinct from a plain TimeoutError so API layers can tell
+    "the query was too slow" apart from any other timeout in the stack, and
+    from "no VASP evidence" — a timeout is an infrastructure failure, not an
+    attribution result, and must never be reported to an officer as either a
+    clean or an insufficient-evidence verdict.
+    """
 
 
 @dataclass
@@ -82,23 +95,44 @@ class ContextBuilder:
         return out
 
     async def build(
-        self, unknown: str, *, depth: int = 6, min_value_wei: int = 0
+        self,
+        unknown: str,
+        *,
+        depth: int = 6,
+        min_value_wei: int = 0,
+        max_nodes: int | None = None,
     ) -> AttributionContext:
+        settings = get_settings()
+        # Defense in depth: even a caller who bypasses the API layer's own
+        # Query(..., le=...) bounds cannot exceed the server-side ceiling —
+        # "configurable" is not "unlimited".
+        hops = min(max(depth, 1), settings.traversal_max_hops_ceiling)
+        nodes = min(
+            max_nodes if max_nodes is not None else settings.traversal_max_nodes,
+            settings.traversal_max_nodes_ceiling,
+        )
         unknown = normalize_address(unknown)
-        forward = await self._repo.traverse(
-            unknown,
-            TraversalBounds(
-                max_hops=depth, direction=Direction.FORWARD, max_nodes=2000
-            ),
-        )
-        # Reverse reachability powers the (separate) risk score: where funds came
-        # from, e.g. an upstream sanctioned mixer.
-        reverse = await self._repo.traverse(
-            unknown,
-            TraversalBounds(
-                max_hops=depth, direction=Direction.REVERSE, max_nodes=2000
-            ),
-        )
+        try:
+            forward = await asyncio.wait_for(
+                self._repo.traverse(
+                    unknown,
+                    TraversalBounds(max_hops=hops, direction=Direction.FORWARD, max_nodes=nodes),
+                ),
+                timeout=settings.traversal_timeout_seconds,
+            )
+            # Reverse reachability powers the (separate) risk score: where funds
+            # came from, e.g. an upstream sanctioned mixer.
+            reverse = await asyncio.wait_for(
+                self._repo.traverse(
+                    unknown,
+                    TraversalBounds(max_hops=hops, direction=Direction.REVERSE, max_nodes=nodes),
+                ),
+                timeout=settings.traversal_timeout_seconds,
+            )
+        except TimeoutError as exc:
+            raise TraversalTimeout(
+                f"traversal exceeded {settings.traversal_timeout_seconds}s for {unknown}"
+            ) from exc
 
         # Candidate VASPs = reached, labeled, VASP-linked nodes.
         vasp_hots: dict[str, set[str]] = {}
