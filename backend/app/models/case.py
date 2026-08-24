@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy import String, Text
+from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
@@ -26,6 +26,13 @@ class Case(Base, TimestampMixin):
         default=CaseStatus.OPEN,
     )
     investigator: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    # Nullable so any pre-existing rows from before this column existed still
+    # load; a case with no owner is a data artifact to clean up, not something
+    # the app should crash on. Every new case is created with an owner (see
+    # app/api/cases.py's create_case) and access is scoped to it.
+    officer_id: Mapped[int | None] = mapped_column(
+        ForeignKey("officers.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     findings: Mapped[list[Finding]] = relationship(
         back_populates="case", cascade="all, delete-orphan"

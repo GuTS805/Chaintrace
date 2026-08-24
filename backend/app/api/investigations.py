@@ -41,9 +41,14 @@ def _pdf(content: bytes, filename: str) -> Response:
     )
 
 
-async def _get_investigation(session: AsyncSession, investigation_id: int) -> Investigation:
+async def _get_owned_investigation(
+    session: AsyncSession, investigation_id: int, officer: Officer
+) -> Investigation:
+    """404 (never 403) for both "doesn't exist" and "exists but isn't
+    yours" — an officer must not be able to learn that investigation #N
+    exists, belonging to someone else, just by probing IDs."""
     row = await session.get(Investigation, investigation_id)
-    if row is None:
+    if row is None or row.officer_id != officer.id:
         raise HTTPException(status_code=404, detail="Investigation not found")
     return row
 
@@ -142,12 +147,17 @@ async def create_investigation(
 
 @router.get("/wallets/{address}/investigations", response_model=list[InvestigationSummary])
 async def list_investigations_for_wallet(
-    address: str, session: AsyncSession = Depends(get_session)
+    address: str,
+    officer: Officer = Depends(get_current_officer),
+    session: AsyncSession = Depends(get_session),
 ) -> list[InvestigationSummary]:
     rows = (
         await session.execute(
             select(Investigation)
-            .where(Investigation.wallet_address == normalize_address(address))
+            .where(
+                Investigation.wallet_address == normalize_address(address),
+                Investigation.officer_id == officer.id,
+            )
             .order_by(Investigation.created_at.desc())
         )
     ).scalars().all()
@@ -156,10 +166,12 @@ async def list_investigations_for_wallet(
 
 @router.get("/investigations/{investigation_id}", response_model=InvestigationOut)
 async def get_investigation(
-    investigation_id: int, session: AsyncSession = Depends(get_session)
+    investigation_id: int,
+    officer: Officer = Depends(get_current_officer),
+    session: AsyncSession = Depends(get_session),
 ) -> Investigation:
     """The frozen record, exactly as captured — never recomputed."""
-    return await _get_investigation(session, investigation_id)
+    return await _get_owned_investigation(session, investigation_id, officer)
 
 
 @router.get("/investigations/{investigation_id}/report")
@@ -168,7 +180,7 @@ async def investigation_report(
     officer: Officer = Depends(get_current_officer),
     session: AsyncSession = Depends(get_session),
 ) -> Response:
-    row = await _get_investigation(session, investigation_id)
+    row = await _get_owned_investigation(session, investigation_id, officer)
     attribution = AttributionResult.model_validate(row.attribution)
     risk = RiskResult.model_validate(row.risk)
     graph = GraphResult.model_validate(row.graph) if row.graph else GraphResult(root=row.wallet_address)
@@ -185,7 +197,7 @@ async def investigation_disclosure_request(
     officer: Officer = Depends(get_current_officer),
     session: AsyncSession = Depends(get_session),
 ) -> Response:
-    row = await _get_investigation(session, investigation_id)
+    row = await _get_owned_investigation(session, investigation_id, officer)
     attribution = AttributionResult.model_validate(row.attribution)
     if attribution.insufficient_evidence or not attribution.candidates:
         raise HTTPException(
