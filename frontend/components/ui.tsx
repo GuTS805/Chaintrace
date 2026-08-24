@@ -1,21 +1,49 @@
 import type { ReactNode } from "react";
 
-export function Panel({
+/**
+ * BentoGrid: the base grid every page composes tiles onto. 12 columns on
+ * large screens (so a tile can claim 3/4/6/8/12 columns — real proportion,
+ * not just "big card, small card"), collapsing to 4 on mobile so span
+ * classes like `md:col-span-4` still read as "half" rather than overflowing.
+ */
+export function BentoGrid({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`grid grid-cols-4 gap-3 md:grid-cols-12 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+export function Tile({
   title,
   right,
   children,
   className = "",
   bodyClassName = "p-4",
+  interactive = false,
 }: {
   title?: string;
   right?: ReactNode;
   children: ReactNode;
+  /** Include col-span and row-span classes here to place the tile in a BentoGrid. */
   className?: string;
   bodyClassName?: string;
+  /** Subtle lift + border glow on hover, for tiles that lead somewhere. */
+  interactive?: boolean;
 }) {
   return (
     <section
-      className={`rounded-lg border border-border bg-panel shadow-panel ${className}`}
+      className={`flex flex-col overflow-hidden rounded-2xl border border-border bg-panel shadow-panel transition-[transform,box-shadow,border-color] duration-200 ${
+        interactive
+          ? "hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-glow"
+          : ""
+      } ${className}`}
     >
       {title && (
         <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
@@ -28,10 +56,13 @@ export function Panel({
           {right}
         </div>
       )}
-      <div className={bodyClassName}>{children}</div>
+      <div className={`flex-1 ${bodyClassName}`}>{children}</div>
     </section>
   );
 }
+
+/** @deprecated alias kept during the bento-grid migration — same as Tile. */
+export const Panel = Tile;
 
 const TONE_BG: Record<string, string> = {
   accent: "bg-accent",

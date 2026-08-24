@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { CaseDetail, CaseStatus, FindingSeverity } from "@/lib/types";
 import { PdfButton } from "@/components/PdfButton";
-import { Panel, Pill } from "@/components/ui";
+import { BentoGrid, Tile, Pill } from "@/components/ui";
 import { fmtTime, shortAddr } from "@/lib/format";
 
 const SEVERITIES: FindingSeverity[] = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"];
@@ -88,8 +88,8 @@ export default function CaseDetailPage({
   if (!detail) return <p className="text-sm text-muted">Loading…</p>;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
-      <div>
+    <BentoGrid>
+      <div className="col-span-4 md:col-span-12">
         <Link href="/cases" className="text-xs text-muted hover:text-accent">
           ← cases
         </Link>
@@ -115,27 +115,25 @@ export default function CaseDetailPage({
         )}
       </div>
 
-      <Panel title="Add finding / note">
+      <Tile title="Add finding / note" className="col-span-4 md:col-span-5">
         <form onSubmit={addFinding} className="space-y-2">
-          <div className="flex flex-wrap gap-2">
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="What did you find?"
-              className="min-w-[220px] flex-1 rounded border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
-            />
-            <select
-              value={severity}
-              onChange={(e) => setSeverity(e.target.value as FindingSeverity)}
-              className="rounded border border-border bg-panel2 px-2 py-2 text-xs text-text outline-none focus:border-accent"
-            >
-              {SEVERITIES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="What did you find?"
+            className="w-full rounded border border-border bg-panel2 px-3 py-2 text-sm text-text outline-none placeholder:text-dim focus:border-accent"
+          />
+          <select
+            value={severity}
+            onChange={(e) => setSeverity(e.target.value as FindingSeverity)}
+            className="w-full rounded border border-border bg-panel2 px-2 py-2 text-xs text-text outline-none focus:border-accent"
+          >
+            {SEVERITIES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
           <input
             value={wallet}
             onChange={(e) => setWallet(e.target.value)}
@@ -152,17 +150,19 @@ export default function CaseDetailPage({
           <button
             type="submit"
             disabled={saving || !title.trim()}
-            className="rounded border border-accent/50 bg-accent/10 px-4 py-2 text-xs uppercase tracking-widest text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded border border-accent/50 bg-accent/10 px-4 py-2 text-xs uppercase tracking-widest text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? "adding…" : "add"}
           </button>
         </form>
-      </Panel>
+      </Tile>
 
       {/* Findings as a chain-of-custody spine — same visual grammar as the
           evidence chain on a wallet page: this case's record IS a chain of
-          evidence, accumulated over time. */}
-      <Panel title={`Findings (${detail.findings.length})`}>
+          evidence, accumulated over time. Order carries real meaning here
+          (chronological), so it stays one sequential tile, not scattered
+          into individual bento cells. */}
+      <Tile title={`Findings (${detail.findings.length})`} className="col-span-4 md:col-span-7">
         {detail.findings.length === 0 ? (
           <p className="text-sm text-muted">
             No findings yet. Add one above, or pin a wallet to this case from
@@ -194,7 +194,7 @@ export default function CaseDetailPage({
             ))}
           </ol>
         )}
-      </Panel>
-    </div>
+      </Tile>
+    </BentoGrid>
   );
 }

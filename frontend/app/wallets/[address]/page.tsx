@@ -12,7 +12,7 @@ import { AddToCase } from "@/components/AddToCase";
 import { WalletSearch } from "@/components/WalletSearch";
 import { LiveTrace } from "@/components/LiveTrace";
 import { PdfButton } from "@/components/PdfButton";
-import { Panel } from "@/components/ui";
+import { BentoGrid, Tile } from "@/components/ui";
 
 export default function WalletPage({
   params,
@@ -113,13 +113,13 @@ export default function WalletPage({
 
       {loading && <p className="text-sm text-muted">Tracing…</p>}
       {error && (
-        <Panel title="Error">
+        <Tile title="Error">
           <p className="text-sm text-bad">{error}</p>
           <p className="mt-2 text-xs text-muted">
             Start the backend (<code className="text-text">make dev</code>) and
             seed data (<code className="text-text">make seed-demo</code>).
           </p>
-        </Panel>
+        </Tile>
       )}
 
       {!loading && !error && isEmpty && (
@@ -133,44 +133,45 @@ export default function WalletPage({
       )}
 
       {!loading && !error && !isEmpty && (
-        <>
-          {/* Graph as the spine: evidence rail references it in place via
-              hover; risk + case sit below rather than competing for the
-              primary reading position. */}
-          <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-5">
-            <div className="xl:col-span-2">
-              {attribution && (
-                <AttributionPanel
-                  result={attribution}
-                  onHoverEvidence={(hashes) => setHighlightedTx(new Set(hashes ?? []))}
-                />
-              )}
-            </div>
-            <div className="xl:col-span-3">
-              {graph && (
-                <GraphView
-                  graph={graph}
-                  highlightedTx={highlightedTx}
-                  highlightedNode={highlightedNode}
-                  riskAddresses={riskAddresses}
-                  onNodeFocus={(addr, isRoot) => {
-                    if (!isRoot) setFocusedNode(addr);
-                  }}
-                />
-              )}
-            </div>
+        // Graph as the biggest tile — the spine every other tile references
+        // in place via hover, sized to match: bento's size-encodes-importance
+        // reads exactly as the graph-first investigation model this page
+        // already used, just made explicit.
+        <BentoGrid>
+          <div className="col-span-4 md:col-span-5">
+            {attribution && (
+              <AttributionPanel
+                result={attribution}
+                onHoverEvidence={(hashes) => setHighlightedTx(new Set(hashes ?? []))}
+              />
+            )}
+          </div>
+          <div className="col-span-4 md:col-span-7">
+            {graph && (
+              <GraphView
+                graph={graph}
+                highlightedTx={highlightedTx}
+                highlightedNode={highlightedNode}
+                riskAddresses={riskAddresses}
+                onNodeFocus={(addr, isRoot) => {
+                  if (!isRoot) setFocusedNode(addr);
+                }}
+              />
+            )}
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="col-span-4 md:col-span-6">
             {risk && (
               <RiskPanel
                 risk={risk}
                 onHoverIndicator={(addr) => setHighlightedNode(addr)}
               />
             )}
+          </div>
+          <div className="col-span-4 md:col-span-6">
             <AddToCase address={address} attribution={attribution} />
           </div>
-        </>
+        </BentoGrid>
       )}
 
       {focusedNode && (
