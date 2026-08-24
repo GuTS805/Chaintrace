@@ -56,14 +56,14 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-white/60 pt-[14vh] backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 pt-[14vh] backdrop-blur-sm"
       onClick={() => setOpen(false)}
     >
       <div
         role="dialog"
         aria-label="Command palette"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg overflow-hidden rounded-card bg-white shadow-card-hover"
+        className="w-full max-w-lg overflow-hidden rounded-card border border-soft-border bg-surface shadow-card-hover"
       >
         <form onSubmit={submit} className="flex items-center gap-2 border-b border-soft-border px-4 py-3">
           <Search size={16} className="shrink-0 text-primary" />

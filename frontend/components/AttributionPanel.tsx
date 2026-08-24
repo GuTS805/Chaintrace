@@ -65,7 +65,7 @@ function EvidenceRow({
           </span>
         </div>
       </div>
-      <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{ev.description}</p>
+      <p className="mt-1.5 max-w-3xl text-[13px] leading-relaxed text-muted">{ev.description}</p>
       {ev.tx_hashes.length > 0 && (
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
           {ev.tx_hashes.slice(0, 6).map((h) => (

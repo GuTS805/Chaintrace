@@ -74,8 +74,8 @@ export function Section({
 }
 
 /**
- * Tile: a white floating card — the signature Soft UI element.
- * Large diffused violet-tinted shadow, rounded corners, no border.
+ * Tile: a dark floating card on a near-black canvas — a thin hairline
+ * border does the separation a shadow alone can't do against black.
  */
 export function Tile({
   title,
@@ -96,9 +96,9 @@ export function Tile({
 }) {
   return (
     <section
-      className={`flex flex-col overflow-hidden rounded-card bg-white shadow-card ${
+      className={`flex flex-col overflow-hidden rounded-card border border-soft-border bg-surface shadow-card ${
         interactive
-          ? "transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover"
+          ? "transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-card-hover"
           : ""
       } ${className}`}
     >
@@ -183,7 +183,7 @@ export function Pill({
 /** A single keyboard-key hint, e.g. for the command palette shortcut. */
 export function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="rounded-lg bg-white px-1.5 py-0.5 font-mono text-[10px] text-muted shadow-sm">
+    <kbd className="rounded-lg border border-soft-border bg-surface-lavender px-1.5 py-0.5 font-mono text-[10px] text-muted shadow-sm">
       {children}
     </kbd>
   );
@@ -242,7 +242,7 @@ export function Button({
     "rounded-btn px-5 py-2.5 text-[13px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40";
   const variants: Record<string, string> = {
     primary:
-      "bg-primary text-white shadow-button hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0",
+      "bg-primary text-[#1A1206] shadow-button hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0",
     secondary:
       "border border-soft-border text-heading hover:bg-surface-lavender",
   };

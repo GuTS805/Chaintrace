@@ -7,22 +7,30 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html,
 body {
-  background: linear-gradient(135deg, #EDEBFB 0%, #F7F3FA 50%, #FDF4F9 100%);
-  color: #5F5F7E;
+  background-color: #0A0A0A;
+  color: #B4AFA4;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   position: relative;
   min-height: 100vh;
+  overflow-x: hidden;
+  /* Sparkle-field texture (a repeating dot grid), amber-tinted, over near-black. */
+  background-image:
+    radial-gradient(circle, rgba(242, 169, 59, 0.22) 1px, transparent 1.6px),
+    linear-gradient(180deg, #0C0C0C 0%, #0A0A0A 100%);
+  background-size: 46px 46px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  background-attachment: fixed, fixed;
 }
 
-/* ── Background decoration blobs ── */
+/* ── Background decoration: a glossy amber planet, top-right ── */
 body::before,
 body::after {
   content: "";
@@ -33,21 +41,38 @@ body::after {
 }
 
 body::before {
-  width: 600px;
-  height: 600px;
-  top: -120px;
-  left: -100px;
-  background: radial-gradient(circle, rgba(233, 229, 251, 0.4) 0%, transparent 70%);
-  filter: blur(120px);
+  width: 640px;
+  height: 640px;
+  top: -170px;
+  right: -170px;
+  left: auto;
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255, 232, 189, 0.5), transparent 40%),
+    radial-gradient(circle at 58% 58%, rgba(242, 169, 59, 0.4) 0%, rgba(224, 151, 43, 0.22) 45%, transparent 75%);
+  filter: blur(2px) brightness(1);
+  box-shadow: 0 0 140px 30px rgba(242, 169, 59, 0.06);
+  animation: moon-shine 6s ease-in-out infinite;
+}
+
+@keyframes moon-shine {
+  0%,
+  100% {
+    filter: blur(2px) brightness(1);
+    box-shadow: 0 0 140px 30px rgba(242, 169, 59, 0.06);
+  }
+  50% {
+    filter: blur(2px) brightness(1.22);
+    box-shadow: 0 0 180px 50px rgba(242, 169, 59, 0.12);
+  }
 }
 
 body::after {
-  width: 500px;
-  height: 500px;
-  bottom: -80px;
-  right: -60px;
-  background: radial-gradient(circle, rgba(240, 166, 202, 0.3) 0%, transparent 70%);
-  filter: blur(120px);
+  width: 520px;
+  height: 520px;
+  bottom: -160px;
+  left: -160px;
+  background: radial-gradient(circle, rgba(187, 169, 245, 0.12) 0%, transparent 70%);
+  filter: blur(110px);
 }
 
 /* Ensure page content sits above the blobs */
@@ -65,25 +90,25 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid #6C5DD3;
+  outline: 2px solid #F2A93B;
   outline-offset: 2px;
   border-radius: 3px;
 }
 
-/* ── Scrollbar (light mode) ── */
+/* ── Scrollbar (dark mode) ── */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #F4F1FE;
+  background: #0A0A0A;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D5D0F0;
+  background: #2A2A2A;
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8B0E8;
+  background: #3A3A3A;
 }
 
 .react-flow__attribution {

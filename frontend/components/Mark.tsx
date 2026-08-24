@@ -1,29 +1,28 @@
-/** The trace-path mark: three hops terminating at a filled (attributed) node —
- * the same visual grammar as the transaction graph, in miniature. Used as the
- * app's logo everywhere. Now wrapped in a gradient chip per design spec. */
+/** The ChainTrace mark: a hexagon (a block) with a magnifying glass inside
+ * it (attribution as "search inside the chain"), a single amber accent dot
+ * standing in for the confidence signal. Rendered on a near-black chip. */
 export function Mark({ size = 22, className = "" }: { size?: number; className?: string }) {
   return (
     <div
-      className={`inline-flex items-center justify-center rounded-[10px] bg-gradient-to-br from-primary to-accent-pink ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-[10px] bg-[#0a0a0a] ${className}`}
       style={{ width: size + 12, height: size + 12 }}
     >
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 32 32"
-        aria-hidden="true"
-      >
+      <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
+        {/* hexagon block */}
         <path
-          d="M7 24 L15 13 L25 8"
+          d="M16 3.5 L26.83 9.75 L26.83 22.25 L16 28.5 L5.17 22.25 L5.17 9.75 Z"
           fill="none"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinecap="round"
+          stroke="#F3F1EA"
+          strokeWidth="1.7"
           strokeLinejoin="round"
         />
-        <circle cx="7" cy="24" r="2.4" fill="white" stroke="white" strokeWidth="1.6" opacity="0.7" />
-        <circle cx="15" cy="13" r="2" fill="white" stroke="white" strokeWidth="1.6" opacity="0.8" />
-        <circle cx="25" cy="8" r="3" fill="white" />
+
+        {/* magnifying glass */}
+        <circle cx="14" cy="14.6" r="4.3" fill="none" stroke="#F3F1EA" strokeWidth="1.7" />
+        <line x1="17.2" y1="17.8" x2="21" y2="21.6" stroke="#F3F1EA" strokeWidth="1.7" strokeLinecap="round" />
+
+        {/* confidence accent */}
+        <circle cx="16" cy="25.2" r="1.5" fill="#F2A93B" />
       </svg>
     </div>
   );

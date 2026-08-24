@@ -45,7 +45,7 @@ export function WalletSearch({
       />
       <button
         type="submit"
-        className="flex items-center gap-1.5 rounded-btn bg-primary px-6 py-2.5 text-[12px] font-medium text-white shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
+        className="flex items-center gap-1.5 rounded-btn bg-primary px-6 py-2.5 text-[12px] font-medium text-[#1A1206] shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
       >
         Run
         <ArrowRight size={14} />

@@ -53,7 +53,7 @@ export function NodeFocusDrawer({ address, onClose }: { address: string; onClose
       <Dialog.Portal forceMount>
         <Dialog.Overlay asChild forceMount>
           <motion.div
-            className="fixed inset-0 z-40 bg-heading/25 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/55 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -62,7 +62,7 @@ export function NodeFocusDrawer({ address, onClose }: { address: string; onClose
         </Dialog.Overlay>
         <Dialog.Content asChild forceMount>
           <motion.div
-            className="fixed inset-y-0 right-0 z-40 flex h-full w-full max-w-sm flex-col bg-white shadow-card-hover"
+            className="fixed inset-y-0 right-0 z-40 flex h-full w-full max-w-sm flex-col border-l border-soft-border bg-surface shadow-card-hover"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
