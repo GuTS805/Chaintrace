@@ -82,4 +82,9 @@ export const DEMO_WALLETS: { label: string; address: string; note: string }[] = 
     address: "0x5b271663569cc0df548a81e2b56689be6999081c",
     note: "real: Binance deposit",
   },
+  {
+    label: "Real wallet — Tron (USDT)",
+    address: "TVYuaXdhEHBvmk8284pSdtyRZwxE5oZ9yQ",
+    note: "real: multi-chain",
+  },
 ];
