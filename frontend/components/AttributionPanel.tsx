@@ -46,6 +46,9 @@ function EvidenceRow({
   const { evidence: ev } = row;
   return (
     <li
+      tabIndex={ev.tx_hashes.length ? 0 : undefined}
+      onFocus={() => ev.tx_hashes.length > 0 && onHover(ev.tx_hashes)}
+      onBlur={() => onHover(null)}
       onMouseEnter={() => ev.tx_hashes.length > 0 && onHover(ev.tx_hashes)}
       onMouseLeave={() => onHover(null)}
       className="group -mx-6 px-6 py-4 transition-colors hover:bg-surface-lavender"
@@ -76,7 +79,7 @@ function EvidenceRow({
           {ev.tx_hashes.length > 6 && (
             <span className="text-[11px] text-muted">+{ev.tx_hashes.length - 6} more</span>
           )}
-          <span className="text-[11px] text-muted opacity-0 transition-opacity group-hover:opacity-100">
+          <span className="text-[11px] text-muted transition-colors group-hover:text-primary">
             traced in graph ↦
           </span>
         </div>
@@ -134,7 +137,7 @@ export function AttributionPanel({
   };
 
   return (
-    <Tile bodyClassName="p-8">
+    <Tile bodyClassName="p-5 sm:p-8">
       {/* Verdict — the largest, most visually dominant element on the page. */}
       <div className="flex items-start justify-between gap-6">
         <Eyebrow>

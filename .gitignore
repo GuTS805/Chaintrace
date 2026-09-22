@@ -45,3 +45,6 @@ Thumbs.db
 
 # claude worktrees / local session state
 .claude/
+
+# Local UI review screenshots and browser fixtures
+.ui-review/

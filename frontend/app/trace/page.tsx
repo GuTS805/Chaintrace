@@ -1,94 +1,35 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { ArrowRight, Fingerprint, FlaskConical, Network, Search } from "lucide-react";
 import { WalletSearch } from "@/components/WalletSearch";
-import { Eyebrow, Pill, Kbd, BentoGrid, Tile } from "@/components/ui";
+import { Eyebrow, Pill, BentoGrid, Tile } from "@/components/ui";
 import { DEMO_WALLETS, shortAddr } from "@/lib/format";
 
-const OUTCOME_TONE: Record<string, "good" | "warn" | "accent" | "muted" | "info"> = {
-  "clean attribution (Binance)": "good",
-  "peel chain → Kraken": "warn",
-  "insufficient evidence": "muted",
-  "ambiguous split": "accent",
-  "real: Kraken deposit": "good",
-  "real: Binance deposit": "good",
-  "real: multi-chain": "info",
-};
-
-// 3 columns: each case is col-span-4, CASE-07 is full-width
-const CASE_SPAN = [
-  "col-span-4", // CASE-01
-  "col-span-4", // CASE-02
-  "col-span-4", // CASE-03
-  "col-span-4", // CASE-04
-  "col-span-4", // CASE-05
-  "col-span-4", // CASE-06
-  "col-span-4 md:col-span-12", // CASE-07 — full-width
-];
-
 export default function TracePage() {
-  return (
-    <div className="space-y-12">
+  const [filter, setFilter] = useState("All examples");
+  const examples = DEMO_WALLETS.map((wallet, index) => ({ ...wallet, index })).filter(w => filter === "All examples" || (filter === "Real-chain snapshots" ? w.note.startsWith("real:") : !w.note.startsWith("real:")));
+  return <div className="space-y-10">
+    <section className="page-intro grid items-center gap-8 lg:grid-cols-[1fr_300px]">
       <div>
-        <Eyebrow tone="accent">Trace a wallet</Eyebrow>
-        <h1 className="mt-3 font-display text-[28px] font-semibold tracking-tight text-heading">
-          Paste a wallet address to start
-        </h1>
-        <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-body">
-          Works with any real Ethereum, Polygon, or Tron wallet — fetched live from chain — or
-          jump into one of the seeded example cases below.
-        </p>
-        <div className="mt-6 max-w-2xl">
-          <WalletSearch autoFocus />
-        </div>
-        <div className="mt-3 flex items-center gap-1.5 text-xs text-muted">
-          or press <Kbd>⌘K</Kbd> to jump anywhere, any time
-        </div>
+        <Eyebrow tone="accent">Investigation / Wallet tracing</Eyebrow>
+        <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-heading sm:text-4xl">One address. A trail of evidence.</h1>
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-body">Enter an Ethereum, Polygon, or Tron wallet to explore its activity, identify likely exchanges, and assess risk.</p>
+        <div className="mt-6 max-w-2xl"><WalletSearch autoFocus /></div>
+        <p className="mt-3 text-xs text-muted">Use a 0x address for EVM networks or a T address for Tron.</p>
       </div>
-
-      <div>
-        <div className="flex items-center gap-3 pb-6">
-          <Eyebrow>Example cases · offline seeded</Eyebrow>
-          <span className="h-px flex-1 bg-soft-border" />
-        </div>
-
-        <BentoGrid>
-          {DEMO_WALLETS.map((w, i) => (
-            <Tile
-              key={w.address}
-              interactive
-              className={CASE_SPAN[i] ?? "col-span-4"}
-              bodyClassName="p-6"
-            >
-              <Link href={`/wallets/${w.address}`} className="group flex h-full flex-col">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase text-muted">
-                    CASE-{String(i + 1).padStart(2, "0")}
-                  </span>
-                  <Pill tone={OUTCOME_TONE[w.note] ?? "muted"}>{w.note}</Pill>
-                </div>
-                <div className="mt-4 font-display text-[20px] font-semibold text-heading group-hover:text-primary">
-                  {w.label}
-                </div>
-                <div className="mt-2 inline-block rounded-lg bg-surface-lavender px-2.5 py-1 font-mono text-xs text-mono">
-                  {shortAddr(w.address, 10, 8)}
-                </div>
-                <div className="mt-auto pt-4 text-[11px] text-muted opacity-0 transition-opacity group-hover:opacity-100">
-                  open investigation →
-                </div>
-              </Link>
-            </Tile>
-          ))}
-        </BentoGrid>
-
-        <p className="mt-8 text-xs text-muted">
-          Start the API (<code className="rounded-lg bg-surface-lavender px-1.5 py-0.5 font-mono text-mono">uvicorn app.main:app</code>) and
-          seed data (<code className="rounded-lg bg-surface-lavender px-1.5 py-0.5 font-mono text-mono">make seed-demo</code>) first. Manage
-          investigations under{" "}
-          <Link href="/cases" className="font-medium text-primary hover:underline">
-            cases
-          </Link>
-          .
-        </p>
-      </div>
-    </div>
-  );
+      <div className="space-y-5 border-t border-soft-border pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">{[
+        { icon: Search, title: "Trace the flow", text: "Explore connected wallets and transfers." },
+        { icon: Fingerprint, title: "Examine the signals", text: "Understand the basis for each attribution." },
+        { icon: Network, title: "Build your case", text: "Save findings and export a report." },
+      ].map(({ icon: Icon, title, text }, i) => <div key={title} className="flex gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-btn bg-primary-soft text-primary"><Icon size={17} /></span><div><div className="text-sm font-medium text-heading"><span className="mr-2 text-xs text-muted">0{i + 1}</span>{title}</div><p className="mt-1 text-xs leading-relaxed text-muted">{text}</p></div></div>)}</div>
+    </section>
+    <section>
+      <div className="flex flex-wrap items-end justify-between gap-4"><div><Eyebrow>Explore the workflow</Eyebrow><h2 className="mt-2 font-display text-xl font-semibold text-heading">Example investigations</h2><p className="mt-2 text-sm text-muted">Seeded scenarios and real-chain snapshots with different attribution outcomes.</p></div><span className="flex items-center gap-2 text-xs text-muted"><FlaskConical size={15} />{examples.length} examples</span></div>
+      <div className="my-6 flex flex-wrap gap-2" role="group" aria-label="Filter example investigations">{["All examples", "Seeded scenarios", "Real-chain snapshots"].map(item => <button key={item} type="button" aria-pressed={filter === item} onClick={() => setFilter(item)} className={`min-h-10 rounded-btn border px-4 text-xs font-medium transition-colors ${filter === item ? "border-primary/30 bg-primary-soft text-primary" : "border-soft-border text-muted hover:text-heading"}`}>{item}</button>)}</div>
+      <BentoGrid>{examples.map(w => <Tile key={w.address} interactive className="col-span-4" bodyClassName="p-0"><Link href={`/wallets/${w.address}`} className="group flex h-full flex-col p-6"><div className="flex items-center justify-between"><span className="font-mono text-[11px] text-muted">EXAMPLE {String(w.index + 1).padStart(2, "0")}</span><Pill tone={w.address.startsWith("T") ? "good" : "info"}>{w.address.startsWith("T") ? "Tron" : "Ethereum"}</Pill></div><h3 className="mt-5 font-display text-lg font-semibold text-heading transition-colors group-hover:text-primary">{w.label}</h3><p className="mt-2 text-xs text-muted">{w.note}</p><div className="mt-5 rounded-lg border border-soft-border bg-[#0D1025] px-3 py-2 font-mono text-xs text-mono">{shortAddr(w.address, 10, 8)}</div><div className="mt-auto flex items-center justify-between pt-5 text-xs font-medium text-primary">Open investigation<ArrowRight size={16} className="transition-transform group-hover:translate-x-1" /></div></Link></Tile>)}</BentoGrid>
+      <p className="mt-6 text-xs leading-relaxed text-muted">Example data is preloaded for repeatable investigations. Save evidence in your <Link href="/cases" className="text-primary hover:underline">case workspace</Link>.</p>
+    </section>
+  </div>;
 }

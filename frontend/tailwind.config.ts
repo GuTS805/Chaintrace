@@ -12,36 +12,36 @@ const config: Config = {
     extend: {
       colors: {
         // ── Surfaces ── (near-black workstation body)
-        surface: "#131313",
-        "surface-lavender": "#1C1930",
-        "surface-blush": "#1A1712",
+        surface: "#14162d",
+        "surface-lavender": "#202342",
+        "surface-blush": "#251d3e",
 
-        // ── Brand & accent — amber/gold, the single warm accent ──
-        primary: "#F2A93B",
-        "primary-hover": "#E0972B",
-        "primary-soft": "#2E230F",
-        "accent-pink": "#E0972B",
+        // ── Brand & accent — cyan and violet intelligence palette ──
+        primary: "#67E8F9",
+        "primary-hover": "#A5F3FC",
+        "primary-soft": "#153344",
+        "accent-pink": "#C4B5FD",
 
         // ── Text ──
-        heading: "#F3F1EA",
-        body: "#B4AFA4",
-        muted: "#847F73",
-        mono: "#BBA9F5",
+        heading: "#F4F3FF",
+        body: "#C3C5DE",
+        muted: "#A0A6C5",
+        mono: "#A5D8FF",
 
         // ── Semantic fills ──
         "good-fill": "#12301F",
         "good-text": "#3ED18E",
         "warn-fill": "#332108",
         "warn-text": "#F2A93B",
-        "neutral-fill": "#1C1C1E",
-        "neutral-text": "#9A968D",
-        "info-fill": "#1C1930",
-        "info-text": "#BBA9F5",
+        "neutral-fill": "#252844",
+        "neutral-text": "#a7b4c6",
+        "info-fill": "#2B2250",
+        "info-text": "#C4B5FD",
         "bad-fill": "#341313",
         "bad-text": "#F16B5C",
 
         // ── Borders ──
-        "soft-border": "rgba(243, 241, 234, 0.1)",
+        "soft-border": "rgba(175, 183, 255, 0.16)",
 
         // ── Legacy compat aliases (keeps old references compiling) ──
         good: "#3ED18E",
@@ -49,11 +49,10 @@ const config: Config = {
         bad: "#F16B5C",
       },
       fontFamily: {
-        display: ["var(--font-poppins)", "Poppins", "ui-sans-serif", "system-ui", "sans-serif"],
-        sans: ["var(--font-dm-sans)", "DM Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["Segoe UI", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Segoe UI", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: [
-          "var(--font-jetbrains-mono)",
-          "JetBrains Mono",
+          "Cascadia Code",
           "ui-monospace",
           "SFMono-Regular",
           "Menlo",
@@ -62,22 +61,22 @@ const config: Config = {
         ],
       },
       boxShadow: {
-        card: "0 20px 40px -14px rgba(0, 0, 0, 0.55)",
-        "card-hover": "0 28px 56px -14px rgba(0, 0, 0, 0.65)",
-        button: "0 12px 24px -8px rgba(242, 169, 59, 0.35)",
+        card: "0 4px 20px -8px rgba(0, 0, 0, 0.3)",
+        "card-hover": "0 12px 28px -12px rgba(0, 0, 0, 0.45)",
+        button: "0 12px 24px -8px rgba(103, 232, 249, 0.25)",
         nav: "0 8px 32px -8px rgba(0, 0, 0, 0.5)",
       },
       borderRadius: {
-        card: "20px",
+        card: "22px",
         hero: "24px",
-        input: "14px",
-        btn: "12px",
+        input: "10px",
+        btn: "10px",
       },
       keyframes: {
         "pulse-ring": {
-          "0%": { boxShadow: "0 0 0 0 rgba(242,169,59,0.35)" },
-          "70%": { boxShadow: "0 0 0 6px rgba(242,169,59,0)" },
-          "100%": { boxShadow: "0 0 0 0 rgba(242,169,59,0)" },
+          "0%": { boxShadow: "0 0 0 0 rgba(103,232,249,0.35)" },
+          "70%": { boxShadow: "0 0 0 6px rgba(103,232,249,0)" },
+          "100%": { boxShadow: "0 0 0 0 rgba(103,232,249,0)" },
         },
         "fade-up": {
           "0%": { opacity: "0", transform: "translateY(12px)" },

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 
 /**
  * BentoGrid: the base grid pages compose onto. 12 columns on large screens
@@ -13,7 +13,7 @@ export function BentoGrid({
   className?: string;
 }) {
   return (
-    <div className={`grid grid-cols-4 gap-6 md:grid-cols-12 ${className}`}>
+    <div className={`grid grid-cols-4 gap-4 md:grid-cols-12 lg:gap-6 ${className}`}>
       {children}
     </div>
   );
@@ -96,19 +96,19 @@ export function Tile({
 }) {
   return (
     <section
-      className={`flex flex-col overflow-hidden rounded-card border border-soft-border bg-surface shadow-card ${
+      className={`glass-panel flex min-w-0 flex-col overflow-hidden rounded-card border border-soft-border bg-surface shadow-card ${
         interactive
-          ? "transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-card-hover"
+          ? "interactive-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-card-hover"
           : ""
       } ${className}`}
     >
       {title && (
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between border-b border-soft-border px-6 py-4">
           <Eyebrow>{title}</Eyebrow>
           {right}
         </div>
       )}
-      <div className={`flex-1 ${bodyClassName}`}>{children}</div>
+      <div className={`min-w-0 flex-1 ${bodyClassName}`}>{children}</div>
     </section>
   );
 }
@@ -223,37 +223,12 @@ export function GhostButton({
  * Button: two clean button styles — solid primary for the main action per
  * view, thin-border secondary for everything else.
  */
-export function Button({
-  children,
-  onClick,
-  type = "button",
-  variant = "secondary",
-  disabled = false,
-  className = "",
-}: {
-  children: ReactNode;
-  onClick?: () => void;
-  type?: "button" | "submit";
-  variant?: "primary" | "secondary";
-  disabled?: boolean;
-  className?: string;
-}) {
-  const base =
-    "rounded-btn px-5 py-2.5 text-[13px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40";
-  const variants: Record<string, string> = {
-    primary:
-      "bg-primary text-[#1A1206] shadow-button hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0",
-    secondary:
-      "border border-soft-border text-heading hover:bg-surface-lavender",
+export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" }>(function Button({
+  children, type = "button", variant = "secondary", className = "", ...props
+}, ref) {
+  const variants = {
+    primary: "action-primary bg-primary text-[#091126] shadow-button hover:bg-primary-hover active:translate-y-px",
+    secondary: "border border-soft-border text-heading hover:bg-surface-lavender",
   };
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={`${base} ${variants[variant]} ${className}`}
-    >
-      {children}
-    </button>
-  );
-}
+  return <button ref={ref} type={type} className={`min-h-11 rounded-btn px-5 py-2.5 text-[13px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 ${variants[variant]} ${className}`} {...props}>{children}</button>;
+});

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { animate, useMotionValue, useTransform, motion } from "framer-motion";
+import { animate, useMotionValue, useTransform, useReducedMotion, motion } from "framer-motion";
 
 /**
  * Counts up to `value` whenever it changes — used for the confidence % and
@@ -20,15 +20,17 @@ export function AnimatedNumber({
   const motionValue = useMotionValue(0);
   const rendered = useTransform(motionValue, (v) => format(v));
   const first = useRef(true);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
+    if (reduced) { motionValue.set(value); return; }
     const controls = animate(motionValue, value, {
       duration: first.current ? 0.8 : 0.5,
       ease: "easeOut",
     });
     first.current = false;
     return () => controls.stop();
-  }, [value, motionValue]);
+  }, [value, motionValue, reduced]);
 
   return <motion.span className={className}>{rendered}</motion.span>;
 }

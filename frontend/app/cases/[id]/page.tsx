@@ -87,12 +87,12 @@ export default function CaseDetailPage({
     router.push("/cases");
   }
 
-  if (error) return <p className="text-sm text-bad-text">{error}</p>;
-  if (!detail) return <p className="text-sm text-muted">Loading…</p>;
+  if (!detail && error) return <Tile title="Case unavailable"><p role="alert" className="text-sm text-bad-text">{error}</p><Button onClick={() => { setError(null); load(); }} className="mt-4">Retry loading</Button></Tile>;
+  if (!detail) return <div role="status" className="animate-pulse space-y-6"><div className="h-28 rounded-card bg-surface" /><div className="h-80 rounded-card bg-surface" /><span className="sr-only">Loading case record...</span></div>;
 
   return (
     <BentoGrid>
-      <div className="col-span-4 md:col-span-12">
+      <div className="page-intro col-span-4 md:col-span-12">
         <Link href="/cases" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
           <ArrowLeft size={13} />
           cases
@@ -121,6 +121,8 @@ export default function CaseDetailPage({
         )}
       </div>
 
+      {error && <p role="alert" className="col-span-4 rounded-btn bg-bad-fill p-4 text-sm text-bad-text md:col-span-12">{error}</p>}
+
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
@@ -133,6 +135,7 @@ export default function CaseDetailPage({
       <Tile title="Add finding / note" className="col-span-4 md:col-span-5" bodyClassName="p-6">
         <form onSubmit={addFinding} className="space-y-3">
           <input
+            aria-label="Finding title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What did you find?"
@@ -140,8 +143,8 @@ export default function CaseDetailPage({
           />
           <Listbox value={severity} onChange={setSeverity}>
             <div className="relative">
-              <Listbox.Button className="flex w-full items-center justify-between rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-left text-xs text-heading outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft">
-                <span className="flex items-center gap-2">
+              <Listbox.Button aria-label="Finding severity" className="flex w-full items-center justify-between rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-left text-xs text-heading outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft">
+                <span className="flex flex-wrap items-center gap-2">
                   <Pill tone={SEV_TONE[severity]}>{severity}</Pill>
                 </span>
                 <ChevronsUpDown size={14} className="shrink-0 text-muted" />
@@ -171,12 +174,14 @@ export default function CaseDetailPage({
             </div>
           </Listbox>
           <input
+            aria-label="Wallet address (optional)"
             value={wallet}
             onChange={(e) => setWallet(e.target.value)}
             placeholder="Wallet address (optional)"
             className="w-full rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-sm text-heading outline-none placeholder:text-muted transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft"
           />
           <textarea
+            aria-label="Finding notes (optional)"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Notes (optional)"
@@ -184,7 +189,7 @@ export default function CaseDetailPage({
             className="w-full resize-none rounded-input border border-soft-border bg-surface-lavender px-3 py-2.5 text-sm text-heading outline-none placeholder:text-muted transition-all focus:border-primary focus:ring-2 focus:ring-primary-soft"
           />
           <Button type="submit" variant="primary" disabled={saving || !title.trim()} className="w-full">
-            {saving ? "Adding…" : "Add"}
+            {saving ? "Adding…" : "Add finding"}
           </Button>
         </form>
       </Tile>
@@ -204,7 +209,7 @@ export default function CaseDetailPage({
             {detail.findings.map((f) => (
               <li key={f.id} className="relative">
                 <span className="absolute -left-[30px] top-1 h-2.5 w-2.5 rounded-full border-2 border-primary bg-surface" />
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Pill tone={SEV_TONE[f.severity]}>{f.severity}</Pill>
                   <span className="font-display font-semibold text-heading">{f.title}</span>
                   <span className="ml-auto text-[10px] text-muted">{fmtTime(f.created_at)}</span>

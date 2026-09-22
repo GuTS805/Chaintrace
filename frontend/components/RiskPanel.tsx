@@ -22,7 +22,7 @@ export function RiskPanel({
   const scoreTone = tone === "bad" ? "text-bad-text" : tone === "warn" ? "text-warn-text" : "text-heading";
 
   return (
-    <Tile bodyClassName="p-8">
+    <Tile bodyClassName="p-5 sm:p-8">
       <div className="flex items-start justify-between gap-6">
         <Eyebrow>Risk</Eyebrow>
         {risk.flagged ? (
@@ -71,6 +71,9 @@ export function RiskPanel({
           {risk.indicators.slice(0, 6).map((ind, i) => (
             <li
               key={i}
+              tabIndex={0}
+              onFocus={() => onHoverIndicator(ind.address)}
+              onBlur={() => onHoverIndicator(null)}
               onMouseEnter={() => onHoverIndicator(ind.address)}
               onMouseLeave={() => onHoverIndicator(null)}
               className="-mx-2 flex items-start gap-3 rounded-btn px-2 py-2 text-[13px] transition-colors hover:bg-surface-lavender"
