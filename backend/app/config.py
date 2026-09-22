@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_JWT_SECRET = "chaintrace-demo-secret-change-in-production"
@@ -22,6 +22,18 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://vasp:vasp@localhost:5432/vasp",
         alias="DATABASE_URL",
     )
+
+    @field_validator("database_url")
+    @classmethod
+    def _use_asyncpg_driver(cls, v: str) -> str:
+        # Managed Postgres providers (Render, Heroku, Railway, Supabase, ...)
+        # hand back a bare postgres(ql):// URL with no driver — SQLAlchemy's
+        # async engine needs the asyncpg dialect spelled out explicitly.
+        if v.startswith("postgres://"):
+            return "postgresql+asyncpg://" + v[len("postgres://") :]
+        if v.startswith("postgresql://"):
+            return "postgresql+asyncpg://" + v[len("postgresql://") :]
+        return v
 
     # Cache.
     redis_url: str = Field(default="redis://localhost:6379/0", alias="REDIS_URL")

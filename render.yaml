@@ -1,0 +1,40 @@
+databases:
+  - name: chaintrace-db
+    plan: free
+    databaseName: chaintrace
+    user: chaintrace
+
+services:
+  - type: web
+    name: chaintrace-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -e .
+    # Runs once per deploy, after the build and before it goes live: apply
+    # migrations and (re)seed the offline demo fixtures, same sequence as
+    # run.ps1 uses locally. All of these are idempotent (upsert, not insert).
+    preDeployCommand: >
+      alembic upgrade head &&
+      python -m app.synthetic.seed &&
+      python -m app.auth.seed_officer &&
+      python -m app.ingest.chain_import --file data/realchain/kraken_depositor_216b7523.json &&
+      python -m app.ingest.chain_import --file data/realchain/binance_depositor_5b271663.json &&
+      python -m app.ingest.chain_import --file data/realchain/tron_kraken_depositor_TVYuaXdh.json --chain tron &&
+      python -m app.attribution.cluster_builder
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: chaintrace-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      # Fill in once the frontend is deployed (its Vercel URL) — see README.
+      - key: CORS_ORIGINS
+        sync: false
