@@ -321,6 +321,26 @@ ruff check .             # lint
 mypy                     # strict type-check on app/
 ```
 
+## Deploy (public demo)
+
+Frontend on **Vercel**, backend + Postgres on **Render** — the backend's ML
+deps (xgboost/scikit-learn/scipy/numpy) exceed Vercel's 250MB serverless
+function limit, so it needs a real container, not a Lambda.
+
+1. **Backend (Render):** push this repo to GitHub, then in the Render
+   dashboard: New → Blueprint → select the repo. `render.yaml` at the repo
+   root provisions the web service + a free Postgres instance, runs Alembic
+   migrations and the same offline seed/import/cluster-build sequence
+   `run.ps1` runs locally, and generates a real `JWT_SECRET` automatically.
+   After the first deploy, set `CORS_ORIGINS` in the Render dashboard to the
+   frontend's Vercel URL (comma-separated if there's more than one).
+2. **Frontend (Vercel):** `vercel --prod` from `frontend/`, with
+   `NEXT_PUBLIC_API_BASE` set to the Render service's URL
+   (`https://<service>.onrender.com`).
+3. Redis is optional in this setup — the cache layer no-ops if unreachable
+   (see `app/cache/redis.py`), so a first public deploy skips it. Add a
+   Render Key Value instance and `REDIS_URL` later if you want caching.
+
 ## Hard requirements (tracked)
 
 1. **Structured evidence, not just a number** — `schemas/attribution.py`.
