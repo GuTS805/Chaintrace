@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Download, Scale } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Check, Copy, Download, Scale } from "lucide-react";
 import { api } from "@/lib/api";
 import type { AttributionResult, GraphResult, RiskResult } from "@/lib/types";
 import { pushRecent } from "@/lib/recents";
@@ -14,7 +15,7 @@ import { AddToCase } from "@/components/AddToCase";
 import { WalletSearch } from "@/components/WalletSearch";
 import { LiveTrace } from "@/components/LiveTrace";
 import { PdfButton } from "@/components/PdfButton";
-import { BentoGrid, Eyebrow, Tile } from "@/components/ui";
+import { BentoGrid, Button, Eyebrow, Tile } from "@/components/ui";
 
 /** Staggered fade+rise entrance for the verdict → graph → risk reading order. */
 function FadeIn({ index, children }: { index: number; children: React.ReactNode }) {
@@ -47,6 +48,14 @@ export default function WalletPage({
   const [graph, setGraph] = useState<GraphResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
+  const [partial, setPartial] = useState(false);
+  async function copyAddress() {
+    try { await navigator.clipboard.writeText(address); setCopied(true); setCopyError(false); }
+    catch { setCopyError(true); }
+  }
+  useEffect(() => { if (!copied) return; const timer = setTimeout(() => setCopied(false), 2000); return () => clearTimeout(timer); }, [copied]);
 
   // Cross-highlight state, shared by AttributionPanel/RiskPanel (source) and
   // GraphView (destination).
@@ -57,12 +66,14 @@ export default function WalletPage({
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setAttribution(null); setRisk(null); setGraph(null); setPartial(false);
     const results = await Promise.allSettled([
       api.attribution(address),
       api.risk(address),
       api.graph(address, 5),
     ]);
     const [a, r, g] = results;
+    setPartial(results.some(x => x.status === "rejected") && results.some(x => x.status === "fulfilled"));
     if (a.status === "fulfilled") setAttribution(a.value);
     if (r.status === "fulfilled") setRisk(r.value);
     if (g.status === "fulfilled") setGraph(g.value);
@@ -94,10 +105,13 @@ export default function WalletPage({
 
   return (
     <div className="space-y-10">
-      <div className="flex flex-wrap items-end justify-between gap-6">
+      <div className="page-intro flex flex-wrap items-end justify-between gap-6">
         <div>
+          <Link href="/trace" className="mb-5 inline-flex items-center gap-2 text-xs text-muted hover:text-primary"><ArrowLeft size={14} /> Wallet tracing</Link>
           <Eyebrow>Trace wallet · {chain}</Eyebrow>
-          <h1 className="mt-2 break-all font-mono text-[15px] text-mono">{address}</h1>
+          <h1 className="mt-2 font-display text-2xl font-semibold text-heading">Wallet investigation</h1>
+          <div className="mt-3 flex items-center gap-3"><span className="break-all font-mono text-xs text-mono sm:text-sm">{address}</span><button type="button" onClick={() => void copyAddress()} aria-label={copied ? "Address copied" : "Copy wallet address"} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-btn border border-soft-border text-muted hover:text-primary">{copied ? <Check size={16} /> : <Copy size={16} />}</button></div>
+          <span role="status" className="text-xs text-muted">{copied ? "Address copied" : copyError ? "Copy unavailable. Select the address to copy it manually." : ""}</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <PdfButton
@@ -112,7 +126,7 @@ export default function WalletPage({
             attribution.candidates.length > 0 && (
               <PdfButton
                 path={`/wallets/${address}/disclosure-request`}
-                className="flex items-center gap-1.5 rounded-btn bg-primary px-3 py-2 text-[12px] font-medium text-[#1A1206] shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
+                className="flex items-center gap-1.5 action-primary rounded-btn bg-primary px-3 py-2 text-[12px] font-medium text-[#091126] shadow-button transition-all hover:-translate-y-0.5 hover:bg-primary-hover active:translate-y-0"
               >
                 <Scale size={13} />
                 Prepare disclosure request (SAHYOG)
@@ -125,18 +139,17 @@ export default function WalletPage({
         <WalletSearch />
       </div>
 
-      {loading && <p className="text-sm text-muted">Tracing…</p>}
+      {loading && <div role="status" aria-label="Loading wallet investigation" className="grid gap-5 md:grid-cols-2">{[0, 1].map(i => <div key={i} className="h-64 animate-pulse rounded-card border border-soft-border bg-surface p-6"><div className="h-3 w-28 rounded bg-neutral-fill" /><div className="mt-6 h-8 w-1/2 rounded bg-neutral-fill" /><div className="mt-5 h-24 rounded bg-neutral-fill" /></div>)}<span className="sr-only">Tracing transactions and collecting evidence...</span></div>}
+      {partial && !loading && <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-btn border border-warn-text/20 bg-warn-fill p-4"><p className="text-sm text-warn-text">Some evidence could not be loaded. Results below are incomplete.</p><Button onClick={() => void load()}>Retry</Button></div>}
       {error && (
-        <Tile title="Error">
-          <p className="text-sm text-bad-text">{error}</p>
-          <p className="mt-2 text-xs text-muted">
-            Start the backend (<code className="rounded-lg bg-surface-lavender px-1.5 py-0.5 font-mono text-mono">make dev</code>) and
-            seed data (<code className="rounded-lg bg-surface-lavender px-1.5 py-0.5 font-mono text-mono">make seed-demo</code>).
-          </p>
+        <Tile title="Investigation unavailable">
+          <p role="alert" className="text-sm text-bad-text">{error}</p>
+          <p className="mt-2 text-sm text-muted">The investigation service could not return this wallet. Retry to reconnect.</p>
+          <Button onClick={() => void load()} className="mt-4">Retry investigation</Button>
         </Tile>
       )}
 
-      {!loading && !error && isEmpty && (
+      {!loading && !error && !partial && isEmpty && (
         <LiveTrace
           address={address}
           onDone={(usedChain) => {

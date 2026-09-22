@@ -21,7 +21,7 @@ export function OfficerBadge() {
 
   if (!officer) {
     return (
-      <span className="ml-auto flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted">
+      <span className="ml-auto hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted">
         <span className="h-2 w-2 animate-pulse rounded-full bg-[#34C77B]" />
         SIH 26182 · crypto attribution
       </span>
@@ -36,7 +36,7 @@ export function OfficerBadge() {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <button className="ml-auto flex shrink-0 items-center gap-2 rounded-btn py-1.5 pl-2 pr-2.5 text-[12px] transition-colors hover:bg-surface-lavender">
+        <button aria-label="Officer account menu" className="ml-auto flex shrink-0 items-center gap-2 rounded-btn py-1.5 pl-2 pr-2.5 text-[12px] transition-colors hover:bg-surface-lavender">
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[11px] font-semibold text-primary">
             {officer.full_name.slice(0, 1).toUpperCase()}
           </span>

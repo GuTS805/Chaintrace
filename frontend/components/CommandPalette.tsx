@@ -6,6 +6,7 @@ import { ArrowRight, Clock, Search } from "lucide-react";
 import { getRecents } from "@/lib/recents";
 import { shortAddr } from "@/lib/format";
 import { Kbd } from "./ui";
+import * as Dialog from "@radix-ui/react-dialog";
 
 /** Global ⌘K / Ctrl+K lookup — an investigator running many wallet lookups a
  * day shouldn't have to leave the keyboard or navigate to the home page to
@@ -25,8 +26,10 @@ export function CommandPalette() {
       }
       if (e.key === "Escape") setOpen(false);
     }
+    const show = () => setOpen(true);
+    window.addEventListener("chaintrace:search", show);
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("chaintrace:search", show); };
   }, []);
 
   useEffect(() => {
@@ -46,7 +49,7 @@ export function CommandPalette() {
 
   function go(address: string) {
     setOpen(false);
-    router.push(`/wallets/${address}`);
+    router.push(`/wallets/${encodeURIComponent(address)}`);
   }
 
   function submit(e: React.FormEvent) {
@@ -55,19 +58,16 @@ export function CommandPalette() {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 pt-[14vh] backdrop-blur-sm"
-      onClick={() => setOpen(false)}
-    >
-      <div
-        role="dialog"
-        aria-label="Command palette"
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg overflow-hidden rounded-card border border-soft-border bg-surface shadow-card-hover"
-      >
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
+        <Dialog.Content aria-describedby="search-description" className="fixed left-1/2 top-[14vh] z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 overflow-hidden rounded-card border border-soft-border bg-surface shadow-card-hover">
+          <Dialog.Title className="sr-only">Search the workspace</Dialog.Title>
+          <Dialog.Description id="search-description" className="sr-only">Enter a wallet address, reopen a recent trace, or navigate to cases.</Dialog.Description>
         <form onSubmit={submit} className="flex items-center gap-2 border-b border-soft-border px-4 py-3">
           <Search size={16} className="shrink-0 text-primary" />
           <input
+            aria-label="Search wallet address"
             ref={inputRef}
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -75,7 +75,7 @@ export function CommandPalette() {
             spellCheck={false}
             className="w-full bg-transparent text-sm text-heading outline-none placeholder:text-muted"
           />
-          <Kbd>esc</Kbd>
+          <Dialog.Close aria-label="Close search"><Kbd>esc</Kbd></Dialog.Close>
         </form>
 
         <div className="max-h-80 overflow-y-auto p-2">
@@ -139,7 +139,8 @@ export function CommandPalette() {
             </div>
           )}
         </div>
-      </div>
-    </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

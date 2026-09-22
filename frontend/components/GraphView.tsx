@@ -27,7 +27,7 @@ import { Eyebrow, Pill, Tile } from "./ui";
 type Role = "root" | "risk" | "bridge" | "vasp" | "plain";
 
 const ROLE_COLOR: Record<Role, string> = {
-  root: "#F2A93B",
+  root: "#67E8F9",
   risk: "#F16B5C",
   bridge: "#38BDF8",
   vasp: "#3ED18E",
@@ -61,10 +61,10 @@ function roleOf(n: GraphNode): Role {
 
 // Low-key dark tints for cluster grouping — same hue family as the node's
 // role color, just enough to read as "grouped" against the near-black canvas.
-const CLUSTER_TINTS = ["#1C1930", "#231C14", "#122619", "#2A1414", "#0F1E26", "#1E1A28"];
+const CLUSTER_TINTS = ["#1C1930", "#242040", "#122619", "#2A1414", "#0F1E26", "#1E1A28"];
 
 function clusterTint(clusterId: number | null | undefined): string {
-  if (clusterId == null) return "#161616";
+  if (clusterId == null) return "#181b34";
   return CLUSTER_TINTS[clusterId % CLUSTER_TINTS.length];
 }
 
@@ -91,10 +91,10 @@ function WalletNode({ data }: NodeProps<WalletNodeData>) {
       className="relative flex items-center gap-2.5 rounded-2xl px-3.5 py-3 transition-shadow duration-150"
       style={{
         background: clusterTint(data.clusterId),
-        border: `${special || data.isHighlighted ? 2 : 1}px solid ${data.isHighlighted ? "#F2A93B" : color}`,
+        border: `${special || data.isHighlighted ? 2 : 1}px solid ${data.isHighlighted ? "#67E8F9" : color}`,
         width: 208,
         boxShadow: data.isHighlighted
-          ? "0 0 0 5px rgba(242,169,59,0.16), 0 8px 24px -8px rgba(242,169,59,0.35)"
+          ? "0 0 0 5px rgba(103,232,249,0.16), 0 8px 24px -8px rgba(103,232,249,0.35)"
           : `0 8px 20px -10px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.2), 0 0 22px -6px ${color}33`,
       }}
     >
@@ -116,7 +116,16 @@ function WalletNode({ data }: NodeProps<WalletNodeData>) {
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="font-mono text-[11px] font-medium text-heading">{shortAddr(data.address)}</div>
+        <div
+          className="cursor-pointer font-mono text-[11px] font-medium text-heading hover:underline"
+          title={`${data.address} — click to copy`}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigator.clipboard?.writeText(data.address).catch(() => {});
+          }}
+        >
+          {shortAddr(data.address)}
+        </div>
         <div className="mt-0.5 truncate text-[10px] font-semibold" style={{ color }}>
           {data.title || ROLE_LABEL[data.role]}
         </div>
@@ -187,7 +196,7 @@ export function GraphView({
       const width = Math.max(1, Math.min(4, 1 + Math.log10(1 + amt)));
       const toVasp = roleByAddr.get(e.to_address) === "vasp";
       const isHl = highlightedTx.has(e.tx_hash);
-      const stroke = isHl ? "#F2A93B" : toVasp ? "#3ED18E" : "#3A3A3A";
+      const stroke = isHl ? "#67E8F9" : toVasp ? "#3ED18E" : "#56657c";
       rfEdges.push({
         id: e.tx_hash,
         source: e.from_address,
@@ -196,11 +205,11 @@ export function GraphView({
         pathOptions: { borderRadius: 16 },
         label: formatAsset(e.value_wei, e.asset),
         labelStyle: {
-          fill: isHl ? "#F2A93B" : "#B4AFA4",
+          fill: isHl ? "#67E8F9" : "#C3C5DE",
           fontSize: 10,
           fontWeight: isHl ? 700 : 500,
         },
-        labelBgStyle: { fill: "#131313", fillOpacity: 1 },
+        labelBgStyle: { fill: "#14162d", fillOpacity: 1 },
         labelBgPadding: [6, 3],
         labelBgBorderRadius: 5,
         style: { stroke, strokeWidth: isHl ? width + 1.5 : width },
@@ -223,11 +232,12 @@ export function GraphView({
           <Pill tone="muted">{graph.prune.nodes_visited} nodes</Pill>
         )}
       </div>
-      <div className="h-[640px] w-full overflow-hidden rounded-card">
+      <div className="h-[420px] sm:h-[560px] lg:h-[640px] w-full overflow-hidden rounded-card">
         {graph.nodes.length === 0 ? (
           <p className="p-6 text-sm text-muted">No outgoing activity within bounds.</p>
         ) : (
           <ReactFlow
+            aria-label="Wallet transaction graph"
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
@@ -238,7 +248,7 @@ export function GraphView({
             minZoom={0.2}
             proOptions={{ hideAttribution: true }}
           >
-            <Background color="#1C1C1C" gap={28} />
+            <Background color="#263246" gap={28} />
             <Controls
               showInteractive={false}
               className="!rounded-btn !border-soft-border !bg-surface !shadow-card [&_button]:!border-soft-border [&_button]:!bg-surface [&_button]:!fill-muted [&_button]:hover:!bg-surface-lavender"
@@ -251,13 +261,13 @@ export function GraphView({
                 return gn ? ROLE_COLOR[roleOf(gn)] : "#847F73";
               }}
               maskColor="rgba(10,10,10,0.75)"
-              style={{ background: "#131313", border: "1px solid rgba(243,241,234,0.1)", borderRadius: 12 }}
+              style={{ background: "#14162d", border: "1px solid rgba(243,241,234,0.1)", borderRadius: 12 }}
             />
           </ReactFlow>
         )}
       </div>
       <p className="pt-4 text-[11px] text-muted">
-        Click a node to inspect inline · root <span className="text-primary">gold</span> · attributed{" "}
+        Click a node to inspect inline · root <span className="text-primary">cyan</span> · attributed{" "}
         <span className="text-good-text">green</span> · mixer <span className="text-bad-text">red</span> · bridge{" "}
         <span style={{ color: "#38BDF8" }}>blue</span> · hovering evidence traces the matching edge here
       </p>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, X } from "lucide-react";
@@ -22,10 +23,18 @@ export function ConfirmDialog({
   title: string;
   description: string;
   confirmLabel?: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
 }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function confirm() {
+    setBusy(true); setError(null);
+    try { await onConfirm(); onOpenChange(false); }
+    catch (e) { setError(e instanceof Error ? e.message : "The action could not be completed."); }
+    finally { setBusy(false); }
+  }
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root open={open} onOpenChange={(next) => { if (!busy) { setError(null); onOpenChange(next); } }}>
       <AnimatePresence>
         {open && (
           <Dialog.Portal forceMount>
@@ -40,10 +49,10 @@ export function ConfirmDialog({
             </Dialog.Overlay>
             <Dialog.Content asChild forceMount>
               <motion.div
-                className="fixed left-1/2 top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-card border border-soft-border bg-surface p-6 shadow-card-hover"
-                initial={{ opacity: 0, scale: 0.96, y: 8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-card border border-soft-border bg-surface p-6 shadow-card-hover"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
               >
                 <div className="flex items-start gap-3">
@@ -61,6 +70,7 @@ export function ConfirmDialog({
                   <Dialog.Close asChild>
                     <button
                       className="rounded-btn p-1 text-muted hover:bg-surface-lavender hover:text-heading"
+                      disabled={busy}
                       aria-label="Cancel"
                     >
                       <X size={16} />
@@ -68,19 +78,18 @@ export function ConfirmDialog({
                   </Dialog.Close>
                 </div>
 
+                {error && <p role="alert" className="mt-4 text-sm text-bad-text">{error}</p>}
                 <div className="mt-6 flex justify-end gap-2">
                   <Dialog.Close asChild>
-                    <Button variant="secondary">Cancel</Button>
+                    <Button variant="secondary" disabled={busy}>Cancel</Button>
                   </Dialog.Close>
                   <Button
                     variant="primary"
                     className="!bg-bad-text hover:!bg-bad-text/90"
-                    onClick={() => {
-                      onConfirm();
-                      onOpenChange(false);
-                    }}
+                    disabled={busy}
+                    onClick={() => void confirm()}
                   >
-                    {confirmLabel}
+                    {busy ? "Working..." : confirmLabel}
                   </Button>
                 </div>
               </motion.div>
