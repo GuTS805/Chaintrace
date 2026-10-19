@@ -66,4 +66,4 @@ The local chain is discarded after the test, so these hashes cannot be looked up
 ## Not yet done (needs a person)
 
 - **Preview deployment with a real Lace wallet.** This needs Lace and tNIGHT from the Preview faucet, which uses a human check. Record the contract address, transaction hash and verification result here once done.
-- Demo video recording, public repository and AKINDO submission.
+- Demo video recording (script: `DEMO_SCRIPT.md`), public repository and AKINDO submission.
