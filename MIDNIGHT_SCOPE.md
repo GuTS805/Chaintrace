@@ -60,7 +60,7 @@ Chaintrace case API -> browser snapshot + salt -> SHA-256 commitment
 - **Chaintrace frontend:** canonical-JSON bundle export (same commitment as the DApp, shared test vector) and an "Attest on Midnight" link. Typecheck and `next build` pass.
 - **Preview:** case contract `8f2b54a3…d11368` deployed, and revision 1 attested (block 1,364,229) and verified through the public indexer, using a headless wallet (`npm run preview:run`).
 - **Not done:** the same flow in the browser with Lace, demo video, public repo and topic, AKINDO submission.
-- **All of this is pre-Wave-3 work.** It still is not an eligible or submitted Buildathon entry.
+- Built during the 2nd Wave (building period 29 September – 19 October 2026). Submission summary: `MIDNIGHT_SUBMISSION.md`.
 
 ## 7. Build sequence and completion criteria
 
@@ -75,6 +75,6 @@ Chaintrace case API -> browser snapshot + salt -> SHA-256 commitment
 
 ## 8. Buildathon timing and constraints
 
-AKINDO lists Wave 3 build period as **27 October–16 November 2026**. Existing code can be reused, but Midnight-related functionality evaluated for Wave 3 must be newly developed or materially extended during that wave. The prototype began before Wave 3 at the user's request; it alone is not sufficient. Confirm the precise deadline and current official rules before submission. Registration and entry must be performed personally; automated entries are prohibited.
+AKINDO lists the 2nd Wave building period as **29 September – 19 October 2026**, with submissions due **19 October 2026, 20:30 IST (15:00 UTC)**. Registration and submission must be done personally; automated entries are prohibited.
 
 Source: https://app.akindo.io/wave-hacks/jaMZjqPOBsLXvjdG

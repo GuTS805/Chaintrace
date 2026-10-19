@@ -23,7 +23,7 @@ On a case page, **Private attestation** downloads the bundle and **Attest on
 Midnight** opens the DApp.
 
 Contract, DApp, tests and setup: **[midnight/README.md](midnight/README.md)**
-(Apache-2.0). Build and test record: [midnight/EVIDENCE.md](midnight/EVIDENCE.md).
+(Apache-2.0). Build and test record: [midnight/EVIDENCE.md](midnight/EVIDENCE.md). Buildathon summary: [MIDNIGHT_SUBMISSION.md](MIDNIGHT_SUBMISSION.md).
 
 ## Run the demo (one command, Windows)
 

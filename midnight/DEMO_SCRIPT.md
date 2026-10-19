@@ -1,6 +1,6 @@
 # Demo video script (about 3 minutes)
 
-For the Buildathon demo video. Record it on **Preview** with a real Lace wallet, during Wave 3.
+For the Buildathon demo video. Record it on **Preview** with a real Lace wallet. If Lace is not set up, use the fallback at the end.
 
 ## Before recording
 
@@ -27,3 +27,13 @@ For the Buildathon demo video. Record it on **Preview** with a real Lace wallet,
 ## After recording
 
 Copy the contract address, transaction hash and verification result into `EVIDENCE.md` under a new “Preview run” heading, with the date.
+
+## Fallback without Lace (about 2 minutes)
+
+Uses the real Preview attestation recorded in `EVIDENCE.md`. No wallet is needed.
+
+1. Chaintrace case page: show **Private attestation** and **Attest on Midnight**.
+2. Terminal: show the end of `npm run preview:run` output (deploy, attest, `reviewer verdict: verified`).
+3. DApp **Verify bundle** tab: drop `.preview/bundle-r1.json` and `.preview/receipt-r1.json`, then click **Verify against Midnight**. The result is a match.
+4. Edit one finding in a copy of the bundle and verify again. The result is no match.
+5. Close on the "what it proves" footer.

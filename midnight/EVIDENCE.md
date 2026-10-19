@@ -1,6 +1,6 @@
 # Build and test evidence
 
-Recorded 19 October 2026 (IST) on Windows 11, Node.js 24.19.0, Docker 29.8.2. **This is pre-Wave-3 work.** The Wave 3 build period is 27 October–16 November 2026. Record new runs here for work done during the wave.
+Recorded 19 October 2026 (IST) on Windows 11, Node.js 24.19.0, Docker 29.8.2. Built during the Buildathon 2nd Wave (building period 29 September – 19 October 2026).
 
 ## Toolchain
 
