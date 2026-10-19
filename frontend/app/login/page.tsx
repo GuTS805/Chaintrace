@@ -32,7 +32,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto grid min-h-[75vh] max-w-6xl items-center gap-12 py-6 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
+    <div className="mx-auto grid min-h-[75vh] min-w-0 max-w-6xl items-center gap-12 py-6 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
       <div className="hidden lg:block">
         <Eyebrow tone="accent">The investigation starts here</Eyebrow>
         <h2 className="mt-4 font-display text-[48px] font-bold leading-tight tracking-tight text-heading">Every transaction<br />leaves a <span className="gradient-text">trace.</span></h2>
@@ -43,7 +43,7 @@ export default function LoginPage() {
         initial={false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="login-panel glass-panel mx-auto w-full max-w-[440px] rounded-hero border border-soft-border bg-surface p-6 shadow-card sm:p-10"
+        className="login-panel glass-panel mx-auto min-w-0 w-full max-w-[440px] rounded-hero border border-soft-border bg-surface p-6 shadow-card sm:p-10"
       >
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 w-fit">
@@ -106,7 +106,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 rounded-btn border border-dashed border-soft-border bg-[#0D1025] p-4 text-center text-[12px] leading-relaxed text-muted">
+        <p className="mt-6 break-words rounded-btn border border-dashed border-soft-border bg-[#0B1A27] p-4 text-center text-[12px] leading-relaxed text-muted">
           Demo credentials: <span className="font-mono text-mono">i4c.analyst</span> /{" "}
           <span className="font-mono text-mono">Chain@2026</span>
         </p>

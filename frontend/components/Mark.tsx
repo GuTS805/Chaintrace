@@ -22,7 +22,7 @@ export function Mark({ size = 22, className = "" }: { size?: number; className?:
         <line x1="17.2" y1="17.8" x2="21" y2="21.6" stroke="#E8E7FF" strokeWidth="1.7" strokeLinecap="round" />
 
         {/* confidence accent */}
-        <circle cx="16" cy="25.2" r="1.5" fill="#67E8F9" />
+        <circle cx="16" cy="25.2" r="1.5" fill="#5EE3CF" />
       </svg>
     </div>
   );

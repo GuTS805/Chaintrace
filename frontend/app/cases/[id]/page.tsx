@@ -249,8 +249,8 @@ export default function CaseDetailPage({
           <ol className="relative space-y-4 pl-9">
             <span className="absolute left-[13px] top-1 h-[calc(100%-0.5rem)] w-px bg-soft-border" />
             {detail.findings.map((f) => (
-              <li key={f.id} className="relative">
-                <span className="absolute -left-[30px] top-1 h-2.5 w-2.5 rounded-full border-2 border-primary bg-surface" />
+              <li key={f.id} data-severity={f.severity} className="finding-timeline-item relative">
+                <span className="finding-timeline-dot absolute -left-[30px] top-1 h-2.5 w-2.5 rounded-full border-2 bg-surface" />
                 <div className="flex flex-wrap items-center gap-2">
                   <Pill tone={SEV_TONE[f.severity]}>{f.severity}</Pill>
                   <span className="font-display font-semibold text-heading">{f.title}</span>

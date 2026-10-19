@@ -33,7 +33,7 @@ export function WalletSearch({
   return (
     <form
       onSubmit={submit}
-      className="wallet-search flex min-h-16 items-center gap-2 rounded-input border border-soft-border bg-[#0D1025] p-2 pl-4 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary-soft"
+      className="wallet-search flex min-h-16 items-center gap-2 rounded-input border border-soft-border bg-[#0B1A27] p-2 pl-4 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary-soft"
     >
       <Search size={16} className="shrink-0 text-primary" />
       <input

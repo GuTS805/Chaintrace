@@ -27,11 +27,11 @@ import { Eyebrow, Pill, Tile } from "./ui";
 type Role = "root" | "risk" | "bridge" | "vasp" | "plain";
 
 const ROLE_COLOR: Record<Role, string> = {
-  root: "#67E8F9",
-  risk: "#F16B5C",
-  bridge: "#38BDF8",
-  vasp: "#3ED18E",
-  plain: "#847F73",
+  root: "#F5C16C",
+  risk: "#FF9C9A",
+  bridge: "#CFC1FF",
+  vasp: "#72E2AD",
+  plain: "#6E8693",
 };
 
 const ROLE_ICON: Record<Role, typeof WalletIcon> = {
@@ -61,10 +61,10 @@ function roleOf(n: GraphNode): Role {
 
 // Low-key dark tints for cluster grouping — same hue family as the node's
 // role color, just enough to read as "grouped" against the near-black canvas.
-const CLUSTER_TINTS = ["#1C1930", "#242040", "#122619", "#2A1414", "#0F1E26", "#1E1A28"];
+const CLUSTER_TINTS = ["#16293A", "#1B2F3F", "#163126", "#2D2129", "#132A33", "#24263A"];
 
 function clusterTint(clusterId: number | null | undefined): string {
-  if (clusterId == null) return "#181b34";
+  if (clusterId == null) return "#152839";
   return CLUSTER_TINTS[clusterId % CLUSTER_TINTS.length];
 }
 
@@ -91,10 +91,10 @@ function WalletNode({ data }: NodeProps<WalletNodeData>) {
       className="relative flex items-center gap-2.5 rounded-2xl px-3.5 py-3 transition-shadow duration-150"
       style={{
         background: clusterTint(data.clusterId),
-        border: `${special || data.isHighlighted ? 2 : 1}px solid ${data.isHighlighted ? "#67E8F9" : color}`,
+        border: `${special || data.isHighlighted ? 2 : 1}px solid ${data.isHighlighted ? "#F5C16C" : color}`,
         width: 208,
         boxShadow: data.isHighlighted
-          ? "0 0 0 5px rgba(103,232,249,0.16), 0 8px 24px -8px rgba(103,232,249,0.35)"
+          ? "0 0 0 5px rgba(245,193,108,0.16), 0 8px 24px -8px rgba(245,193,108,0.35)"
           : `0 8px 20px -10px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.2), 0 0 22px -6px ${color}33`,
       }}
     >
@@ -196,7 +196,7 @@ export function GraphView({
       const width = Math.max(1, Math.min(4, 1 + Math.log10(1 + amt)));
       const toVasp = roleByAddr.get(e.to_address) === "vasp";
       const isHl = highlightedTx.has(e.tx_hash);
-      const stroke = isHl ? "#67E8F9" : toVasp ? "#3ED18E" : "#56657c";
+      const stroke = isHl ? "#F5C16C" : toVasp ? "#72E2AD" : "#4C6372";
       rfEdges.push({
         id: e.tx_hash,
         source: e.from_address,
@@ -205,11 +205,11 @@ export function GraphView({
         pathOptions: { borderRadius: 16 },
         label: formatAsset(e.value_wei, e.asset),
         labelStyle: {
-          fill: isHl ? "#67E8F9" : "#C3C5DE",
+          fill: isHl ? "#F5C16C" : "#CBD6DB",
           fontSize: 10,
           fontWeight: isHl ? 700 : 500,
         },
-        labelBgStyle: { fill: "#14162d", fillOpacity: 1 },
+        labelBgStyle: { fill: "#122334", fillOpacity: 1 },
         labelBgPadding: [6, 3],
         labelBgBorderRadius: 5,
         style: { stroke, strokeWidth: isHl ? width + 1.5 : width },
@@ -260,16 +260,16 @@ export function GraphView({
                 const gn = graph.nodes.find((x) => x.address === n.id);
                 return gn ? ROLE_COLOR[roleOf(gn)] : "#847F73";
               }}
-              maskColor="rgba(10,10,10,0.75)"
-              style={{ background: "#14162d", border: "1px solid rgba(243,241,234,0.1)", borderRadius: 12 }}
+              maskColor="rgba(8,23,34,0.75)"
+              style={{ background: "#122334", border: "1px solid rgba(243,241,234,0.1)", borderRadius: 12 }}
             />
           </ReactFlow>
         )}
       </div>
       <p className="pt-4 text-[11px] text-muted">
-        Click a node to inspect inline · root <span className="text-primary">cyan</span> · attributed{" "}
-        <span className="text-good-text">green</span> · mixer <span className="text-bad-text">red</span> · bridge{" "}
-        <span style={{ color: "#38BDF8" }}>blue</span> · hovering evidence traces the matching edge here
+        Click a node to inspect inline · root <span style={{ color: ROLE_COLOR.root }}>amber</span> · attributed{" "}
+        <span style={{ color: ROLE_COLOR.vasp }}>green</span> · mixer <span style={{ color: ROLE_COLOR.risk }}>coral</span> · bridge{" "}
+        <span style={{ color: ROLE_COLOR.bridge }}>lavender</span> · hovering evidence traces the matching edge here
       </p>
     </Tile>
   );

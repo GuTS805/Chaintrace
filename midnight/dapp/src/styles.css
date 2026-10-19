@@ -1,24 +1,24 @@
 /* Copyright 2026 Chaintrace contributors. SPDX-License-Identifier: Apache-2.0 */
-/* Palette follows the Chaintrace frontend (frontend/tailwind.config.ts). */
+/* Palette follows the Chaintrace frontend (frontend/tailwind.config.ts, 2026 workspace refresh). */
 :root {
   color-scheme: dark;
-  --bg: #0d0f22;
-  --surface: #14162d;
-  --surface-2: #202342;
-  --border: #2c3058;
-  --heading: #f4f3ff;
-  --body: #c3c5de;
-  --muted: #a0a6c5;
-  --mono: #a5d8ff;
-  --primary: #67e8f9;
-  --primary-hover: #a5f3fc;
-  --primary-soft: #153344;
-  --good: #3ed18e;
-  --good-fill: #12301f;
-  --warn: #f2a93b;
-  --warn-fill: #332108;
-  --bad: #f16b5c;
-  --bad-fill: #341313;
+  --bg: #081722;
+  --surface: #122334;
+  --surface-2: #1b3043;
+  --border: #2b4556;
+  --heading: #f7f5f0;
+  --body: #cbd6db;
+  --muted: #a8bbc4;
+  --mono: #a6e7e1;
+  --primary: #5ee3cf;
+  --primary-hover: #9af1e2;
+  --primary-soft: #153c3e;
+  --good: #72e2ad;
+  --good-fill: #183b32;
+  --warn: #f5c16c;
+  --warn-fill: #44351e;
+  --bad: #ff9c9a;
+  --bad-fill: #452c34;
   --radius: 14px;
   --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
@@ -36,7 +36,7 @@ p { margin: 0; }
 .shell { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
 .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
 .brand { display: flex; align-items: center; gap: 10px; }
-.brand-mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, var(--primary), #c4b5fd); }
+.brand-mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, var(--primary), var(--warn)); }
 .sub { color: var(--muted); font-size: 13px; }
 
 .tabs { display: flex; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; overflow-x: auto; }
@@ -50,13 +50,13 @@ p { margin: 0; }
 
 label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
 input[type="text"], input[type="password"] { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--heading); font: 14px var(--font-mono); }
-input:focus-visible, button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+input:focus-visible, button:focus-visible { outline: 2px solid var(--warn); outline-offset: 2px; }
 .radio { display: flex; gap: 8px; align-items: center; color: var(--body); font-size: 14px; }
 
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2); color: var(--heading); font: inherit; font-weight: 500; cursor: pointer; }
 .btn:hover:not(:disabled) { border-color: var(--primary); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn.primary { background: var(--primary); border-color: var(--primary); color: #06202a; }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: #0b2330; }
 .btn.primary:hover:not(:disabled) { background: var(--primary-hover); }
 .btn.small { padding: 6px 10px; font-size: 13px; }
 
@@ -92,8 +92,8 @@ input:focus-visible, button:focus-visible { outline: 2px solid var(--primary); o
 .step.failed .dot { background: var(--bad); }
 
 .verdict { border-radius: var(--radius); padding: 18px; display: grid; gap: 10px; }
-.verdict.ok { background: var(--good-fill); border: 1px solid #1f5a3a; }
-.verdict.fail { background: var(--bad-fill); border: 1px solid #5c2420; }
+.verdict.ok { background: var(--good-fill); border: 1px solid #2f6b55; }
+.verdict.fail { background: var(--bad-fill); border: 1px solid #6b3a44; }
 .verdict h2 { display: flex; align-items: center; gap: 8px; }
 
 details summary { cursor: pointer; color: var(--muted); font-size: 13px; }

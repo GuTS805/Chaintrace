@@ -12,41 +12,41 @@ const config: Config = {
     extend: {
       colors: {
         // ── Surfaces ── (near-black workstation body)
-        surface: "#14162d",
-        "surface-lavender": "#202342",
-        "surface-blush": "#251d3e",
+        surface: "#122334",
+        "surface-lavender": "#1b3043",
+        "surface-blush": "#322836",
 
         // ── Brand & accent — cyan and violet intelligence palette ──
-        primary: "#67E8F9",
-        "primary-hover": "#A5F3FC",
-        "primary-soft": "#153344",
-        "accent-pink": "#C4B5FD",
+        primary: "#5EE3CF",
+        "primary-hover": "#9AF1E2",
+        "primary-soft": "#153C3E",
+        "accent-pink": "#F2A9A0",
 
         // ── Text ──
-        heading: "#F4F3FF",
-        body: "#C3C5DE",
-        muted: "#A0A6C5",
-        mono: "#A5D8FF",
+        heading: "#F7F5F0",
+        body: "#CBD6DB",
+        muted: "#A8BBC4",
+        mono: "#A6E7E1",
 
         // ── Semantic fills ──
-        "good-fill": "#12301F",
-        "good-text": "#3ED18E",
-        "warn-fill": "#332108",
-        "warn-text": "#F2A93B",
-        "neutral-fill": "#252844",
-        "neutral-text": "#a7b4c6",
-        "info-fill": "#2B2250",
-        "info-text": "#C4B5FD",
-        "bad-fill": "#341313",
-        "bad-text": "#F16B5C",
+        "good-fill": "#183B32",
+        "good-text": "#72E2AD",
+        "warn-fill": "#44351E",
+        "warn-text": "#F5C16C",
+        "neutral-fill": "#263744",
+        "neutral-text": "#BDCCD2",
+        "info-fill": "#302F50",
+        "info-text": "#CFC1FF",
+        "bad-fill": "#452C34",
+        "bad-text": "#FF9C9A",
 
         // ── Borders ──
-        "soft-border": "rgba(175, 183, 255, 0.16)",
+        "soft-border": "rgba(166, 205, 207, 0.18)",
 
         // ── Legacy compat aliases (keeps old references compiling) ──
-        good: "#3ED18E",
-        warn: "#F2A93B",
-        bad: "#F16B5C",
+        good: "#72E2AD",
+        warn: "#F5C16C",
+        bad: "#FF9C9A",
       },
       fontFamily: {
         display: ["Segoe UI", "ui-sans-serif", "system-ui", "sans-serif"],
