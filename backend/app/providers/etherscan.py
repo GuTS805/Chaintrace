@@ -70,7 +70,8 @@ def parse_etherscan_tokentx(payload: dict[str, Any]) -> list[ProviderTx]:
             ts = datetime.fromtimestamp(int(item["timeStamp"]), tz=UTC)
         except (KeyError, ValueError, OverflowError):
             continue
-        symbol = str(item.get("tokenSymbol") or "TOKEN").strip() or "TOKEN"
+        # Spam tokens use long symbols; Transaction.asset is VARCHAR(32).
+        symbol = str(item.get("tokenSymbol") or "TOKEN").strip()[:32] or "TOKEN"
         txs.append(
             ProviderTx(
                 tx_hash=str(item["hash"]),

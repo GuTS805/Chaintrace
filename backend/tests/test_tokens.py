@@ -38,6 +38,13 @@ def _tokentx_payload() -> dict[str, Any]:
     }
 
 
+def test_parse_tokentx_clips_long_spam_symbols() -> None:
+    payload = _tokentx_payload()
+    payload["result"][0]["tokenSymbol"] = "Visit https://claim-rewards.example to claim " * 3
+    (tx,) = parse_etherscan_tokentx(payload)
+    assert len(tx.asset) == 32  # fits Transaction.asset (VARCHAR(32)) on Postgres
+
+
 def test_parse_tokentx_sets_asset_and_value() -> None:
     txs = parse_etherscan_tokentx(_tokentx_payload())
     assert len(txs) == 1

@@ -82,7 +82,8 @@ def parse_trongrid_trc20(payload: dict[str, Any]) -> list[ProviderTx]:
         except (KeyError, ValueError, OverflowError, TypeError):
             continue
         token_info = item.get("token_info") or {}
-        symbol = str(token_info.get("symbol") or "TRC20").strip() or "TRC20"
+        # Spam tokens use long symbols; Transaction.asset is VARCHAR(32).
+        symbol = str(token_info.get("symbol") or "TRC20").strip()[:32] or "TRC20"
         txs.append(
             ProviderTx(
                 tx_hash=str(item["transaction_id"]),
