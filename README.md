@@ -13,6 +13,8 @@ every wallet.
 
 > **Status: all six phases complete.**
 
+![Chaintrace overview](docs/screenshots/01-chaintrace-overview.png)
+
 ## Private case attestations on Midnight
 
 Investigators can commit a salted hash of an exact case version to a Compact
@@ -24,6 +26,58 @@ Midnight** opens the DApp.
 
 Contract, DApp, tests and setup: **[midnight/README.md](midnight/README.md)**
 (Apache-2.0). Build and test record: [midnight/EVIDENCE.md](midnight/EVIDENCE.md). Buildathon summary: [MIDNIGHT_SUBMISSION.md](MIDNIGHT_SUBMISSION.md).
+
+Live on Midnight Preview: contract
+`8f2b54a3321ac1e7ce7d4aafbed276975c30a0939e0c8616f9dbb3dd44d11368`, revision 1
+attested in block 1,364,229.
+
+### Flow
+
+```mermaid
+flowchart LR
+    A[Chaintrace case page] -->|Private attestation| B[Case bundle<br/>canonical JSON + 32-byte salt]
+    B -->|SHA-256| C[Commitment]
+    C --> D[DApp: attest<br/>proof generated locally]
+    S[Owner secret<br/>sealed with passphrase, in browser] -->|private witness| D
+    D -->|wallet balances + signs| E[(Compact contract<br/>Midnight Preview)]
+    B -->|disclosed bundle + receipt| R[Reviewer browser]
+    E -->|confirmed ledger via indexer| R
+    R --> V{Match / No match}
+```
+
+1. **Freeze the case.** On a case page, *Private attestation* writes the case in
+   a canonical format, adds a random 32-byte salt and hashes it with SHA-256.
+   The bundle stays with the investigator; only the hash goes on chain.
+2. **Attest.** *Attest on Midnight* opens the DApp. It re-checks the bundle,
+   shows the commitment, and generates an owner secret in the browser, sealed
+   with a passphrase. The contract checks that secret through a private witness,
+   so the chain only sees a hash of it.
+3. **Confirm.** The proof is generated locally, the wallet balances and signs,
+   and the transaction is submitted. It counts as confirmed only after it is in a
+   block and the ledger has been read back.
+4. **Verify.** A reviewer drops in the bundle (and optionally the receipt). The
+   browser hashes it, reads the contract's confirmed state from the Preview
+   indexer, and checks that the contract runs exactly our circuits. No wallet is
+   needed.
+5. **Tamper check.** Any edited bundle, even one whose hash was recomputed, does
+   not match the on-chain commitment and is rejected.
+
+### Screenshots
+
+| | |
+|---|---|
+| ![Case page with Private attestation](docs/screenshots/02-case-private-attestation.png) | ![DApp attest view](docs/screenshots/03-dapp-attest.png) |
+| **1. Case page.** *Private attestation* downloads the bundle; *Attest on Midnight* opens the DApp. | **2. Attest.** Bundle checked locally, commitment shown, owner secret sealed with a passphrase. |
+| ![Preview run log](docs/screenshots/04-preview-run.png) | ![Verify: match](docs/screenshots/05-verify-match.png) |
+| **3. Preview network.** Deploy and attest, confirmed in blocks 1,364,225 and 1,364,229. | **4. Verify.** Reviewer checks the bundle against the confirmed ledger: match. |
+| ![Verify: tampered bundle](docs/screenshots/06-verify-tamper.png) | ![Compact contract](docs/screenshots/07-contract.png) |
+| **5. Tamper test.** One finding edited, hash recomputed: no match. | **6. Contract.** Owner-only attest, revision guard against stale or replayed transactions, secret rotation. |
+
+![What an attestation proves and does not prove](docs/screenshots/08-guarantees.png)
+
+An attestation proves that the disclosed report is byte-for-byte the version
+committed at that revision, by whoever held the case's owner secret. It does not
+prove that the findings are true.
 
 ## Run the demo (one command, Windows)
 
