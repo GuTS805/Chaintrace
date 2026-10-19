@@ -16,6 +16,7 @@ every wallet.
 **Live demo:** https://chaintrace-rouge.vercel.app (log in as `i4c.analyst` / `Chain@2026`;
 the free API host sleeps when idle, so the first request can take about a minute).
 Attestation DApp: https://chaintrace-midnight.vercel.app
+Slide deck: [PDF](docs/Chaintrace-Midnight-deck.pdf) · [online](https://claude.ai/artifact/Pb7KCd36jKzwdEHYVg6Gnp) · Demo video: https://youtu.be/X2Y6v5fo_Z8
 
 ![Chaintrace overview](docs/screenshots/01-chaintrace-overview.png)
 
