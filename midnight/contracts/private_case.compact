@@ -1,0 +1,25 @@
+// Copyright 2026 Chaintrace contributors. Licensed under Apache-2.0.
+// One deployment represents one case. The case file and owner secret stay off chain.
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export ledger case_commitment: Bytes<32>;
+export ledger revision: Uint<32>;
+export ledger owner_secret_hash: Bytes<32>;
+
+// Supplied from client-side private state, never from a public circuit argument.
+witness owner_secret(): Bytes<32>;
+
+constructor(secret: Bytes<32>) {
+  owner_secret_hash = disclose(persistentHash<Bytes<32>>(secret));
+  revision = 0;
+}
+
+export circuit attest(commitment: Bytes<32>): [] {
+  const secret = owner_secret();
+  assert(persistentHash<Bytes<32>>(secret) == owner_secret_hash, "Unauthorized attestation");
+  assert(revision < 4294967295, "Revision overflow");
+  case_commitment = disclose(commitment);
+  revision = (revision + 1) as Uint<32>;
+}

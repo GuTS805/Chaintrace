@@ -11,6 +11,7 @@ import { PdfButton } from "@/components/PdfButton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { BentoGrid, Button, Tile, Pill } from "@/components/ui";
 import { fmtTime, shortAddr } from "@/lib/format";
+import { createCaseAttestation } from "@/lib/case-attestation";
 
 const SEVERITIES: FindingSeverity[] = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
@@ -87,6 +88,22 @@ export default function CaseDetailPage({
     router.push("/cases");
   }
 
+  async function exportAttestation() {
+    if (!detail) return;
+    try {
+      const bundle = await createCaseAttestation(detail);
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `chaintrace-case-${detail.id}-attestation.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(`Could not prepare attestation: ${String(err)}`);
+    }
+  }
+
   if (!detail && error) return <Tile title="Case unavailable"><p role="alert" className="text-sm text-bad-text">{error}</p><Button onClick={() => { setError(null); load(); }} className="mt-4">Retry loading</Button></Tile>;
   if (!detail) return <div role="status" className="animate-pulse space-y-6"><div className="h-28 rounded-card bg-surface" /><div className="h-80 rounded-card bg-surface" /><span className="sr-only">Loading case record...</span></div>;
 
@@ -109,6 +126,14 @@ export default function CaseDetailPage({
             Report (PDF)
           </PdfButton>
           <button
+            onClick={exportAttestation}
+            className="flex items-center gap-1.5 rounded-btn border border-soft-border px-3 py-1.5 text-xs text-muted transition-all hover:bg-surface-lavender hover:text-heading"
+            title="Export a salted commitment and private case snapshot. This does not submit a Midnight transaction."
+          >
+            <Download size={13} />
+            Private attestation
+          </button>
+          <button
             onClick={() => setConfirmDelete(true)}
             className="flex items-center gap-1.5 rounded-btn bg-bad-fill px-3 py-1.5 text-xs font-medium text-bad-text transition-all hover:bg-bad-fill/80"
           >
@@ -119,6 +144,10 @@ export default function CaseDetailPage({
         {detail.investigator && (
           <p className="mt-1 text-xs text-muted">investigator: {detail.investigator}</p>
         )}
+        <p className="mt-2 text-xs text-muted">
+          Private attestation downloads a sensitive case snapshot and salted hash to this device.
+          It does not send a Midnight transaction.
+        </p>
       </div>
 
       {error && <p role="alert" className="col-span-4 rounded-btn bg-bad-fill p-4 text-sm text-bad-text md:col-span-12">{error}</p>}

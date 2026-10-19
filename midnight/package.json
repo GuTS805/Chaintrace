@@ -1,0 +1,12 @@
+{
+  "name": "chaintrace-midnight",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compile": "compact compile +0.31.1 contracts/private_case.compact managed/private_case",
+    "test": "node --test test/private_case.test.mjs"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.16.0"
+  }
+}
