@@ -27,6 +27,9 @@ Midnight** opens the DApp.
 Contract, DApp, tests and setup: **[midnight/README.md](midnight/README.md)**
 (Apache-2.0). Build and test record: [midnight/EVIDENCE.md](midnight/EVIDENCE.md). Buildathon summary: [MIDNIGHT_SUBMISSION.md](MIDNIGHT_SUBMISSION.md).
 
+**Live DApp:** https://chaintrace-midnight.vercel.app (open *Verify bundle* to check a
+case bundle against Preview; no wallet needed).
+
 Live on Midnight Preview: contract
 `8f2b54a3321ac1e7ce7d4aafbed276975c30a0939e0c8616f9dbb3dd44d11368`, revision 1
 attested in block 1,364,229.
