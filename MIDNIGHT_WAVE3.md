@@ -24,11 +24,11 @@ The proposed Wave 3 product is **Chaintrace Private Case Attestations**. An inve
 
 ## Wave 3 build and evidence checklist
 
-- [x] Pin the intended Compact compiler and runtime combination in the prototype; actual compatibility and compilation remain to be verified.
-- [ ] Implement at least one Compact contract with private-state management and a meaningful circuit; compile it successfully and save the exact command/output.
-- [ ] Add tests for unauthorized calls, mismatched commitments, replay or duplicate disclosure, and the valid disclosure path.
-- [ ] Integrate the generated contract with the case workflow and demonstrate one complete, accurately labelled path.
-- [ ] Update README with architecture, privacy boundaries, local setup, test instructions, and known limitations.
+- [x] Pin the Compact compiler and runtime combination (0.31.1 / 0.16.0, matches the support matrix).
+- [x] Implement at least one Compact contract with private-state management and a meaningful circuit; compile it successfully and save the exact command/output (`midnight/EVIDENCE.md`, pre-wave).
+- [x] Add tests for unauthorized calls, mismatched commitments, replay or duplicate disclosure, and the valid disclosure path (simulator + local-network E2E, pre-wave).
+- [ ] Integrate the generated contract with the case workflow and demonstrate one complete, accurately labelled path. Integrated and proven on a local network; **still needs a Preview run with Lace**.
+- [x] Update README with architecture, privacy boundaries, local setup, test instructions, and known limitations (`midnight/README.md`).
 - [ ] Make Midnight-related code and code required to evaluate it public under Apache License 2.0. Check licensing of pre-existing code separately.
 - [ ] Publish a public GitHub repository with the `midnightntwrk` topic/label.
 - [ ] Prepare a slide deck and a demo video or video pitch; describe work completed during Wave 3.
@@ -41,4 +41,4 @@ The proposed Wave 3 product is **Chaintrace Private Case Attestations**. An inve
 - Private-state witnesses: https://docs.midnight.network/guides/private-state-witnesses
 - Contract safety tutorial: https://docs.midnight.network/tutorials/battleship
 
-This file is a preparation brief, not evidence of a compiled contract, live integration, or completed submission.
+Pre-wave status (19 October 2026): contract compiled, tests and local-network E2E passing, DApp built. See `midnight/EVIDENCE.md`. Wave 3 work must add or materially extend Midnight functionality after 27 October; candidates are listed in `MIDNIGHT_SCOPE.md` section 5 (multi-case contracts, delegated reviewer access, selective disclosure of individual findings).

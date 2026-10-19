@@ -52,12 +52,14 @@ Chaintrace case API -> browser snapshot + salt -> SHA-256 commitment
 - **Trust boundary:** Chaintrace currently holds case data on its backend. This feature protects public-chain disclosure and detects later changes to a shared snapshot; it does not hide case data from the Chaintrace server.
 - **Contract ownership:** one deployment per case for MVP. A later version can support multiple cases, delegated reviewer access, secret rotation and selective disclosure of individual findings.
 
-## 6. Current implementation status (19 October 2026)
+## 6. Current implementation status (19 October 2026, end of day)
 
-- Done: case-page local bundle export and salted hash helper; Compact contract draft with private owner witness and revision; initial contract test source; Apache-2.0 license text for `midnight/`.
-- Not verified: Compact compilation, contract test, frontend typecheck. This machine lacks Node.js/Compact; WSL access was denied and Docker daemon was unavailable.
-- Not built: wallet connection, on-chain deploy/call, confirmation tracking, ledger-backed reviewer UI, secure owner-secret lifecycle, slide deck and video.
-- **Current state is a prototype, not an eligible or submitted Buildathon entry.**
+- **Contract:** hardened and compiled with Compact 0.31.1 (Docker image `midnight/toolchain`). Owner secret now comes from a witness in the constructor too (no constructor argument), domain-separated owner key, `expected_revision` stale/replay guard, duplicate and empty commitment rejection, `rotate_owner` circuit.
+- **Tests:** 42 unit, simulator, UI and verify tests pass. The opt-in E2E test (6 cases) passes on a local Midnight network (node, indexer and proof server in Docker): deploy, attest, verify, forged attestation rejected, superseded revision, owner rotation. Record: `midnight/EVIDENCE.md`.
+- **DApp:** `midnight/dapp` (Vite + React) covers Lace connection (DApp connector 4.x), deploy and attest with honest *proving → balancing → prepared → submitted → confirmed* stages, reviewer verification against the confirmed ledger with a contract-code check, and a passphrase-sealed owner secret with backup, import and rotation.
+- **Chaintrace frontend:** canonical-JSON bundle export (same commitment as the DApp, shared test vector) and an "Attest on Midnight" link. Typecheck and `next build` pass.
+- **Not done:** attestation on the public Preview network with a real Lace wallet (needs faucet funds, a human step), demo video, public repo and topic, AKINDO submission.
+- **All of this is pre-Wave-3 work.** It still is not an eligible or submitted Buildathon entry.
 
 ## 7. Build sequence and completion criteria
 

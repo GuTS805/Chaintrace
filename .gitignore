@@ -22,6 +22,10 @@ htmlcov/
 # --- Node / Next.js ---
 node_modules/
 midnight/managed/
+midnight/dapp/dist/
+midnight/dapp/.vite/
+midnight/logs/
+midnight/.states/
 .next/
 out/
 .turbo/

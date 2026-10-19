@@ -4,7 +4,7 @@
 BACKEND := backend
 PY := python
 
-.PHONY: help install up down migrate revision test lint typecheck seed-demo ingest-labels dev
+.PHONY: help install up down migrate revision test lint typecheck seed-demo ingest-labels dev midnight-compile midnight-test midnight-e2e midnight-dapp
 
 help:
 	@echo "install       - install backend deps (editable, with dev extras)"
@@ -18,6 +18,10 @@ help:
 	@echo "ingest-labels - load bundled offline label sources into the DB"
 	@echo "seed-demo     - seed demo fixtures (Phase 2, offline)"
 	@echo "dev           - run the API with autoreload"
+	@echo "midnight-compile - compile the Compact contract (Docker on Windows)"
+	@echo "midnight-test    - Midnight unit, simulator and UI tests"
+	@echo "midnight-e2e     - end-to-end test on a local Midnight network (Docker)"
+	@echo "midnight-dapp    - run the attestation DApp on :5173"
 
 install:
 	cd $(BACKEND) && $(PY) -m pip install -e ".[dev]"
@@ -58,3 +62,15 @@ import-realchain:
 
 dev:
 	cd $(BACKEND) && uvicorn app.main:app --reload
+
+midnight-compile:
+	cd midnight && npm run compile
+
+midnight-test:
+	cd midnight && npm test
+
+midnight-e2e:
+	cd midnight && npm run test:e2e
+
+midnight-dapp:
+	cd midnight && npm run dev

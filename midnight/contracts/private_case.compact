@@ -1,25 +1,60 @@
-// Copyright 2026 Chaintrace contributors. Licensed under Apache-2.0.
-// One deployment represents one case. The case file and owner secret stay off chain.
+// Copyright 2026 Chaintrace contributors.
+// SPDX-License-Identifier: Apache-2.0
+//
+// Chaintrace private case attestation. One deployment represents one case.
+//
+// Public ledger: the latest salted case commitment, its revision, and a hash
+// derived from the owner's secret. The case file, the salt and the owner secret
+// never appear on chain or as circuit arguments; the secret is supplied by the
+// `owner_secret` witness from the investigator's local private state.
 pragma language_version 0.23;
 
 import CompactStandardLibrary;
 
+// SHA-256 commitment of the latest attested case snapshot. All zero until the
+// first attestation.
 export ledger case_commitment: Bytes<32>;
-export ledger revision: Uint<32>;
-export ledger owner_secret_hash: Bytes<32>;
 
-// Supplied from client-side private state, never from a public circuit argument.
+// Number of successful attestations. Revision N is the N-th snapshot.
+export ledger revision: Uint<32>;
+
+// persistentHash(domain, secret). Only the holder of the secret can attest.
+export ledger owner_key: Bytes<32>;
+
+// 32-byte owner secret from local private state, never a public argument.
 witness owner_secret(): Bytes<32>;
 
-constructor(secret: Bytes<32>) {
-  owner_secret_hash = disclose(persistentHash<Bytes<32>>(secret));
+export pure circuit derive_owner_key(secret: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "chaintrace:case-owner:v1"), secret]);
+}
+
+circuit assert_owner(): [] {
+  assert(derive_owner_key(owner_secret()) == owner_key, "Unauthorized: owner secret does not match");
+}
+
+constructor() {
+  owner_key = disclose(derive_owner_key(owner_secret()));
   revision = 0;
 }
 
-export circuit attest(commitment: Bytes<32>): [] {
-  const secret = owner_secret();
-  assert(persistentHash<Bytes<32>>(secret) == owner_secret_hash, "Unauthorized attestation");
+// Records `commitment` as revision `expected_revision + 1`.
+// `expected_revision` must equal the current on-chain revision, so a transaction
+// built against an older state (stale or replayed) is rejected.
+export circuit attest(expected_revision: Uint<32>, commitment: Bytes<32>): [] {
+  assert_owner();
+  assert(disclose(expected_revision) == revision, "Stale revision");
   assert(revision < 4294967295, "Revision overflow");
+  assert(disclose(commitment) != default<Bytes<32>>, "Empty commitment");
+  assert(disclose(commitment) != case_commitment, "Commitment already attested");
   case_commitment = disclose(commitment);
   revision = (revision + 1) as Uint<32>;
+}
+
+// Moves ownership to a new secret. The caller passes only the derived key of the
+// new secret, so the new secret itself stays private. The old secret stops
+// working immediately. A lost secret cannot be recovered.
+export circuit rotate_owner(new_owner_key: Bytes<32>): [] {
+  assert_owner();
+  assert(disclose(new_owner_key) != owner_key, "New owner key equals current key");
+  owner_key = disclose(new_owner_key);
 }

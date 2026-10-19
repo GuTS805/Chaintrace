@@ -13,6 +13,9 @@ import { BentoGrid, Button, Tile, Pill } from "@/components/ui";
 import { fmtTime, shortAddr } from "@/lib/format";
 import { createCaseAttestation } from "@/lib/case-attestation";
 
+// Standalone Midnight DApp (midnight/dapp). Only the URL is shared; the bundle never leaves this device.
+const MIDNIGHT_DAPP_URL = process.env.NEXT_PUBLIC_MIDNIGHT_DAPP_URL ?? "http://localhost:5173";
+
 const SEVERITIES: FindingSeverity[] = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
 const SEV_TONE: Record<FindingSeverity, "muted" | "warn" | "bad"> = {
@@ -128,11 +131,21 @@ export default function CaseDetailPage({
           <button
             onClick={exportAttestation}
             className="flex items-center gap-1.5 rounded-btn border border-soft-border px-3 py-1.5 text-xs text-muted transition-all hover:bg-surface-lavender hover:text-heading"
-            title="Export a salted commitment and private case snapshot. This does not submit a Midnight transaction."
+            title="Download the case snapshot, a random salt and its SHA-256 commitment. This does not submit a Midnight transaction."
           >
             <Download size={13} />
             Private attestation
           </button>
+          <a
+            href={`${MIDNIGHT_DAPP_URL}/#/attest`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 rounded-btn border border-soft-border px-3 py-1.5 text-xs text-muted transition-all hover:bg-surface-lavender hover:text-heading"
+            title="Open the Midnight attestation DApp. Drop the downloaded bundle there to commit it on chain."
+          >
+            <ExternalLink size={13} />
+            Attest on Midnight
+          </a>
           <button
             onClick={() => setConfirmDelete(true)}
             className="flex items-center gap-1.5 rounded-btn bg-bad-fill px-3 py-1.5 text-xs font-medium text-bad-text transition-all hover:bg-bad-fill/80"
@@ -145,8 +158,8 @@ export default function CaseDetailPage({
           <p className="mt-1 text-xs text-muted">investigator: {detail.investigator}</p>
         )}
         <p className="mt-2 text-xs text-muted">
-          Private attestation downloads a sensitive case snapshot and salted hash to this device.
-          It does not send a Midnight transaction.
+          Private attestation downloads a sensitive case snapshot and salted hash to this device. Attest on
+          Midnight records only the 32-byte hash on chain; a reviewer you give the bundle to can check it there.
         </p>
       </div>
 

@@ -13,6 +13,18 @@ every wallet.
 
 > **Status: all six phases complete.**
 
+## Private case attestations on Midnight
+
+Investigators can commit a salted hash of an exact case version to a Compact
+contract on [Midnight](https://midnight.network). The case itself, wallet
+addresses and the officer's identity stay off chain. A reviewer who receives the
+case bundle can check, with no wallet, that it is exactly the attested version.
+On a case page, **Private attestation** downloads the bundle and **Attest on
+Midnight** opens the DApp.
+
+Contract, DApp, tests and setup: **[midnight/README.md](midnight/README.md)**
+(Apache-2.0). Build and test record: [midnight/EVIDENCE.md](midnight/EVIDENCE.md).
+
 ## Run the demo (one command, Windows)
 
 ```powershell
