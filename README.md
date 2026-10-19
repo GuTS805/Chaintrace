@@ -13,6 +13,10 @@ every wallet.
 
 > **Status: all six phases complete.**
 
+**Live demo:** https://chaintrace-rouge.vercel.app (log in as `i4c.analyst` / `Chain@2026`;
+the free API host sleeps when idle, so the first request can take about a minute).
+Attestation DApp: https://chaintrace-midnight.vercel.app
+
 ![Chaintrace overview](docs/screenshots/01-chaintrace-overview.png)
 
 ## Private case attestations on Midnight
