@@ -126,7 +126,27 @@ async function main() {
       writeFileSync(path.join(stateDir, "ADDRESS.txt"), `${address}\n`);
     }
     await Rx.firstValueFrom(walletProvider.wallet.state().pipe(Rx.filter(funded)));
-    log("tNIGHT received; syncing and registering for DUST if needed…");
+    log("tNIGHT received; waiting for full wallet sync (a new wallet can take several minutes)…");
+    // testkit's own sync wait gives up after 90 s, which is too short for a fresh Preview wallet.
+    const done = (p: unknown) => !!p && typeof (p as { isStrictlyComplete?: () => boolean }).isStrictlyComplete === "function" && (p as { isStrictlyComplete: () => boolean }).isStrictlyComplete();
+    const pct = (p: unknown) => {
+      const d = p as { appliedIndex?: bigint; highestIndex?: bigint } | undefined;
+      return d?.highestIndex ? `${((Number(d.appliedIndex ?? 0n) * 100) / Number(d.highestIndex)).toFixed(1)}%` : "?";
+    };
+    const started = Date.now();
+    await Rx.firstValueFrom(
+      walletProvider.wallet.state().pipe(
+        Rx.throttleTime(30_000, undefined, { leading: true, trailing: true }),
+        Rx.tap((s) =>
+          log(
+            `  sync after ${Math.round((Date.now() - started) / 1000)} s: shielded ${pct(s.shielded.state.progress)}, unshielded ${pct(s.unshielded.progress)}, dust ${pct(s.dust.state.progress)}`,
+          ),
+        ),
+        Rx.filter((s) => done(s.shielded.state.progress) && done(s.unshielded.progress) && done(s.dust.state.progress)),
+        Rx.timeout(60 * 60_000),
+      ),
+    );
+    log("wallet synced; registering for DUST if needed…");
     const balance = await waitForFunds(walletProvider.wallet, env, false, walletProvider.unshieldedKeystore);
     log(`NIGHT balance: ${balance}`);
     const dust = await Rx.firstValueFrom(

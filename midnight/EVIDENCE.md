@@ -63,7 +63,29 @@ Assertions in the same run:
 
 The local chain is discarded after the test, so these hashes cannot be looked up later. They show that the full path works.
 
+## Preview run (public Midnight Preview network), 19 October 2026
+
+`npm run preview:run`: a headless wallet-sdk wallet (not Lace), funded with 5,000 tNIGHT from https://faucet.preview.midnight.network. It then:
+- registered for DUST (fee) generation
+- deployed the case contract
+- attested revision 1 of a demo case through the DApp's own `deployCase` / `attestCase`
+- read the result back from the public Preview indexer as a reviewer would
+
+| Event | Value |
+| --- | --- |
+| DUST registration tx | `00b99a01a0b06d8c1874659ce2f240383a9145be0faf747a88d8c4b7b0f32ccc33` |
+| Contract address | `8f2b54a3321ac1e7ce7d4aafbed276975c30a0939e0c8616f9dbb3dd44d11368` |
+| Deploy tx hash | `c51c563511ee16c5a0eef40e03c9a04b72e1e3964809c170c190d7aa9365e7b5`, block 1,364,225 |
+| Attest r1 commitment | `62e24bdab34ac13ed6f4b4f1fe350976644634cd77387838888099b66a07be1c` |
+| Attest r1 tx hash | `e718a14a0e7ca6e3ab7d27ca5e25f14faf9074f12ac93f4f598e594219cccc4f`, block 1,364,229 |
+| Reviewer verdict (public indexer, no wallet) | `verified`, revision 1, contract code matched |
+| Same bundle with the case edited | rejected (`bundle-invalid`) |
+
+Anyone can re-check this: paste the contract address into the DApp's **Verify bundle** tab together with the bundle and receipt (kept locally in `midnight/.preview/`, not committed).
+
+Wallet sync note: a brand-new Preview wallet took about 13.5 minutes to sync. testkit's own 90-second sync wait times out, so the script waits for the full sync itself.
+
 ## Not yet done (needs a person)
 
-- **Preview deployment with a real Lace wallet.** This needs Lace and tNIGHT from the Preview faucet, which uses a human check. Record the contract address, transaction hash and verification result here once done.
+- **The same flow in the browser with Lace** (Midnight is built into the regular Lace extension), for the demo video.
 - Demo video recording (script: `DEMO_SCRIPT.md`), public repository and AKINDO submission.

@@ -58,7 +58,8 @@ Chaintrace case API -> browser snapshot + salt -> SHA-256 commitment
 - **Tests:** 42 unit, simulator, UI and verify tests pass. The opt-in E2E test (6 cases) passes on a local Midnight network (node, indexer and proof server in Docker): deploy, attest, verify, forged attestation rejected, superseded revision, owner rotation. Record: `midnight/EVIDENCE.md`.
 - **DApp:** `midnight/dapp` (Vite + React) covers Lace connection (DApp connector 4.x), deploy and attest with honest *proving → balancing → prepared → submitted → confirmed* stages, reviewer verification against the confirmed ledger with a contract-code check, and a passphrase-sealed owner secret with backup, import and rotation.
 - **Chaintrace frontend:** canonical-JSON bundle export (same commitment as the DApp, shared test vector) and an "Attest on Midnight" link. Typecheck and `next build` pass.
-- **Not done:** attestation on the public Preview network with a real Lace wallet (needs faucet funds, a human step), demo video, public repo and topic, AKINDO submission.
+- **Preview:** case contract `8f2b54a3…d11368` deployed, and revision 1 attested (block 1,364,229) and verified through the public indexer, using a headless wallet (`npm run preview:run`).
+- **Not done:** the same flow in the browser with Lace, demo video, public repo and topic, AKINDO submission.
 - **All of this is pre-Wave-3 work.** It still is not an eligible or submitted Buildathon entry.
 
 ## 7. Build sequence and completion criteria

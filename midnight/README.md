@@ -77,7 +77,7 @@ npm run typecheck
 
 1. Start the proof server: `npm run proof-server` (image `midnightntwrk/proof-server:8.1.3`, port 6300, runs detached; `docker stop chaintrace-proof-server` stops it).
 2. Copy `dapp/.env.example` to `dapp/.env`. The defaults target Preview.
-3. Install the [Lace Midnight Preview](https://chromewebstore.google.com/detail/hgeekaiplokcnmakghbdfbgnlfheichg) extension (Chrome), switch it to **Preview**, and get tNIGHT from the Preview faucet (https://midnight-tmnight-preview.nethermind.dev/). The wallet generates DUST from tNIGHT to pay fees.
+3. Install the [Lace](https://chromewebstore.google.com/detail/lace/gafhhkghbfjjkeiendhlofajokpaflmk) extension (Chrome; Midnight is built in), add a Midnight wallet, set Settings › Midnight › proof server to Local (http://localhost:6300), switch it to **Preview**, and get tNIGHT from the Preview faucet (https://faucet.preview.midnight.network). The wallet generates DUST from tNIGHT to pay fees.
 4. `npm run dev`, then open http://localhost:5173.
 5. In Chaintrace, open a case. **Private attestation** downloads the bundle. **Attest on Midnight** opens this DApp. Set `NEXT_PUBLIC_MIDNIGHT_DAPP_URL` in the frontend if the DApp is hosted elsewhere.
 

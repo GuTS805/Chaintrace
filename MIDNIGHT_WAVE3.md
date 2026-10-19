@@ -27,7 +27,7 @@ The proposed Wave 3 product is **Chaintrace Private Case Attestations**. An inve
 - [x] Pin the Compact compiler and runtime combination (0.31.1 / 0.16.0, matches the support matrix).
 - [x] Implement at least one Compact contract with private-state management and a meaningful circuit; compile it successfully and save the exact command/output (`midnight/EVIDENCE.md`, pre-wave).
 - [x] Add tests for unauthorized calls, mismatched commitments, replay or duplicate disclosure, and the valid disclosure path (simulator + local-network E2E, pre-wave).
-- [ ] Integrate the generated contract with the case workflow and demonstrate one complete, accurately labelled path. Integrated and proven on a local network; **still needs a Preview run with Lace**.
+- [ ] Integrate the generated contract with the case workflow and demonstrate one complete, accurately labelled path. Proven on a local network and on **Preview** (headless wallet, contract `8f2b54a3…d11368`); a browser run with Lace is still needed for the demo.
 - [x] Update README with architecture, privacy boundaries, local setup, test instructions, and known limitations (`midnight/README.md`).
 - [ ] Make Midnight-related code and code required to evaluate it public under Apache License 2.0. Check licensing of pre-existing code separately.
 - [ ] Publish a public GitHub repository with the `midnightntwrk` topic/label.
