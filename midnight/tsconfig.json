@@ -17,5 +17,5 @@
     "paths": { "@/*": ["../frontend/*"] },
     "noEmit": true
   },
-  "include": ["src", "test", "dapp/src", "dapp/vite.config.ts", "vitest.config.ts", "managed/private_case/contract/index.d.ts"]
+  "include": ["src", "test", "scripts", "dapp/src", "dapp/vite.config.ts", "vitest.config.ts", "managed/private_case/contract/index.d.ts"]
 }

@@ -14,9 +14,10 @@
     "dev": "vite --config dapp/vite.config.ts",
     "build": "vite build --config dapp/vite.config.ts",
     "preview": "vite preview --config dapp/vite.config.ts",
-    "proof-server": "docker run --rm -p 6300:6300 midnightntwrk/proof-server:8.1.3",
+    "proof-server": "docker run -d --rm --name chaintrace-proof-server -p 6300:6300 midnightntwrk/proof-server:8.1.3",
     "test:e2e": "node scripts/with-env.mjs MIDNIGHT_E2E=1 vitest run test/e2e",
-    "test:smoke": "node scripts/with-env.mjs MIDNIGHT_SMOKE=1 vitest run test/network.smoke.test.ts"
+    "test:smoke": "node scripts/with-env.mjs MIDNIGHT_SMOKE=1 vitest run test/network.smoke.test.ts",
+    "preview:run": "tsx scripts/preview-run.ts"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
@@ -50,6 +51,7 @@
     "jsdom": "^27.0.0",
     "pino": "^10.4.0",
     "testcontainers": "^12.2.1",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vite": "^8.0.14",
     "vite-plugin-wasm": "^3.6.0",

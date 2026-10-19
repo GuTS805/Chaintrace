@@ -71,12 +71,13 @@ npm run typecheck
 | `npm test` | Contract simulator (authorized, unauthorized, stale and replayed revision, duplicate and empty commitment, rotation, cross-case isolation); bundle canonicalization and the shared test vector; vault; verdict logic against real compiled verifier keys; transaction-stage ordering; DApp UI flows (jsdom) | Compiled contract |
 | `npm run test:e2e` | Starts a local Midnight node, indexer and proof server in Docker, then runs the DApp's own code on a genesis-funded wallet: deploy, attest, verify, reject a forged attestation, revision 2 supersedes revision 1, owner rotation | Docker, about 3 min |
 | `npm run test:smoke` | Reads the public Preview indexer | Internet |
+| `npm run preview:run` | Attests a demo case on **Preview** with a headless wallet (saved in `.preview/`, gitignored), then verifies it as a reviewer would. On the first run it prints an address to fund once at https://faucet.preview.midnight.network; DUST registration is automatic. Each later run attests the next revision. | Proof server, funded wallet |
 
 ### Run the DApp against Preview
 
-1. Start the proof server: `npm run proof-server` (image `midnightntwrk/proof-server:8.1.3`, port 6300).
+1. Start the proof server: `npm run proof-server` (image `midnightntwrk/proof-server:8.1.3`, port 6300, runs detached; `docker stop chaintrace-proof-server` stops it).
 2. Copy `dapp/.env.example` to `dapp/.env`. The defaults target Preview.
-3. Install the Lace wallet with Midnight support, switch it to **Preview**, and get tNIGHT from the Preview faucet (https://midnight-tmnight-preview.nethermind.dev/). The wallet generates DUST from tNIGHT to pay fees.
+3. Install the [Lace Midnight Preview](https://chromewebstore.google.com/detail/hgeekaiplokcnmakghbdfbgnlfheichg) extension (Chrome), switch it to **Preview**, and get tNIGHT from the Preview faucet (https://midnight-tmnight-preview.nethermind.dev/). The wallet generates DUST from tNIGHT to pay fees.
 4. `npm run dev`, then open http://localhost:5173.
 5. In Chaintrace, open a case. **Private attestation** downloads the bundle. **Attest on Midnight** opens this DApp. Set `NEXT_PUBLIC_MIDNIGHT_DAPP_URL` in the frontend if the DApp is hosted elsewhere.
 
